@@ -1,0 +1,65 @@
+{
+  "name": "eslint-plugin-harlanzw",
+  "type": "module",
+  "version": "3.1.1",
+  "packageManager": "pnpm@10.14.0",
+  "description": "Harlan's opinionated ESLint rules",
+  "author": "Harlan Wilton <harlan@harlanzw.com>",
+  "license": "MIT",
+  "funding": "https://github.com/sponsors/harlan-zw",
+  "homepage": "https://github.com/harlan-zw/eslint-plugin-harlanzw#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harlan-zw/eslint-plugin-harlanzw.git"
+  },
+  "bugs": "https://github.com/harlan-zw/eslint-plugin-harlanzw/issues",
+  "keywords": [
+    "eslint-plugin"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "lint": "pnpm run dev && eslint .",
+    "prepublishOnly": "nr build",
+    "release": "bumpp && pnpm publish",
+    "start": "tsx src/index.ts",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "eslint": "*"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^5.2.1",
+    "@antfu/ni": "^25.0.0",
+    "@antfu/utils": "^9.2.0",
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^22.17.1",
+    "@typescript-eslint/typescript-estree": "^8.39.1",
+    "@typescript-eslint/utils": "^8.39.1",
+    "bumpp": "^10.2.3",
+    "eslint": "^9.33.0",
+    "eslint-vitest-rule-tester": "^2.2.1",
+    "jsonc-eslint-parser": "^2.4.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "unbuild": "^3.6.0",
+    "vite": "^7.1.2",
+    "vitest": "^3.2.4",
+    "vue": "^3.5.18"
+  },
+  "resolutions": {
+    "eslint-plugin-harlanzw": "workspace:*"
+  }
+}
