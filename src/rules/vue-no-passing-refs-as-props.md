@@ -10,7 +10,7 @@ This rule prevents passing Vue refs directly as props to components without unwr
 
 ❌ **Incorrect** code for this rule:
 
-```js
+```ts
 import { ref } from 'vue'
 
 const state = {
@@ -29,7 +29,7 @@ const template = html`
 
 ✅ **Correct** code for this rule:
 
-```js
+```ts
 import { reactive, ref } from 'vue'
 
 // Option 1: Use .value to unwrap refs

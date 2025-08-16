@@ -29,10 +29,8 @@
   "scripts": {
     "build": "unbuild",
     "dev": "unbuild --stub",
-    "lint": "pnpm run dev && eslint .",
-    "prepublishOnly": "nr build",
-    "release": "bumpp && pnpm publish",
-    "start": "tsx src/index.ts",
+    "lint": "pnpm run dev && eslint . --fix",
+    "release": "pnpm build && bumpp && pnpm -r publish",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
@@ -44,7 +42,7 @@
     "@antfu/ni": "^25.0.0",
     "@antfu/utils": "^9.2.0",
     "@types/eslint": "^9.6.1",
-    "@types/node": "^22.17.1",
+    "@types/node": "^24.3.0",
     "@typescript-eslint/typescript-estree": "^8.39.1",
     "@typescript-eslint/utils": "^8.39.1",
     "bumpp": "^10.2.3",
@@ -54,7 +52,7 @@
     "tsup": "^8.5.0",
     "tsx": "^4.20.4",
     "typescript": "^5.9.2",
-    "unbuild": "^3.6.0",
+    "unbuild": "^3.6.1",
     "vite": "^7.1.2",
     "vitest": "^3.2.4",
     "vue": "^3.5.18"

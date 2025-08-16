@@ -3,8 +3,6 @@ import { ref } from 'vue'
 import ChildComponent from './ChildComponent.vue'
 
 const count = ref(0)
-const message = ref('hello')
-
 const data = {
   userRef: ref('user data'),
   normalValue: 'static',

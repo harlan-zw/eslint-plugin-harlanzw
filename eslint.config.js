@@ -4,6 +4,9 @@ import * as parserVue from 'vue-eslint-parser'
 
 const local = await tsImport('./src/index.ts', import.meta.url).then(r => r.default)
 
+// eslint-disable-next-line node/prefer-global/process
+const devOnly = process.env.TEST_SELF ? 'error' : 'off'
+
 export default antfu(
   {
     type: 'lib',
@@ -13,34 +16,31 @@ export default antfu(
     plugins: { harlanzw: local },
   },
   {
-    files: ['**/*.vue'],
+    files: ['fixtures/**/*.ts'],
+    rules: {
+      'no-unused-vars': 'off',
+      'unused-imports/no-unused-vars': 'off',
+      'ts/explicit-function-return-type': 'off',
+      'harlanzw/vue-no-faux-composables': devOnly,
+    },
+  },
+  // for testing
+  {
+    files: ['fixtures/**/*.vue'],
     languageOptions: {
       parser: parserVue,
     },
     rules: {
-      'harlanzw/vue-no-ref-access-in-templates': 'error',
-      'harlanzw/vue-no-passing-refs-as-props': 'error',
-      'harlanzw/vue-no-torefs-on-props': 'error',
-    },
-  },
-  {
-    files: ['fixtures/**/*.ts'],
-    rules: {
-      'harlanzw/vue-no-faux-composables': 'error',
-      // Disable other rules that might interfere with testing
-      'no-unused-vars': 'off',
-      'unused-imports/no-unused-vars': 'off',
-      'ts/explicit-function-return-type': 'off',
+      'harlanzw/vue-no-faux-composables': devOnly,
+      'harlanzw/vue-no-ref-access-in-templates': devOnly,
+      'harlanzw/vue-no-passing-refs-as-props': devOnly,
+      'harlanzw/vue-no-torefs-on-props': devOnly,
+      'harlanzw/vue-no-nested-reactivity': devOnly,
     },
   },
   {
     rules: {
       'ts/explicit-function-return-type': 'off',
-      // for testing - enable all rules
-      'harlanzw/vue-no-faux-composables': 'error',
-      'harlanzw/vue-no-ref-access-in-templates': 'error',
-      'harlanzw/vue-no-passing-refs-as-props': 'error',
-      'harlanzw/vue-no-torefs-on-props': 'error',
     },
   },
 )

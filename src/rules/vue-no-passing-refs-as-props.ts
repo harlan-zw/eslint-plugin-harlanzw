@@ -1,5 +1,5 @@
-import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
+import { isInVueTemplateString, isRefCall } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-passing-refs-as-props'
 export type MessageIds = 'noPassingRefsAsProps'
@@ -12,7 +12,6 @@ export default createEslintRule<Options, MessageIds>({
     docs: {
       description: 'disallow passing refs as props to Vue components',
     },
-    fixable: null,
     schema: [],
     messages: {
       noPassingRefsAsProps: 'Avoid passing refs as props. Pass the unwrapped value using ref.value or use reactive() instead.',
@@ -21,27 +20,6 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   create: (context) => {
     const refProperties = new Map<string, Set<string>>() // objectName -> Set of property names that are refs
-
-    function isRefCall(node: TSESTree.CallExpression): boolean {
-      return node.callee.type === 'Identifier' && node.callee.name === 'ref'
-    }
-
-    function isInVueTemplateString(node: TSESTree.Node): boolean {
-      let parent = node.parent
-      while (parent) {
-        if (parent.type === 'TemplateLiteral') {
-          const grandparent = parent.parent
-          if (grandparent?.type === 'TaggedTemplateExpression') {
-            const tag = grandparent.tag
-            if (tag.type === 'Identifier' && tag.name === 'html') {
-              return true
-            }
-          }
-        }
-        parent = parent.parent
-      }
-      return false
-    }
 
     function isRefProperty(objectName: string, propertyName: string): boolean {
       const properties = refProperties.get(objectName)

@@ -10,7 +10,7 @@ This rule identifies when `toRefs()` is called on variables that were assigned f
 
 ### ❌ Incorrect
 
-```js
+```ts
 import { toRefs } from 'vue'
 
 const props = defineProps<{
@@ -22,7 +22,7 @@ const props = defineProps<{
 const { dateRange, userName } = toRefs(props)
 ```
 
-```js
+```ts
 import { toRefs } from 'vue'
 
 const componentProps = defineProps<{
@@ -36,7 +36,7 @@ const { value, disabled } = toRefs(componentProps)
 
 ### ✅ Correct
 
-```js
+```ts
 const props = defineProps<{
   dateRange: DateRange
   userName: string
@@ -46,7 +46,7 @@ const props = defineProps<{
 const { dateRange, userName } = props
 ```
 
-```js
+```ts
 import { reactive, toRefs } from 'vue'
 
 // Using toRefs on non-props reactive objects is fine
@@ -58,7 +58,7 @@ const state = reactive({
 const { count, message } = toRefs(state)
 ```
 
-```js
+```ts
 const props = defineProps<{
   initialValue: number
 }>()

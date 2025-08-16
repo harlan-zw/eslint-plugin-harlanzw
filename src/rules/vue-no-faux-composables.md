@@ -21,7 +21,7 @@ This rule checks that composable functions use at least one of the following:
 
 ### ❌ Incorrect
 
-```js
+```ts
 import { someUtility } from 'vue'
 
 // This composable doesn't use any reactivity APIs
@@ -56,7 +56,7 @@ function useMethodCall() {
 
 ### ✅ Correct
 
-```js
+```ts
 import { computed, ref } from 'vue'
 
 // Uses ref() for reactive state

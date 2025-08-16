@@ -12,7 +12,6 @@ export default createEslintRule<Options, MessageIds>({
     docs: {
       description: 'disallow using toRefs on props object in Vue',
     },
-    fixable: null,
     schema: [],
     messages: {
       noToRefsOnProps: 'Using toRefs() on all props can be an antipattern as props are already reactive. Destruct props directory and wrap as refs individually if needed.',

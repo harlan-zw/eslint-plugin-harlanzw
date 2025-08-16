@@ -18,8 +18,8 @@ Harlan's opinionated ESLint rules for better code quality and consistency.
 
 ## Features
 
-D
 - 🚫 Prevent faux composables that don't use Vue's reactivity
+- 🔗 Disallow nested reactivity patterns to avoid confusion and performance issues
 - 📦 Avoid passing refs as props in Vue components
 - 🎯 Prevent direct ref access in Vue templates
 - ⚡ Disallow toRefs usage on props object
@@ -51,6 +51,7 @@ export default antfu(
     },
     rules: {
       'harlanzw/vue-no-faux-composables': 'error',
+      'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'error',
       'harlanzw/vue-no-torefs-on-props': 'error'
@@ -74,6 +75,7 @@ export default [
     },
     rules: {
       'harlanzw/vue-no-faux-composables': 'error',
+      'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'error',
       'harlanzw/vue-no-torefs-on-props': 'error'
@@ -86,6 +88,14 @@ export default [
 
 [📖 View all rules documentation](./src/rules)
 
+<!-- rules:start -->
+- [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - enforce that composables must use Vue reactivity APIs
+- [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) - disallow nested reactivity patterns like reactive({ foo: ref() }) or ref({ foo: reactive() })
+- [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) - disallow passing refs as props to Vue components
+- [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) - disallow accessing refs in Vue templates with `.value`
+- [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) - disallow using `toRefs` directly on Vue component props
+<!-- rules:end -->
+
 ## Sponsors
 
 <p align="center">
@@ -93,6 +103,10 @@ export default [
     <img src='https://raw.githubusercontent.com/harlan-zw/static/main/sponsors.svg'/>
   </a>
 </p>
+
+## Credits
+
+This plugin is based on [eslint-plugin-antfu](https://github.com/antfu/eslint-plugin-antfu) by Anthony Fu.
 
 ## License
 

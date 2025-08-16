@@ -1,5 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
+import { isComposableCall, isComposableName, isReactivityCall } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-faux-composables'
 export type MessageIds = 'mustUseReactivity'
@@ -12,7 +13,6 @@ export default createEslintRule<Options, MessageIds>({
     docs: {
       description: 'enforce that composables must use Vue reactivity APIs',
     },
-    fixable: null,
     schema: [],
     messages: {
       mustUseReactivity: 'Functions starting with use must implement reactivity APIs (use*, ref, reactive, computed, watch, etc.)',
@@ -20,39 +20,6 @@ export default createEslintRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create: (context) => {
-    const reactivityAPIs = new Set([
-      // Core reactivity
-      'ref',
-      'reactive',
-      'computed',
-      'watch',
-      'watchEffect',
-      'readonly',
-      'watchPostEffect',
-      'watchSyncEffect',
-      'onWatcherCleanup',
-      // Shallow variants
-      'shallowRef',
-      'shallowReactive',
-      'shallowReadonly',
-      // Utilities
-      'toRef',
-      'toRefs',
-      'unref',
-      'toRaw',
-      'markRaw',
-      // Type checking
-      'isRef',
-      'isReactive',
-      'isReadonly',
-      // Advanced
-      'customRef',
-      'triggerRef',
-      'effectScope',
-      'getCurrentScope',
-      'onScopeDispose',
-    ])
-
     const vueImports = new Set<string>()
     const composableFunctions = new Map<string, TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression>()
 
@@ -98,14 +65,8 @@ export default createEslintRule<Options, MessageIds>({
 
       switch (expr.type) {
         case 'CallExpression':
-          if (expr.callee.type === 'Identifier') {
-            // Check if it's a Vue reactivity API
-            if (reactivityAPIs.has(expr.callee.name) && vueImports.has(expr.callee.name))
-              return true
-            // Check if it's calling another composable (starts with 'use' followed by capital letter or underscore)
-            if (/^use[A-Z_]/.test(expr.callee.name))
-              return true
-          }
+          if (isReactivityCall(expr, vueImports) || isComposableCall(expr))
+            return true
           return false
         case 'ObjectExpression':
           return expr.properties.some(prop =>
@@ -143,8 +104,12 @@ export default createEslintRule<Options, MessageIds>({
       ImportDeclaration(node) {
         if (node.source.value === 'vue') {
           node.specifiers.forEach((spec) => {
-            if (spec.type === 'ImportSpecifier')
-              vueImports.add(spec.imported.name)
+            if (spec.type === 'ImportSpecifier') {
+              const imported = spec.imported
+              if (imported.type === 'Identifier') {
+                vueImports.add(imported.name)
+              }
+            }
           })
         }
       },
@@ -155,13 +120,13 @@ export default createEslintRule<Options, MessageIds>({
       },
 
       FunctionDeclaration(node) {
-        if (node.id && /^use[A-Z_]/.test(node.id.name))
+        if (node.id && isComposableName(node.id.name))
           composableFunctions.set(node.id.name, node)
       },
 
       VariableDeclarator(node) {
         if (node.id.type === 'Identifier'
-          && /^use[A-Z_]/.test(node.id.name)
+          && isComposableName(node.id.name)
           && (node.init?.type === 'FunctionExpression'
             || node.init?.type === 'ArrowFunctionExpression')) {
           composableFunctions.set(node.id.name, node.init)
@@ -170,7 +135,7 @@ export default createEslintRule<Options, MessageIds>({
 
       ExportNamedDeclaration(node) {
         if (node.declaration?.type === 'FunctionDeclaration'
-          && node.declaration.id && /^use[A-Z_]/.test(node.declaration.id.name)) {
+          && node.declaration.id && isComposableName(node.declaration.id.name)) {
           composableFunctions.set(node.declaration.id.name, node.declaration)
         }
       },

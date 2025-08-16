@@ -1,49 +1,7 @@
 import type { TSESTree } from '@typescript-eslint/utils'
-import type { Rule } from 'eslint'
+import type { VueTemplateListener } from '../vue-utils'
 import { createEslintRule } from '../utils'
-
-interface VExpressionContainer {
-  type: 'VExpressionContainer'
-  expression: TSESTree.Expression | null
-  parent: any
-}
-
-interface VueNode extends TSESTree.Node {
-  type: string
-}
-
-type VueTemplateListener = Record<string, any>
-
-// Taken directly from eslint-plugin-vue
-function defineTemplateBodyVisitor(
-  context: Rule.RuleContext,
-  templateVisitor: VueTemplateListener,
-  scriptVisitor?: Rule.RuleListener,
-) {
-  const parserServices = getParserServices(context)
-  if (!parserServices?.defineTemplateBodyVisitor) {
-    return {}
-  }
-  return parserServices.defineTemplateBodyVisitor(
-    templateVisitor,
-    scriptVisitor,
-  )
-}
-
-/**
- * This function is API compatible with eslint v8.x and eslint v9 or later.
- * @see https://eslint.org/blog/2023/09/preparing-custom-rules-eslint-v9/#from-context-to-sourcecode
- */
-function getParserServices(context: Rule.RuleContext) {
-  const legacy = context.sourceCode
-
-  return legacy ? legacy.parserServices : context.parserServices
-}
-
-export function isVueParser(context: Rule.RuleContext) {
-  const parserServices = getParserServices(context)
-  return !!parserServices?.defineTemplateBodyVisitor
-}
+import { defineTemplateBodyVisitor, isInVueTemplateString, isRefCall, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-ref-access-in-templates'
 export type MessageIds = 'noRefAccessInTemplate'
@@ -56,7 +14,7 @@ export default createEslintRule<Options, MessageIds>({
     docs: {
       description: 'disallow accessing ref.value in Vue templates',
     },
-    fixable: null,
+    fixable: undefined,
     schema: [],
     messages: {
       noRefAccessInTemplate: 'Avoid unpacking refs in templates for cleaner separation of reactivity.',
@@ -66,9 +24,6 @@ export default createEslintRule<Options, MessageIds>({
   create: (context) => {
     const refVariables = new Set<string>()
     const objectRefs = new Map<string, Set<string>>() // object -> set of ref properties
-    function isRefCall(node: TSESTree.CallExpression): boolean {
-      return node.callee.type === 'Identifier' && node.callee.name === 'ref'
-    }
 
     function isRefAccess(node: TSESTree.MemberExpression): boolean {
       // Direct ref access: refVariable.value
@@ -94,33 +49,15 @@ export default createEslintRule<Options, MessageIds>({
       return false
     }
 
-    function isInVueTemplateString(node: TSESTree.Node): boolean {
-      let parent = node.parent
-      while (parent) {
-        if (parent.type === 'TemplateLiteral') {
-          // Check if this template literal is likely a Vue template
-          const grandparent = parent.parent
-          if (grandparent?.type === 'TaggedTemplateExpression') {
-            const tag = grandparent.tag
-            if (tag.type === 'Identifier' && tag.name === 'html') {
-              return true
-            }
-          }
-        }
-        parent = parent.parent
-      }
-      return false
-    }
-
     // Use vue-eslint-parser's defineTemplateBodyVisitor if available
-    if (isVueParser(context)) {
-      const scriptVisitor = {
+    if (isVueParser(context as any)) {
+      const scriptVisitor: any = {
         Program() {
           refVariables.clear()
           objectRefs.clear()
         },
 
-        VariableDeclarator(node: TSESTree.VariableDeclarator) {
+        VariableDeclarator(node: any) {
           if (node.init?.type === 'CallExpression' && isRefCall(node.init)) {
             if (node.id.type === 'Identifier') {
               refVariables.add(node.id.name)
@@ -146,7 +83,7 @@ export default createEslintRule<Options, MessageIds>({
           }
         },
 
-        MemberExpression(node: TSESTree.MemberExpression) {
+        MemberExpression(node: any) {
           if (isInVueTemplateString(node) && isRefAccess(node)) {
             context.report({
               node,
@@ -156,8 +93,8 @@ export default createEslintRule<Options, MessageIds>({
         },
       }
 
-      const templateVisitor = {
-        MemberExpression(node: TSESTree.MemberExpression) {
+      const templateVisitor: VueTemplateListener = {
+        MemberExpression(node: any) {
           if (isRefAccess(node)) {
             context.report({
               node,
@@ -177,7 +114,7 @@ export default createEslintRule<Options, MessageIds>({
         objectRefs.clear()
       },
 
-      VariableDeclarator(node: TSESTree.VariableDeclarator) {
+      VariableDeclarator(node: any) {
         if (node.init?.type === 'CallExpression' && isRefCall(node.init)) {
           if (node.id.type === 'Identifier') {
             refVariables.add(node.id.name)
@@ -203,7 +140,7 @@ export default createEslintRule<Options, MessageIds>({
         }
       },
 
-      MemberExpression(node: TSESTree.MemberExpression) {
+      MemberExpression(node: any) {
         if (isInVueTemplateString(node) && isRefAccess(node)) {
           context.report({
             node,
