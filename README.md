@@ -88,6 +88,8 @@ export default [
 
 [📖 View all rules documentation](./src/rules)
 
+> **Note:** Some of these rules will be submitted to the official Vue ESLint plugin for consideration.
+
 <!-- rules:start -->
 - [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - enforce that composables must use Vue reactivity APIs
 - [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) - disallow nested reactivity patterns like reactive({ foo: ref() }) or ref({ foo: reactive() })
