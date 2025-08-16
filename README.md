@@ -4,7 +4,7 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
 
-Harlan's opinionated ESLint rules for better code quality and consistency.
+Harlan's ESLint rules for Vue projects.
 
 <p align="center">
 <table>
@@ -16,20 +16,26 @@ Harlan's opinionated ESLint rules for better code quality and consistency.
 </table>
 </p>
 
-## Features
+## Rules
 
-- 🚫 Prevent faux composables that don't use Vue's reactivity
-- 🔗 Disallow nested reactivity patterns to avoid confusion and performance issues
-- 📦 Avoid passing refs as props in Vue components
-- 🎯 Prevent direct ref access in Vue templates
-- ⚡ Disallow toRefs usage on props object
+[📖 View all rules documentation](./src/rules)
+
+> **Note:** Some of these rules will be submitted to the official Vue ESLint plugin for consideration.
+
+<!-- rules:start -->
+- [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - stop fake composables that don't use Vue reactivity
+- [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) - don't mix `ref()` and `reactive()` together
+- [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) - don't pass refs as props - unwrap them first
+- [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) - don't use `.value` in Vue templates
+- [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) - don't use `toRefs()` on the props object
+<!-- rules:end -->
 
 ## Installation
 
-Install `eslint-plugin-harlanzw` dependency to your project:
+Install the plugin:
 
 ```bash
-npm install eslint-plugin-harlanzw --save-dev
+pnpm add -D eslint-plugin-harlanzw
 ```
 
 ## Usage
@@ -84,19 +90,6 @@ export default [
 ]
 ```
 
-## Rules
-
-[📖 View all rules documentation](./src/rules)
-
-> **Note:** Some of these rules will be submitted to the official Vue ESLint plugin for consideration.
-
-<!-- rules:start -->
-- [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - enforce that composables must use Vue reactivity APIs
-- [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) - disallow nested reactivity patterns like reactive({ foo: ref() }) or ref({ foo: reactive() })
-- [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) - disallow passing refs as props to Vue components
-- [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) - disallow accessing refs in Vue templates with `.value`
-- [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) - disallow using `toRefs` directly on Vue component props
-<!-- rules:end -->
 
 ## Sponsors
 
