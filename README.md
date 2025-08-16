@@ -16,6 +16,12 @@ Harlan's ESLint rules for Vue projects.
 </table>
 </p>
 
+## Playground
+
+Try the rules in action with a Nuxt ESLint interactive playground:
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/harlan-zw/eslint-plugin-harlanzw/tree/main/playground)
+
 ## Rules
 
 > **Note:** These rules are experimental and may change. They will be submitted to the official Vue ESLint plugin for consideration.

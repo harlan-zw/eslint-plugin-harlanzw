@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "@nuxt/devtools": "latest",
-    "nuxt": "^3.14.159",
+    "nuxt": "^4.0.3",
     "vue": "latest"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^0.6.0",
+    "@nuxt/eslint": "^1.8.0",
     "eslint": "^9.33.0",
-    "eslint-plugin-harlanzw": "workspace:*",
+    "eslint-plugin-harlanzw": "latest",
     "typescript": "^5.9.2"
   }
 }

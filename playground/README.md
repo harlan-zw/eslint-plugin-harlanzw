@@ -1,5 +1,7 @@
 # ESLint Plugin Harlanzw - Playground
 
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/harlan-zw/eslint-plugin-harlanzw/tree/main/playground)
+
 This is a StackBlitz playground showcasing the ESLint rules from `eslint-plugin-harlanzw`.
 
 ## Features
