@@ -18,9 +18,7 @@ Harlan's ESLint rules for Vue projects.
 
 ## Rules
 
-[📖 View all rules documentation](./src/rules)
-
-> **Note:** Some of these rules will be submitted to the official Vue ESLint plugin for consideration.
+> **Note:** These rules are experimental and may change. They will be submitted to the official Vue ESLint plugin for consideration.
 
 <!-- rules:start -->
 - [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - stop fake composables that don't use Vue reactivity
