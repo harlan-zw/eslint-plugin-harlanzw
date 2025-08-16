@@ -30,4 +30,16 @@ function useComposed() {
 }
 ```
 
+Use them in components:
+
+```vue
+<script setup>
+const { count } = useCounter()
+</script>
+
+<template>
+  <div>{{ count }}</div>
+</template>
+```
+
 Real composables use things like `ref()`, `reactive()`, `computed()`, `watch()`, or call other `use*()` functions. If yours doesn't, maybe it shouldn't start with "use".

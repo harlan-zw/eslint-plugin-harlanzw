@@ -6,20 +6,38 @@ When you pass a ref to a component, pass the actual value, not the ref wrapper.
 
 ## Wrong
 
-```ts
+```vue
+<script setup>
 const message = ref('Hello')
-const template = html`<MyComponent :message="${message}" />`  // passes ref object
+</script>
+
+<template>
+  <MyComponent :message="message" />  <!-- passes ref object -->
+</template>
 ```
 
 ## Right
 
-```ts
+```vue
+<script setup>
 const message = ref('Hello')
-const template = html`<MyComponent :message="${message.value}" />`  // passes string
+</script>
 
-// Or use reactive() instead
+<template>
+  <MyComponent :message="message.value" />  <!-- passes string -->
+</template>
+```
+
+Or use reactive instead:
+
+```vue
+<script setup>
 const state = reactive({ message: 'Hello' })
-const template = html`<MyComponent :message="${state.message}" />`
+</script>
+
+<template>
+  <MyComponent :message="state.message" />
+</template>
 ```
 
 Components expect values, not ref wrappers. Always use `.value` when passing refs as props.
