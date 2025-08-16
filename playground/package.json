@@ -1,0 +1,24 @@
+{
+  "name": "eslint-plugin-harlanzw-playground",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@nuxt/devtools": "latest",
+    "nuxt": "^3.14.159",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^0.6.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-harlanzw": "workspace:*",
+    "typescript": "^5.9.2"
+  }
+}

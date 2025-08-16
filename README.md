@@ -64,6 +64,27 @@ export default antfu(
 )
 ```
 
+### With Nuxt ESLint
+
+```ts
+// eslint.config.mjs
+import harlanzw from 'eslint-plugin-harlanzw'
+import withNuxt from './.nuxt/eslint.config.mjs'
+
+export default withNuxt([{
+  plugins: {
+    harlanzw
+  },
+  rules: {
+    'harlanzw/vue-no-faux-composables': 'error',
+    'harlanzw/vue-no-nested-reactivity': 'error',
+    'harlanzw/vue-no-passing-refs-as-props': 'error',
+    'harlanzw/vue-no-ref-access-in-templates': 'error',
+    'harlanzw/vue-no-torefs-on-props': 'error'
+  }
+}])
+```
+
 ### Standalone Usage
 
 Add the plugin to your ESLint configuration:
