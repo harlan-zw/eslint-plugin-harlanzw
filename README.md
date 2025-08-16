@@ -93,7 +93,6 @@ export default [
 ]
 ```
 
-
 ## Sponsors
 
 <p align="center">
