@@ -10,16 +10,16 @@ Nesting reactive primitives gets confusing fast. Pick one approach and stick wit
 <script setup>
 // Don't nest refs inside reactive
 const state = reactive({
-  count: ref(0)  // confusing!
+  count: ref(0) // confusing!
 })
 
 // Don't nest reactive inside ref
 const data = ref({
-  state: reactive({ count: 0 })  // why?
+  state: reactive({ count: 0 }) // why?
 })
 
 // Don't return refs from computed
-const computedRef = computed(() => ref(0))  // just return the value
+const computedRef = computed(() => ref(0)) // just return the value
 </script>
 ```
 

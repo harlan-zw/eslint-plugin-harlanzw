@@ -9,7 +9,7 @@ Props are already reactive in Vue, so wrapping them with `toRefs()` is pointless
 ```vue
 <script setup>
 const props = defineProps<{ name: string }>()
-const { name } = toRefs(props)  // unnecessary!
+const { name } = toRefs(props) // unnecessary!
 </script>
 ```
 

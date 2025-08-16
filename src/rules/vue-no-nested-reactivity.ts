@@ -1,5 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
+import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-nested-reactivity'
 export type MessageIds = 'noNestedInRef' | 'noNestedInReactive' | 'noNestedInShallowRef' | 'noNestedInShallowReactive' | 'noNestedInComputed' | 'noNestedInWatch' | 'noNestedInWatchEffect'
@@ -188,15 +189,15 @@ export default createEslintRule<Options, MessageIds>({
       }
     }
 
-    return {
+    const scriptVisitor = {
       Program() {
         vueImports.clear()
         reactiveVariables.clear()
       },
 
-      ImportDeclaration(node) {
+      ImportDeclaration(node: any) {
         if (node.source.value === 'vue') {
-          node.specifiers.forEach((spec) => {
+          node.specifiers.forEach((spec: any) => {
             if (spec.type === 'ImportSpecifier') {
               const imported = spec.imported
               if (imported.type === 'Identifier') {
@@ -207,7 +208,7 @@ export default createEslintRule<Options, MessageIds>({
         }
       },
 
-      CallExpression(node) {
+      CallExpression(node: any) {
         const reactiveType = isReactiveCall(node)
         if (reactiveType) {
           checkForNestedReactivity(node, reactiveType)
@@ -217,7 +218,7 @@ export default createEslintRule<Options, MessageIds>({
         checkComputedCallback(node)
       },
 
-      VariableDeclarator(node) {
+      VariableDeclarator(node: any) {
         if (node.id.type === 'Identifier' && node.init?.type === 'CallExpression') {
           const reactiveType = isReactiveCall(node.init)
           if (reactiveType) {
@@ -226,5 +227,26 @@ export default createEslintRule<Options, MessageIds>({
         }
       },
     }
+
+    const templateVisitor = {
+      // Check for nested reactivity in Vue SFC templates
+      CallExpression(node: any) {
+        const reactiveType = isReactiveCall(node)
+        if (reactiveType) {
+          checkForNestedReactivity(node, reactiveType)
+        }
+
+        // Also check computed callbacks for reactive returns
+        checkComputedCallback(node)
+      },
+    }
+
+    // If this is a Vue SFC, use template body visitor
+    if (isVueParser(context)) {
+      return defineTemplateBodyVisitor(context, templateVisitor, scriptVisitor)
+    }
+
+    // For non-SFC files, use the script visitor only
+    return scriptVisitor
   },
 })

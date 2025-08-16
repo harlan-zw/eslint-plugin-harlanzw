@@ -8,12 +8,12 @@ If you're naming a function `useWhatever()`, it should use Vue's reactivity syst
 
 ```ts
 function useCounter() {
-  let count = 0  // not reactive!
+  const count = 0 // not reactive!
   return { count }
 }
 
 function useTimer() {
-  return { time: Date.now() }  // static value
+  return { time: Date.now() } // static value
 }
 ```
 
@@ -21,12 +21,12 @@ function useTimer() {
 
 ```ts
 function useCounter() {
-  const count = ref(0)  // actually reactive
+  const count = ref(0) // actually reactive
   return { count }
 }
 
 function useComposed() {
-  return useCounter()  // calls another composable
+  return useCounter() // calls another composable
 }
 ```
 

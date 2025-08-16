@@ -10,7 +10,9 @@ Vue automatically unwraps refs in templates, so `count.value` becomes just `coun
 <template>
   <div>{{ count.value }}</div>
   <input v-model="message.value">
-  <button @click="count.value++">Increment</button>
+  <button @click="count.value++">
+    Increment
+  </button>
 </template>
 ```
 
@@ -20,7 +22,9 @@ Vue automatically unwraps refs in templates, so `count.value` becomes just `coun
 <template>
   <div>{{ count }}</div>
   <input v-model="message">
-  <button @click="count++">Increment</button>
+  <button @click="count++">
+    Increment
+  </button>
 </template>
 ```
 

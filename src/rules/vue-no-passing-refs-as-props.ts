@@ -1,5 +1,5 @@
 import { createEslintRule } from '../utils'
-import { isInVueTemplateString, isRefCall } from '../vue-utils'
+import { defineTemplateBodyVisitor, isInVueTemplateString, isRefCall, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-passing-refs-as-props'
 export type MessageIds = 'noPassingRefsAsProps'
@@ -26,13 +26,32 @@ export default createEslintRule<Options, MessageIds>({
       return properties?.has(propertyName) ?? false
     }
 
-    return {
+    function checkMemberExpression(node: any) {
+      if (node.object.type === 'Identifier'
+        && node.property.type === 'Identifier'
+        && isRefProperty(node.object.name, node.property.name)) {
+        // Check if this is followed by .value access, which would be valid
+        const parent = node.parent
+        if (parent?.type === 'MemberExpression'
+          && parent.property.type === 'Identifier'
+          && parent.property.name === 'value') {
+          return // Allow foo.bar.value pattern
+        }
+
+        context.report({
+          node,
+          messageId: 'noPassingRefsAsProps',
+        })
+      }
+    }
+
+    const scriptVisitor = {
       Program() {
         refProperties.clear()
       },
 
       // Track object properties assigned from ref() calls
-      VariableDeclarator(node) {
+      VariableDeclarator(node: any) {
         if (node.id.type === 'Identifier' && node.init?.type === 'ObjectExpression') {
           const objectName = node.id.name
           const objectProperties = new Set<string>()
@@ -52,26 +71,23 @@ export default createEslintRule<Options, MessageIds>({
         }
       },
 
-      // Check for ref property access in template expressions
-      MemberExpression(node) {
-        if (isInVueTemplateString(node)
-          && node.object.type === 'Identifier'
-          && node.property.type === 'Identifier'
-          && isRefProperty(node.object.name, node.property.name)) {
-          // Check if this is followed by .value access, which would be valid
-          const parent = node.parent
-          if (parent?.type === 'MemberExpression'
-            && parent.property.type === 'Identifier'
-            && parent.property.name === 'value') {
-            return // Allow foo.bar.value pattern
-          }
-
-          context.report({
-            node,
-            messageId: 'noPassingRefsAsProps',
-          })
+      // Check for ref property access in template strings (for non-SFC files)
+      MemberExpression(node: any) {
+        if (isInVueTemplateString(node)) {
+          checkMemberExpression(node)
         }
       },
     }
+
+    // If this is a Vue SFC, use template body visitor
+    if (isVueParser(context)) {
+      return defineTemplateBodyVisitor(context, {
+        // Check for ref property access in Vue SFC templates
+        MemberExpression: checkMemberExpression,
+      }, scriptVisitor)
+    }
+
+    // For non-SFC files, use the script visitor only
+    return scriptVisitor
   },
 })
