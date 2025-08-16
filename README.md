@@ -71,9 +71,14 @@ Add the plugin to your ESLint configuration:
 ```js
 // eslint.config.js
 import harlanzw from 'eslint-plugin-harlanzw'
+import vueParser from 'vue-eslint-parser'
 
 export default [
   {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser
+    },
     plugins: {
       harlanzw
     },
