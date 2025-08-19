@@ -1,7 +1,8 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { VueTemplateListener } from '../vue-utils'
+import { isIdentifier, isMemberExpression } from '../ast-utils'
 import { createEslintRule } from '../utils'
-import { defineTemplateBodyVisitor, isInVueTemplateString, isRefCall, isVueParser } from '../vue-utils'
+import { defineTemplateBodyVisitor, isInVueTemplateString, isRefAccess, isRefCall, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-ref-access-in-templates'
 export type MessageIds = 'noRefAccessInTemplate'
@@ -25,21 +26,19 @@ export default createEslintRule<Options, MessageIds>({
     const refVariables = new Set<string>()
     const objectRefs = new Map<string, Set<string>>() // object -> set of ref properties
 
-    function isRefAccess(node: TSESTree.MemberExpression): boolean {
+    function isRefValueAccess(node: TSESTree.MemberExpression): boolean {
       // Direct ref access: refVariable.value
-      if (node.object.type === 'Identifier'
+      if (isIdentifier(node.object)
         && refVariables.has(node.object.name)
-        && node.property.type === 'Identifier'
-        && node.property.name === 'value') {
+        && isRefAccess(node)) {
         return true
       }
 
       // Object property ref access: object.refProperty.value
-      if (node.object.type === 'MemberExpression'
-        && node.object.object.type === 'Identifier'
-        && node.object.property.type === 'Identifier'
-        && node.property.type === 'Identifier'
-        && node.property.name === 'value') {
+      if (isMemberExpression(node.object)
+        && isIdentifier(node.object.object)
+        && isIdentifier(node.object.property)
+        && isRefAccess(node)) {
         const objectName = node.object.object.name
         const propertyName = node.object.property.name
         const objectRefProperties = objectRefs.get(objectName)
@@ -84,7 +83,7 @@ export default createEslintRule<Options, MessageIds>({
         },
 
         MemberExpression(node: any) {
-          if (isInVueTemplateString(node) && isRefAccess(node)) {
+          if (isInVueTemplateString(node) && isRefValueAccess(node)) {
             context.report({
               node,
               messageId: 'noRefAccessInTemplate',
@@ -95,7 +94,7 @@ export default createEslintRule<Options, MessageIds>({
 
       const templateVisitor: VueTemplateListener = {
         MemberExpression(node: any) {
-          if (isRefAccess(node)) {
+          if (isRefValueAccess(node)) {
             context.report({
               node,
               messageId: 'noRefAccessInTemplate',
@@ -141,7 +140,7 @@ export default createEslintRule<Options, MessageIds>({
       },
 
       MemberExpression(node: any) {
-        if (isInVueTemplateString(node) && isRefAccess(node)) {
+        if (isInVueTemplateString(node) && isRefValueAccess(node)) {
           context.report({
             node,
             messageId: 'noRefAccessInTemplate',

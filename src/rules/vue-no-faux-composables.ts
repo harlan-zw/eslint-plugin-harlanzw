@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { isComposableCall, isComposableName, isReactivityCall } from '../vue-utils'
+import { isComposableCall, isComposableName, isReactivityCall, trackVueImports } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-faux-composables'
 export type MessageIds = 'mustUseReactivity'
@@ -102,16 +102,7 @@ export default createEslintRule<Options, MessageIds>({
       },
 
       ImportDeclaration(node) {
-        if (node.source.value === 'vue') {
-          node.specifiers.forEach((spec) => {
-            if (spec.type === 'ImportSpecifier') {
-              const imported = spec.imported
-              if (imported.type === 'Identifier') {
-                vueImports.add(imported.name)
-              }
-            }
-          })
-        }
+        trackVueImports(node, vueImports)
       },
 
       'Program:exit': function () {

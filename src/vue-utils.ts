@@ -1,5 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { Rule } from 'eslint'
+import { isAtTopLevel } from './ast-utils'
 
 export type VueTemplateListener = Record<string, (node: any) => void>
 
@@ -99,3 +100,35 @@ export function isComposableCall(node: TSESTree.CallExpression): boolean {
 export function isComposableName(name: string): boolean {
   return /^use[A-Z_]/.test(name)
 }
+
+export function isInVueScriptSetup(node: TSESTree.Node): boolean {
+  return isAtTopLevel(node)
+}
+
+export function isDefinePropsCall(node: TSESTree.CallExpression): boolean {
+  return node.callee.type === 'Identifier' && node.callee.name === 'defineProps'
+}
+
+export function isToRefsCall(node: TSESTree.CallExpression): boolean {
+  return node.callee.type === 'Identifier' && node.callee.name === 'toRefs'
+}
+
+export function isRefAccess(node: TSESTree.MemberExpression): boolean {
+  return node.property.type === 'Identifier' && node.property.name === 'value'
+}
+
+export function trackVueImports(node: TSESTree.ImportDeclaration, vueImports: Set<string>): void {
+  if (node.source.value === 'vue') {
+    node.specifiers.forEach((spec) => {
+      if (spec.type === 'ImportSpecifier') {
+        const imported = spec.imported
+        if (imported.type === 'Identifier') {
+          vueImports.add(imported.name)
+        }
+      }
+    })
+  }
+}
+
+// Re-export commonly used AST utilities for convenience
+export { isAwaited, isFunctionCall, isInFunction, isReturned } from './ast-utils'

@@ -1,3 +1,4 @@
+import { isCallExpression, isIdentifier, isMemberExpression, isObjectExpression, isProperty } from '../ast-utils'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isInVueTemplateString, isRefCall, isVueParser } from '../vue-utils'
 
@@ -27,13 +28,13 @@ export default createEslintRule<Options, MessageIds>({
     }
 
     function checkMemberExpression(node: any) {
-      if (node.object.type === 'Identifier'
-        && node.property.type === 'Identifier'
+      if (isIdentifier(node.object)
+        && isIdentifier(node.property)
         && isRefProperty(node.object.name, node.property.name)) {
         // Check if this is followed by .value access, which would be valid
         const parent = node.parent
-        if (parent?.type === 'MemberExpression'
-          && parent.property.type === 'Identifier'
+        if (isMemberExpression(parent)
+          && isIdentifier(parent.property)
           && parent.property.name === 'value') {
           return // Allow foo.bar.value pattern
         }
@@ -52,14 +53,14 @@ export default createEslintRule<Options, MessageIds>({
 
       // Track object properties assigned from ref() calls
       VariableDeclarator(node: any) {
-        if (node.id.type === 'Identifier' && node.init?.type === 'ObjectExpression') {
+        if (isIdentifier(node.id) && isObjectExpression(node.init)) {
           const objectName = node.id.name
           const objectProperties = new Set<string>()
 
           for (const property of node.init.properties) {
-            if (property.type === 'Property'
-              && property.key.type === 'Identifier'
-              && property.value.type === 'CallExpression'
+            if (isProperty(property)
+              && isIdentifier(property.key)
+              && isCallExpression(property.value)
               && isRefCall(property.value)) {
               objectProperties.add(property.key.name)
             }

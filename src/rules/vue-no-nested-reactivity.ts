@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
+import { defineTemplateBodyVisitor, isVueParser, trackVueImports } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-nested-reactivity'
 export type MessageIds = 'noNestedInRef' | 'noNestedInReactive' | 'noNestedInShallowRef' | 'noNestedInShallowReactive' | 'noNestedInComputed' | 'noNestedInWatch' | 'noNestedInWatchEffect'
@@ -196,16 +196,7 @@ export default createEslintRule<Options, MessageIds>({
       },
 
       ImportDeclaration(node: any) {
-        if (node.source.value === 'vue') {
-          node.specifiers.forEach((spec: any) => {
-            if (spec.type === 'ImportSpecifier') {
-              const imported = spec.imported
-              if (imported.type === 'Identifier') {
-                vueImports.add(imported.name)
-              }
-            }
-          })
-        }
+        trackVueImports(node, vueImports)
       },
 
       CallExpression(node: any) {

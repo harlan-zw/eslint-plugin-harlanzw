@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
+import { defineTemplateBodyVisitor, isDefinePropsCall, isToRefsCall, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-torefs-on-props'
 export type MessageIds = 'noToRefsOnProps'
@@ -28,7 +28,7 @@ export default createEslintRule<Options, MessageIds>({
 
     function checkToRefsCall(node: any): void {
       // Check if the function being called is 'toRefs'
-      if (node.callee.type === 'Identifier' && node.callee.name === 'toRefs') {
+      if (isToRefsCall(node)) {
         // Check if the argument is a props-related variable
         if (node.arguments.length > 0) {
           const firstArg = node.arguments[0]
@@ -51,7 +51,7 @@ export default createEslintRule<Options, MessageIds>({
       VariableDeclarator(node: any) {
         if (node.init?.type === 'CallExpression') {
           const callExpr = node.init
-          if (callExpr.callee.type === 'Identifier' && callExpr.callee.name === 'defineProps') {
+          if (isDefinePropsCall(callExpr)) {
             if (node.id.type === 'Identifier') {
               propsVariables.add(node.id.name)
             }
