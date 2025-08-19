@@ -6,6 +6,7 @@ export default withNuxt([{
     harlanzw,
   },
   rules: {
+    'harlanzw/nuxt-await-navigate-to': 'error',
     'harlanzw/vue-no-faux-composables': 'error',
     'harlanzw/vue-no-nested-reactivity': 'error',
     'harlanzw/vue-no-passing-refs-as-props': 'error',

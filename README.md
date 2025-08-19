@@ -27,6 +27,7 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 > **Note:** These rules are experimental and may change. They will be submitted to the official Vue ESLint plugin for consideration.
 
 <!-- rules:start -->
+- [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) - enforce awaiting `navigateTo()` calls
 - [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - stop fake composables that don't use Vue reactivity
 - [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) - don't mix `ref()` and `reactive()` together
 - [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) - don't pass refs as props - unwrap them first
@@ -60,6 +61,7 @@ export default antfu(
       harlanzw
     },
     rules: {
+      'harlanzw/nuxt-await-navigate-to': 'error',
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
@@ -82,6 +84,7 @@ export default withNuxt([{
     harlanzw
   },
   rules: {
+    'harlanzw/nuxt-await-navigate-to': 'error',
     'harlanzw/vue-no-faux-composables': 'error',
     'harlanzw/vue-no-nested-reactivity': 'error',
     'harlanzw/vue-no-passing-refs-as-props': 'error',
@@ -110,6 +113,7 @@ export default [
       harlanzw
     },
     rules: {
+      'harlanzw/nuxt-await-navigate-to': 'error',
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
