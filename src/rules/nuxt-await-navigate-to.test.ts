@@ -90,6 +90,9 @@ run({
       code: $`
         navigateTo('/')
       `,
+      output: $`
+        await navigateTo('/')
+      `,
       errors: [{
         messageId: 'mustAwaitNavigateTo',
       }],
@@ -99,6 +102,11 @@ run({
       code: $`
         async function asyncFunction() {
           navigateTo('/async')
+        }
+      `,
+      output: $`
+        async function asyncFunction() {
+          await navigateTo('/async')
         }
       `,
       errors: [{
@@ -133,6 +141,13 @@ run({
         async function mixedFunction() {
           await navigateTo('/good')
           navigateTo('/bad')
+          return navigateTo('/also-good')
+        }
+      `,
+      output: $`
+        async function mixedFunction() {
+          await navigateTo('/good')
+          await navigateTo('/bad')
           return navigateTo('/also-good')
         }
       `,
@@ -172,6 +187,96 @@ run({
         const value = 'test'
         navigateTo('/')
         console.log('after')
+      `,
+      output: $`
+        const value = 'test'
+        await navigateTo('/')
+        console.log('after')
+      `,
+      errors: [{
+        messageId: 'mustAwaitNavigateTo',
+      }],
+    },
+    // Non-async function - no fix should be provided
+    {
+      code: $`
+        function syncFunction() {
+          navigateTo('/sync')
+        }
+      `,
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
+      }],
+    },
+    // Non-async arrow function - no fix should be provided
+    {
+      code: $`
+        const syncHandler = () => {
+          navigateTo('/sync')
+        }
+      `,
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
+      }],
+    },
+    // Non-async function expression - no fix should be provided
+    {
+      code: $`
+        const syncHandler = function() {
+          navigateTo('/sync')
+        }
+      `,
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
+      }],
+    },
+    // Async arrow function with navigateTo - should be fixed
+    {
+      code: $`
+        const asyncHandler = async () => {
+          navigateTo('/async-arrow')
+        }
+      `,
+      output: $`
+        const asyncHandler = async () => {
+          await navigateTo('/async-arrow')
+        }
+      `,
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
+      }],
+    },
+    // Async function expression - should be fixed
+    {
+      code: $`
+        const asyncHandler = async function() {
+          navigateTo('/async-function')
+        }
+      `,
+      output: $`
+        const asyncHandler = async function() {
+          await navigateTo('/async-function')
+        }
+      `,
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
+      }],
+    },
+    // Complex Vue script setup scenario
+    {
+      code: $`
+        const router = useRouter()
+        if (condition) {
+          navigateTo('/conditional')
+        }
+        const result = computed(() => someValue)
+      `,
+      output: $`
+        const router = useRouter()
+        if (condition) {
+          await navigateTo('/conditional')
+        }
+        const result = computed(() => someValue)
       `,
       errors: [{
         messageId: 'mustAwaitNavigateTo',

@@ -1,4 +1,4 @@
-import { isAwaited, isFunctionCall, isInFunction, isReturned } from '../ast-utils'
+import { isAwaited, isFunctionCall, isInAsyncFunction, isInFunction, isReturned } from '../ast-utils'
 import { createEslintRule } from '../utils'
 import { isInVueScriptSetup } from '../vue-utils'
 
@@ -13,6 +13,7 @@ export default createEslintRule<Options, MessageIds>({
     docs: {
       description: 'enforce that navigateTo() calls are properly awaited or returned',
     },
+    fixable: 'code',
     schema: [],
     messages: {
       mustAwaitNavigateTo: 'navigateTo() must be awaited in Vue script setup',
@@ -36,15 +37,24 @@ export default createEslintRule<Options, MessageIds>({
             context.report({
               node,
               messageId: 'mustAwaitNavigateTo',
+              fix(fixer) {
+                return fixer.insertTextBefore(node, 'await ')
+              },
             })
           }
         }
         else if (inFunction) {
           // Inside a function - must be awaited or returned
           if (!isAwaited(node) && !isReturned(node)) {
+            const canFix = isInAsyncFunction(node)
             context.report({
               node,
               messageId: 'mustAwaitOrReturnNavigateTo',
+              fix: canFix
+                ? (fixer) => {
+                    return fixer.insertTextBefore(node, 'await ')
+                  }
+                : undefined,
             })
           }
         }

@@ -34,6 +34,19 @@ export function isInFunction(node: TSESTree.Node): boolean {
   return false
 }
 
+export function isInAsyncFunction(node: TSESTree.Node): boolean {
+  let parent: TSESTree.Node | undefined = node.parent
+  while (parent) {
+    if (parent.type === 'FunctionDeclaration'
+      || parent.type === 'FunctionExpression'
+      || parent.type === 'ArrowFunctionExpression') {
+      return parent.async === true
+    }
+    parent = parent.parent
+  }
+  return false
+}
+
 export function isFunctionCall(node: TSESTree.CallExpression, functionName: string): boolean {
   return node.callee.type === 'Identifier' && node.callee.name === functionName
 }
