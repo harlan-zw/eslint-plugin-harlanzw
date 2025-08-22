@@ -46,7 +46,9 @@ The rule automatically transforms router method calls:
 // Before
 const router = useRouter()
 router.push('/profile')
+```
 
+```js
 // After (auto-fixed)
 const router = useRouter()
 navigateTo('/profile')
@@ -58,7 +60,9 @@ navigateTo('/profile')
 // Before
 const router = useRouter()
 router.replace('/dashboard')
+```
 
+```js
 // After (auto-fixed)
 const router = useRouter()
 navigateTo('/dashboard', { replace: true })
