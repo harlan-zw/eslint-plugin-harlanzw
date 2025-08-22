@@ -37,8 +37,54 @@ export const VUE_REACTIVITY_APIS = new Set([
   'onScopeDispose',
 ])
 
+/**
+ * Side effect functions that should be moved to onMounted in Vue script setup.
+ * These functions create persistent effects that need cleanup during SSR.
+ */
+export const SIDE_EFFECT_FUNCTIONS = new Set([
+  // Timer functions
+  'setTimeout',
+  'setInterval',
+  // Animation functions
+  'requestAnimationFrame',
+  'requestIdleCallback',
+  // Observer constructors (when called with 'new')
+  'IntersectionObserver',
+  'MutationObserver',
+  'ResizeObserver',
+  'PerformanceObserver',
+  // Network/Streaming
+  'WebSocket',
+  'EventSource',
+])
+
+/**
+ * Maps side effect functions to their corresponding cleanup functions.
+ * Note: Some cleanup patterns are more complex and handled in the auto-fix logic.
+ */
+export const SIDE_EFFECT_CLEANUP_MAP: Record<string, string> = {
+  // Timer functions
+  setTimeout: 'clearTimeout',
+  setInterval: 'clearInterval',
+  // Animation functions
+  requestAnimationFrame: 'cancelAnimationFrame',
+  requestIdleCallback: 'cancelIdleCallback',
+  // Observers (use disconnect method)
+  IntersectionObserver: 'disconnect',
+  MutationObserver: 'disconnect',
+  ResizeObserver: 'disconnect',
+  PerformanceObserver: 'disconnect',
+  // Network (use close method)
+  WebSocket: 'close',
+  EventSource: 'close',
+}
+
 export function isRefCall(node: TSESTree.CallExpression): boolean {
   return node.callee.type === 'Identifier' && node.callee.name === 'ref'
+}
+
+export function isSideEffectCall(node: TSESTree.CallExpression): boolean {
+  return node.callee.type === 'Identifier' && SIDE_EFFECT_FUNCTIONS.has(node.callee.name)
 }
 
 export function isInVueTemplateString(node: TSESTree.Node): boolean {

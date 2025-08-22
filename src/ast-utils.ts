@@ -88,3 +88,26 @@ export function isObjectExpression(node: TSESTree.Node): node is TSESTree.Object
 export function isProperty(node: TSESTree.Node): node is TSESTree.Property {
   return node.type === 'Property'
 }
+
+/**
+ * Finds the statement that contains a given node (for auto-fixing purposes).
+ * Walks up the AST until it finds a statement type node.
+ */
+export function findContainingStatement(node: TSESTree.Node): TSESTree.Node {
+  let current: TSESTree.Node = node
+  while (current.parent && current.parent.type !== 'Program') {
+    if (current.parent.type === 'ExpressionStatement'
+      || current.parent.type === 'VariableDeclaration') {
+      return current.parent
+    }
+    current = current.parent
+  }
+  return current
+}
+
+/**
+ * Extracts the indentation (whitespace) at the beginning of a statement.
+ */
+export function getStatementIndentation(statement: TSESTree.Node, sourceCode: any): string {
+  return sourceCode.text.slice(sourceCode.getIndexFromLoc(statement.loc.start)).match(/^(\s*)/)?.[1] || ''
+}
