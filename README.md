@@ -27,15 +27,17 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 > **Note:** These rules are experimental and may change. They will be submitted to the official Vue ESLint plugin for consideration.
 
 <!-- rules:start -->
-- [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) - enforce awaiting `navigateTo()` calls
-- [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) - disallow side effects in async data handlers
-- [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) - disallow side effects in setup functions
-- [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) - prefer `navigateTo()` over `router.push()` or `router.replace()`
-- [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) - stop fake composables that don't use Vue reactivity
-- [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) - don't mix `ref()` and `reactive()` together
-- [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) - don't pass refs as props - unwrap them first
-- [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) - don't use `.value` in Vue templates
-- [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) - don't use `toRefs()` on the props object
+| Rule | Description |
+| --- | --- |
+| [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) | enforce awaiting `navigateTo()` calls |
+| [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
+| [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
+| [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) | prefer `navigateTo()` over `router.push()` or `router.replace()` |
+| [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) | stop fake composables that don't use Vue reactivity |
+| [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) | don't mix `ref()` and `reactive()` together |
+| [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) | don't pass refs as props - unwrap them first |
+| [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) | don't use `.value` in Vue templates |
+| [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) | don't use `toRefs()` on the props object |
 <!-- rules:end -->
 
 ## Installation
