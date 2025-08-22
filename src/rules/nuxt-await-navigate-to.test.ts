@@ -1,5 +1,5 @@
 import { unindent as $ } from 'eslint-vitest-rule-tester'
-import { run } from './_test'
+import { run, runVue } from './_test'
 import rule, { RULE_NAME } from './nuxt-await-navigate-to'
 
 run({
@@ -280,6 +280,158 @@ run({
       `,
       errors: [{
         messageId: 'mustAwaitNavigateTo',
+      }],
+    },
+  ],
+})
+
+// Vue SFC tests
+runVue({
+  name: `${RULE_NAME} (Vue SFC)`,
+  rule,
+  valid: [
+    // Vue SFC - correctly awaited navigateTo
+    {
+      code: $`
+        <script setup>
+        // Top-level awaited navigateTo (correct)
+        await navigateTo('/')
+        
+        // Function with awaited navigateTo (correct)
+        async function handleNavigation() {
+          await navigateTo('/profile')
+        }
+        
+        // Function with returned navigateTo (correct)
+        function goToPage() {
+          return navigateTo('/page')
+        }
+        </script>
+        
+        <template>
+          <div>
+            <button @click="handleNavigation">Go to Profile</button>
+            <button @click="goToPage">Go to Page</button>
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    // Vue SFC - non-navigateTo calls
+    {
+      code: $`
+        <script setup>
+        // Other function calls don't need await
+        someOtherFunction()
+        
+        function handleClick() {
+          anotherFunction()
+        }
+        </script>
+        
+        <template>
+          <button @click="handleClick">Click</button>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+  ],
+  invalid: [
+    // Vue SFC - missing await in top-level
+    {
+      code: $`
+        <script setup>
+        // Missing await at top level (incorrect)
+        navigateTo('/')
+        
+        async function handleLogin() {
+          await navigateTo('/dashboard')
+        }
+        </script>
+        
+        <template>
+          <button @click="handleLogin">Login</button>
+        </template>
+      `,
+      output: $`
+        <script setup>
+        // Missing await at top level (incorrect)
+        await navigateTo('/')
+        
+        async function handleLogin() {
+          await navigateTo('/dashboard')
+        }
+        </script>
+        
+        <template>
+          <button @click="handleLogin">Login</button>
+        </template>
+      `,
+      filename: 'test.vue',
+      errors: [{
+        messageId: 'mustAwaitNavigateTo',
+      }],
+    },
+    // Vue SFC - missing await in async function (fixable)
+    {
+      code: $`
+        <script setup>
+        await navigateTo('/initial')
+        
+        async function handleAsyncNav() {
+          // Missing await in async function (incorrect)
+          navigateTo('/async-page')
+        }
+        </script>
+        
+        <template>
+          <div>
+            <button @click="handleAsyncNav">Async Navigate</button>
+          </div>
+        </template>
+      `,
+      output: $`
+        <script setup>
+        await navigateTo('/initial')
+        
+        async function handleAsyncNav() {
+          // Missing await in async function (incorrect)
+          await navigateTo('/async-page')
+        }
+        </script>
+        
+        <template>
+          <div>
+            <button @click="handleAsyncNav">Async Navigate</button>
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
+      }],
+    },
+    // Vue SFC - missing await/return in non-async function (not fixable)
+    {
+      code: $`
+        <script setup>
+        await navigateTo('/initial')
+        
+        function handleNavigation() {
+          // Missing await or return (incorrect)
+          navigateTo('/page')
+        }
+        </script>
+        
+        <template>
+          <div>
+            <button @click="handleNavigation">Navigate</button>
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+      errors: [{
+        messageId: 'mustAwaitOrReturnNavigateTo',
       }],
     },
   ],

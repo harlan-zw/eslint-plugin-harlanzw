@@ -1,5 +1,5 @@
 import { unindent as $ } from 'eslint-vitest-rule-tester'
-import { run } from './_test'
+import { run, runVue } from './_test'
 import rule, { RULE_NAME } from './vue-no-nested-reactivity'
 
 run({
@@ -378,6 +378,125 @@ run({
       errors: [
         { messageId: 'noNestedInComputed' }, // reactive call
         { messageId: 'noNestedInComputed' }, // ref call
+      ],
+    },
+  ],
+})
+
+// Vue SFC tests
+runVue({
+  name: `${RULE_NAME} (Vue SFC)`,
+  rule,
+  valid: [
+    // Vue SFC - correct reactivity usage
+    {
+      code: $`
+        <script setup>
+        import { ref, reactive, computed } from 'vue'
+        
+        // Correct usage - no nesting
+        const count = ref(0)
+        const user = reactive({ name: 'John', age: 30 })
+        
+        const doubled = computed(() => count.value * 2)
+        
+        function increment() {
+          count.value++
+        }
+        </script>
+        
+        <template>
+          <div>
+            <p>Count: {{ count }}</p>
+            <p>Doubled: {{ doubled }}</p>
+            <p>User: {{ user.name }}</p>
+            <button @click="increment">Increment</button>
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    // Vue SFC - separate reactive declarations
+    {
+      code: $`
+        <script setup>
+        import { ref, reactive } from 'vue'
+        
+        const isLoading = ref(false)
+        const userState = reactive({
+          name: '',
+          email: ''
+        })
+        </script>
+        
+        <template>
+          <div v-if="!isLoading">
+            <input v-model="userState.name">
+            <input v-model="userState.email">
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+  ],
+  invalid: [
+    // Vue SFC - nested ref in reactive
+    {
+      code: $`
+        <script setup>
+        import { ref, reactive } from 'vue'
+        
+        // Incorrect - nesting ref inside reactive
+        const state = reactive({
+          count: ref(0),
+          message: ref('Hello')
+        })
+        
+        function increment() {
+          state.count.value++
+        }
+        </script>
+        
+        <template>
+          <div>
+            <p>{{ state.count }}</p>
+            <p>{{ state.message }}</p>
+            <button @click="increment">Increment</button>
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+      errors: [
+        { messageId: 'noNestedInReactive' },
+        { messageId: 'noNestedInReactive' },
+      ],
+    },
+    // Vue SFC - complex nested in computed
+    {
+      code: $`
+        <script setup>
+        import { ref, reactive, computed } from 'vue'
+        
+        const baseCount = ref(0)
+        
+        // Incorrect - nesting reactive/ref in computed
+        const complexState = computed(() => reactive({
+          doubled: ref(baseCount.value * 2),
+          tripled: baseCount.value * 3
+        }))
+        </script>
+        
+        <template>
+          <div>
+            <p>Complex: {{ complexState.doubled }}</p>
+            <p>Tripled: {{ complexState.tripled }}</p>
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+      errors: [
+        { messageId: 'noNestedInComputed' },
+        { messageId: 'noNestedInReactive' },
       ],
     },
   ],

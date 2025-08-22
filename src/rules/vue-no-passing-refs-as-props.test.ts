@@ -1,5 +1,5 @@
 import { unindent as $ } from 'eslint-vitest-rule-tester'
-import { run } from './_test'
+import { run, runVue } from './_test'
 import rule, { RULE_NAME } from './vue-no-passing-refs-as-props'
 
 run({
@@ -93,5 +93,64 @@ run({
       `,
       errors: [{ messageId: 'noPassingRefsAsProps' }],
     },
+  ],
+})
+
+// Vue SFC tests
+runVue({
+  name: `${RULE_NAME} (Vue SFC)`,
+  rule,
+  valid: [
+    // Vue SFC - correct prop passing (unwrapped refs)
+    {
+      code: $`
+        <script setup>
+        import { ref } from 'vue'
+        import ChildComponent from './ChildComponent.vue'
+        
+        const count = ref(0)
+        const message = ref('Hello')
+        
+        // Correctly unwrapping refs before passing as props
+        </script>
+        
+        <template>
+          <div>
+            <ChildComponent 
+              :count="count" 
+              :message="message"
+            />
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    // Vue SFC - passing regular values
+    {
+      code: $`
+        <script setup>
+        import { reactive } from 'vue'
+        import ChildComponent from './ChildComponent.vue'
+        
+        const state = reactive({ name: 'John', age: 30 })
+        const staticValue = 'static'
+        </script>
+        
+        <template>
+          <div>
+            <ChildComponent 
+              :name="state.name"
+              :age="state.age" 
+              :static="staticValue"
+            />
+          </div>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+  ],
+  invalid: [
+    // Vue SFC - this rule might not detect template-based ref passing
+    // The rule appears to focus on JavaScript/TypeScript prop passing patterns
   ],
 })
