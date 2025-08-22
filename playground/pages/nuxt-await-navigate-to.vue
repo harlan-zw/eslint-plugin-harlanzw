@@ -1,7 +1,7 @@
 <script setup>
 import { nonAwaitedNavigateTo } from "../composables/useNonAwaitedNavigateTo.js";
 
-navigateTo('/')
+await navigateTo('/')
 
 nonAwaitedNavigateTo()
 </script>

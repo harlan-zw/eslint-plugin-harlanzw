@@ -7,6 +7,7 @@ export default withNuxt([{
   },
   rules: {
     'harlanzw/nuxt-await-navigate-to': 'error',
+    'harlanzw/nuxt-no-side-effects-in-setup': 'warn',
     'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
     'harlanzw/vue-no-faux-composables': 'error',
     'harlanzw/vue-no-nested-reactivity': 'error',
