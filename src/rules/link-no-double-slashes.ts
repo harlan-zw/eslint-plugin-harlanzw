@@ -9,7 +9,7 @@ function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
   if (!node.startTag?.attributes) {
     return { url: null, attrNode: null }
   }
-  
+
   // Check for href or to attributes
   for (const attr of node.startTag.attributes) {
     if (attr.key?.name === 'href' || attr.key?.name === 'to') {
@@ -18,7 +18,7 @@ function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
       }
     }
   }
-  
+
   return { url: null, attrNode: null }
 }
 
@@ -27,27 +27,27 @@ function fixDoubleSlashesInUrl(url: string): string {
   if (url.startsWith('//') || url.includes('://')) {
     return url
   }
-  
+
   // Parse the URL to separate path, search, and hash
   let path = url
   let search = ''
   let hash = ''
-  
+
   const hashIndex = url.indexOf('#')
   if (hashIndex !== -1) {
     hash = url.slice(hashIndex)
     path = url.slice(0, hashIndex)
   }
-  
+
   const searchIndex = path.indexOf('?')
   if (searchIndex !== -1) {
     search = path.slice(searchIndex)
     path = path.slice(0, searchIndex)
   }
-  
+
   // Fix consecutive slashes in the path only
   const fixedPath = path.replace(/\/+/g, '/')
-  
+
   return `${fixedPath}${search}${hash}`
 }
 
@@ -55,7 +55,7 @@ function fixDoubleSlashesInAttr(context: any, attrNode: any, url: string) {
   const fixedUrl = fixDoubleSlashesInUrl(url)
   const sourceCode = context.getSourceCode()
   const attrText = sourceCode.getText(attrNode)
-  
+
   // Replace the URL value while preserving quotes
   const fixedAttrText = attrText.replace(url, fixedUrl)
   return fixedAttrText
@@ -78,18 +78,18 @@ export default createEslintRule<Options, MessageIds>({
   create(context) {
     function checkLinkUrl(node: any) {
       const { url, attrNode } = getLinkUrl(node)
-      
+
       if (!url || !attrNode) {
         return
       }
-      
+
       // Skip protocol-relative URLs and full URLs
       if (url.startsWith('//') || url.includes('://')) {
         return
       }
-      
+
       // Check for consecutive slashes (but not at the start for protocol-relative)
-      if (/\/\/+/.test(url)) {
+      if (/\/{2,}/.test(url)) {
         context.report({
           node,
           messageId: 'doubleSlashes',
@@ -126,13 +126,13 @@ export default createEslintRule<Options, MessageIds>({
             if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
               if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string') {
                 const url = attr.value.value
-                
+
                 // Skip protocol-relative URLs and full URLs
                 if (url.startsWith('//') || url.includes('://')) {
                   return
                 }
-                
-                if (/\/\/+/.test(url)) {
+
+                if (/\/{2,}/.test(url)) {
                   context.report({
                     node,
                     messageId: 'doubleSlashes',

@@ -9,8 +9,12 @@ Consecutive slashes in URLs can cause issues with routing, server interpretation
 ```vue
 <template>
   <a href="/path//with//double">Link</a>
-  <NuxtLink to="/page//section">Navigation</NuxtLink>
-  <RouterLink to="/router///page">Route</RouterLink>
+  <NuxtLink to="/page//section">
+    Navigation
+  </NuxtLink>
+  <RouterLink to="/router///page">
+    Route
+  </RouterLink>
   <a href="/path//to?query=1#hash">With params</a>
 </template>
 ```
@@ -27,8 +31,12 @@ Consecutive slashes in URLs can cause issues with routing, server interpretation
 ```vue
 <template>
   <a href="/path/with/double">Link</a>
-  <NuxtLink to="/page/section">Navigation</NuxtLink>
-  <RouterLink to="/router/page">Route</RouterLink>
+  <NuxtLink to="/page/section">
+    Navigation
+  </NuxtLink>
+  <RouterLink to="/router/page">
+    Route
+  </RouterLink>
   <a href="/path/to?query=1#hash">With params</a>
 </template>
 ```
@@ -63,5 +71,5 @@ The rule ignores:
 
 The rule works with:
 - `<a>` tags with `href` attributes
-- `<NuxtLink>` components with `to` attributes  
+- `<NuxtLink>` components with `to` attributes
 - `<RouterLink>` components with `to` attributes

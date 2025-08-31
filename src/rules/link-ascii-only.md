@@ -9,8 +9,12 @@ Non-ASCII characters in URLs can cause compatibility issues with older browsers,
 ```vue
 <template>
   <a href="/página">Spanish page</a>
-  <NuxtLink to="/测试">Chinese test</NuxtLink>
-  <RouterLink to="/café">French café</RouterLink>
+  <NuxtLink to="/测试">
+    Chinese test
+  </NuxtLink>
+  <RouterLink to="/café">
+    French café
+  </RouterLink>
 </template>
 ```
 
@@ -25,8 +29,12 @@ Non-ASCII characters in URLs can cause compatibility issues with older browsers,
 ```vue
 <template>
   <a href="/p%C3%A1gina">Spanish page</a>
-  <NuxtLink to="/%E6%B5%8B%E8%AF%95">Chinese test</NuxtLink>
-  <RouterLink to="/caf%C3%A9">French café</RouterLink>
+  <NuxtLink to="/%E6%B5%8B%E8%AF%95">
+    Chinese test
+  </NuxtLink>
+  <RouterLink to="/caf%C3%A9">
+    French café
+  </RouterLink>
 </template>
 ```
 
@@ -45,7 +53,7 @@ This rule includes an auto-fix that will automatically URL-encode non-ASCII char
 
 The rule works with:
 - `<a>` tags with `href` attributes
-- `<NuxtLink>` components with `to` attributes  
+- `<NuxtLink>` components with `to` attributes
 - `<RouterLink>` components with `to` attributes
 
 Dynamic attributes (using expressions) are not checked by this rule.

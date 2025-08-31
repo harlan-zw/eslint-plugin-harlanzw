@@ -9,8 +9,12 @@ Whitespace characters in URLs can cause issues with URL parsing, accessibility t
 ```vue
 <template>
   <a href="/path with spaces">Link</a>
-  <NuxtLink to="/page with spaces">Link</NuxtLink>
-  <RouterLink to="/router	page">Link</RouterLink>
+  <NuxtLink to="/page with spaces">
+    Link
+  </NuxtLink>
+  <RouterLink to="/router	page">
+    Link
+  </RouterLink>
 </template>
 ```
 
@@ -25,8 +29,12 @@ Whitespace characters in URLs can cause issues with URL parsing, accessibility t
 ```vue
 <template>
   <a href="/path%20with%20spaces">Link</a>
-  <NuxtLink to="/page%20with%20spaces">Link</NuxtLink>
-  <RouterLink to="/router%09page">Link</RouterLink>
+  <NuxtLink to="/page%20with%20spaces">
+    Link
+  </NuxtLink>
+  <RouterLink to="/router%09page">
+    Link
+  </RouterLink>
 </template>
 ```
 
@@ -45,7 +53,7 @@ This rule includes an auto-fix that will automatically URL-encode whitespace cha
 
 The rule works with:
 - `<a>` tags with `href` attributes
-- `<NuxtLink>` components with `to` attributes  
+- `<NuxtLink>` components with `to` attributes
 - `<RouterLink>` components with `to` attributes
 
 Dynamic attributes (using expressions) are not checked by this rule.

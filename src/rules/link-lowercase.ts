@@ -57,7 +57,7 @@ export default createEslintRule<Options, MessageIds>({
       // Check for uppercase characters, but ignore URL-encoded sequences (%XX)
       const hasUppercase = /[A-Z]/.test(url)
       const isUrlEncoded = /%[0-9A-F]{2}/i.test(url)
-      
+
       if (hasUppercase && !isUrlEncoded) {
         context.report({
           node,
@@ -97,7 +97,7 @@ export default createEslintRule<Options, MessageIds>({
                 const url = attr.value.value
                 const hasUppercase = /[A-Z]/.test(url)
                 const isUrlEncoded = /%[0-9A-F]{2}/i.test(url)
-                
+
                 if (hasUppercase && !isUrlEncoded) {
                   context.report({
                     node,

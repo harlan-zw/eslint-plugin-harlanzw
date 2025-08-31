@@ -9,8 +9,12 @@ Uppercase characters in URLs can cause issues with case-sensitive servers and cr
 ```vue
 <template>
   <a href="/Page">Link</a>
-  <NuxtLink to="/About-Us">About page</NuxtLink>
-  <RouterLink to="/Contact-Page">Contact</RouterLink>
+  <NuxtLink to="/About-Us">
+    About page
+  </NuxtLink>
+  <RouterLink to="/Contact-Page">
+    Contact
+  </RouterLink>
 </template>
 ```
 
@@ -25,8 +29,12 @@ Uppercase characters in URLs can cause issues with case-sensitive servers and cr
 ```vue
 <template>
   <a href="/page">Link</a>
-  <NuxtLink to="/about-us">About page</NuxtLink>
-  <RouterLink to="/contact-page">Contact</RouterLink>
+  <NuxtLink to="/about-us">
+    About page
+  </NuxtLink>
+  <RouterLink to="/contact-page">
+    Contact
+  </RouterLink>
 </template>
 ```
 
@@ -51,7 +59,7 @@ This rule includes an auto-fix that will automatically convert URLs to lowercase
 
 The rule works with:
 - `<a>` tags with `href` attributes
-- `<NuxtLink>` components with `to` attributes  
+- `<NuxtLink>` components with `to` attributes
 - `<RouterLink>` components with `to` attributes
 
 Dynamic attributes (using expressions) are not checked by this rule.
