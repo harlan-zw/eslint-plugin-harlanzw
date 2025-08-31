@@ -4,6 +4,10 @@ import type { Rule } from 'eslint'
 
 // @keep-sorted
 const hasDocs = [
+  'link-ascii-only',
+  'link-lowercase',
+  'link-no-double-slashes',
+  'link-no-whitespace',
   'nuxt-no-redundant-import-meta',
   'nuxt-no-side-effects-in-setup',
   'nuxt-prefer-navigate-to-over-router-push-replace',

@@ -6,6 +6,10 @@ export default withNuxt([{
     harlanzw,
   },
   rules: {
+    'harlanzw/link-ascii-only': 'error',
+    'harlanzw/link-lowercase': 'error',
+    'harlanzw/link-no-double-slashes': 'error',
+    'harlanzw/link-no-whitespace': 'error',
     'harlanzw/nuxt-await-navigate-to': 'error',
     'harlanzw/nuxt-no-redundant-import-meta': 'error',
     'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',

@@ -1,5 +1,9 @@
 import type { ESLint, Linter } from 'eslint'
 import { version } from '../package.json'
+import linkAsciiOnly from './rules/link-ascii-only'
+import linkLowercase from './rules/link-lowercase'
+import linkNoDoubleSlashes from './rules/link-no-double-slashes'
+import linkNoWhitespace from './rules/link-no-whitespace'
 import nuxtAwaitNavigateTo from './rules/nuxt-await-navigate-to'
 import nuxtNoRedundantImportMeta from './rules/nuxt-no-redundant-import-meta'
 import nuxtNoSideEffectsInAsyncDataHandler from './rules/nuxt-no-side-effects-in-async-data-handler'
@@ -20,6 +24,10 @@ const plugin = {
   },
   // @keep-sorted
   rules: {
+    'link-ascii-only': linkAsciiOnly,
+    'link-lowercase': linkLowercase,
+    'link-no-double-slashes': linkNoDoubleSlashes,
+    'link-no-whitespace': linkNoWhitespace,
     'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
     'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
     'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,

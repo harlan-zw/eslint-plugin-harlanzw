@@ -4,7 +4,7 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
 
-Harlan's ESLint rules for Vue projects.
+Harlan's ESLint rules for Vue projects with focus on link hygiene, Nuxt best practices, and Vue reactivity patterns.
 
 <p align="center">
 <table>
@@ -26,9 +26,19 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 
 > **Note:** These rules are experimental and may change. They will be submitted to the official Vue ESLint plugin for consideration.
 
+The rules are organized into the following categories:
+
+- **Link Rules** - Ensure link URLs are clean, accessible, and SEO-friendly
+- **Nuxt Rules** - Best practices for Nuxt applications
+- **Vue Rules** - Vue composition API and reactivity best practices
+
 <!-- rules:start -->
 | Rule | Description |
 | --- | --- |
+| [`link-ascii-only`](./src/rules/link-ascii-only.md) | ensure link URLs contain only ASCII characters |
+| [`link-lowercase`](./src/rules/link-lowercase.md) | ensure link URLs do not contain uppercase characters |
+| [`link-no-double-slashes`](./src/rules/link-no-double-slashes.md) | ensure link URLs do not contain consecutive slashes |
+| [`link-no-whitespace`](./src/rules/link-no-whitespace.md) | ensure link URLs do not contain whitespace characters |
 | [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) | enforce awaiting `navigateTo()` calls |
 | [`nuxt-no-redundant-import-meta`](./src/rules/nuxt-no-redundant-import-meta.md) | disallow redundant `import.meta.server` or `import.meta.client` checks in scoped components |
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
@@ -38,6 +48,7 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 | [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) | stop fake composables that don't use Vue reactivity |
 | [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) | don't mix `ref()` and `reactive()` together |
 | [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) | don't pass refs as props - unwrap them first |
+| [`vue-no-reactive-destructuring`](./src/rules/vue-no-reactive-destructuring.md) | avoid destructuring reactive objects |
 | [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) | don't use `.value` in Vue templates |
 | [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) | don't use `toRefs()` on the props object |
 <!-- rules:end -->
@@ -68,6 +79,10 @@ export default antfu(
       harlanzw
     },
     rules: {
+      'harlanzw/link-ascii-only': 'error',
+      'harlanzw/link-lowercase': 'error',
+      'harlanzw/link-no-double-slashes': 'error',
+      'harlanzw/link-no-whitespace': 'error',
       'harlanzw/nuxt-await-navigate-to': 'error',
       'harlanzw/nuxt-no-redundant-import-meta': 'error',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
@@ -77,6 +92,7 @@ export default antfu(
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
+      'harlanzw/vue-no-reactive-destructuring': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'error',
       'harlanzw/vue-no-torefs-on-props': 'error'
     }
@@ -96,7 +112,12 @@ export default withNuxt([{
     harlanzw
   },
   rules: {
+    'harlanzw/link-ascii-only': 'error',
+    'harlanzw/link-lowercase': 'error',
+    'harlanzw/link-no-double-slashes': 'error',
+    'harlanzw/link-no-whitespace': 'error',
     'harlanzw/nuxt-await-navigate-to': 'error',
+    'harlanzw/nuxt-no-redundant-import-meta': 'error',
     'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
     'harlanzw/nuxt-no-side-effects-in-setup': 'error',
     'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
@@ -104,6 +125,7 @@ export default withNuxt([{
     'harlanzw/vue-no-faux-composables': 'error',
     'harlanzw/vue-no-nested-reactivity': 'error',
     'harlanzw/vue-no-passing-refs-as-props': 'error',
+    'harlanzw/vue-no-reactive-destructuring': 'error',
     'harlanzw/vue-no-ref-access-in-templates': 'error',
     'harlanzw/vue-no-torefs-on-props': 'error'
   }
@@ -129,6 +151,10 @@ export default [
       harlanzw
     },
     rules: {
+      'harlanzw/link-ascii-only': 'error',
+      'harlanzw/link-lowercase': 'error',
+      'harlanzw/link-no-double-slashes': 'error',
+      'harlanzw/link-no-whitespace': 'error',
       'harlanzw/nuxt-await-navigate-to': 'error',
       'harlanzw/nuxt-no-redundant-import-meta': 'error',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
@@ -138,6 +164,7 @@ export default [
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
+      'harlanzw/vue-no-reactive-destructuring': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'error',
       'harlanzw/vue-no-torefs-on-props': 'error'
     }

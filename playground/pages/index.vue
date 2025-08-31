@@ -1,6 +1,32 @@
 <template>
   <div>
     <h1>ESLint Plugin Harlanzw - Playground</h1>
+    
+    <h2>Link Rules</h2>
+    <ul>
+      <li>
+        <NuxtLink to="/link-ascii-only">
+          link-ascii-only
+        </NuxtLink>
+      </li>
+      <li>
+        <NuxtLink to="/link-lowercase">
+          link-lowercase
+        </NuxtLink>
+      </li>
+      <li>
+        <NuxtLink to="/link-no-double-slashes">
+          link-no-double-slashes
+        </NuxtLink>
+      </li>
+      <li>
+        <NuxtLink to="/link-no-whitespace">
+          link-no-whitespace
+        </NuxtLink>
+      </li>
+    </ul>
+
+    <h2>Nuxt Rules</h2>
     <ul>
       <li>
         <NuxtLink to="/nuxt-await-navigate-to">
@@ -32,6 +58,10 @@
           nuxt-prefer-nuxt-link-over-router-link
         </NuxtLink>
       </li>
+    </ul>
+
+    <h2>Vue Rules</h2>
+    <ul>
       <li>
         <NuxtLink to="/vue-no-faux-composables">
           vue-no-faux-composables
