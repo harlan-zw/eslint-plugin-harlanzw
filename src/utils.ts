@@ -11,6 +11,7 @@ const hasDocs = [
   'use-composables-must-use-reactivity',
   'vue-no-nested-reactivity',
   'vue-no-passing-refs-as-props',
+  'vue-no-reactive-destructuring',
   'vue-no-ref-access-in-templates',
   'vue-no-torefs-on-props',
 ]
