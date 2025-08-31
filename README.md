@@ -34,6 +34,7 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
 | [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
 | [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) | prefer `navigateTo()` over `router.push()` or `router.replace()` |
+| [`nuxt-prefer-nuxt-link-over-router-link`](./src/rules/nuxt-prefer-nuxt-link-over-router-link.md) | prefer `NuxtLink` over `RouterLink` |
 | [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) | stop fake composables that don't use Vue reactivity |
 | [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) | don't mix `ref()` and `reactive()` together |
 | [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) | don't pass refs as props - unwrap them first |
@@ -72,6 +73,7 @@ export default antfu(
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
+      'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
@@ -98,6 +100,7 @@ export default withNuxt([{
     'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
     'harlanzw/nuxt-no-side-effects-in-setup': 'error',
     'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
+    'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
     'harlanzw/vue-no-faux-composables': 'error',
     'harlanzw/vue-no-nested-reactivity': 'error',
     'harlanzw/vue-no-passing-refs-as-props': 'error',
@@ -131,6 +134,7 @@ export default [
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
+      'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',

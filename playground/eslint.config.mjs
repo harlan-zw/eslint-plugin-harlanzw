@@ -10,6 +10,7 @@ export default withNuxt([{
     'harlanzw/nuxt-no-redundant-import-meta': 'error',
     'harlanzw/nuxt-no-side-effects-in-setup': 'warn',
     'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
+    'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
     'harlanzw/vue-no-faux-composables': 'error',
     'harlanzw/vue-no-nested-reactivity': 'error',
     'harlanzw/vue-no-passing-refs-as-props': 'error',
