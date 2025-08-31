@@ -18,6 +18,7 @@ const plugin = {
   // @keep-sorted
   rules: {
     'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
+    'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
     'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
     'nuxt-no-side-effects-in-setup': nuxtNoSideEffectsInSetup,
     'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,

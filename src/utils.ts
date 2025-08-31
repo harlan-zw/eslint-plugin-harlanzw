@@ -4,6 +4,7 @@ import type { Rule } from 'eslint'
 
 // @keep-sorted
 const hasDocs = [
+  'nuxt-no-redundant-import-meta',
   'nuxt-no-side-effects-in-setup',
   'nuxt-prefer-navigate-to-over-router-push-replace',
   'use-composables-must-use-reactivity',

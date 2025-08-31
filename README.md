@@ -30,6 +30,7 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 | Rule | Description |
 | --- | --- |
 | [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) | enforce awaiting `navigateTo()` calls |
+| [`nuxt-no-redundant-import-meta`](./src/rules/nuxt-no-redundant-import-meta.md) | disallow redundant `import.meta.server` or `import.meta.client` checks in scoped components |
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
 | [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
 | [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) | prefer `navigateTo()` over `router.push()` or `router.replace()` |
@@ -67,6 +68,7 @@ export default antfu(
     },
     rules: {
       'harlanzw/nuxt-await-navigate-to': 'error',
+      'harlanzw/nuxt-no-redundant-import-meta': 'error',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
@@ -125,6 +127,7 @@ export default [
     },
     rules: {
       'harlanzw/nuxt-await-navigate-to': 'error',
+      'harlanzw/nuxt-no-redundant-import-meta': 'error',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
