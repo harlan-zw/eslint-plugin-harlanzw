@@ -13,6 +13,11 @@ run({
       const foo = { bar: ref('test') }
       const template = html\`<MyComponent :bar="\${foo.bar.value}" />\`
     `,
+    // Variable declaration without initialization (should not crash)
+    $`
+      let foo;
+      const bar = undefined;
+    `,
     // Using reactive instead of refs (allowed)
     $`
       import { reactive } from 'vue'

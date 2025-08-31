@@ -53,7 +53,7 @@ export default createEslintRule<Options, MessageIds>({
 
       // Track object properties assigned from ref() calls
       VariableDeclarator(node: any) {
-        if (isIdentifier(node.id) && isObjectExpression(node.init)) {
+        if (isIdentifier(node.id) && node.init && isObjectExpression(node.init)) {
           const objectName = node.id.name
           const objectProperties = new Set<string>()
 

@@ -3,6 +3,9 @@ import { nonAwaitedNavigateTo } from "../composables/useNonAwaitedNavigateTo.js"
 
 await navigateTo('/')
 
+const { foo } = reactive({ foo: 'bar' })
+console.log(foo)
+
 nonAwaitedNavigateTo()
 </script>
 
