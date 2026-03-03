@@ -203,6 +203,36 @@ run({
         return [useCounter(), useTimer()]
       }
     `,
+    // Auto-imported ref (no import statement, e.g. Nuxt)
+    $`
+      function useTest() {
+        const value = ref('test')
+        return { value }
+      }
+    `,
+    // Auto-imported reactive
+    $`
+      function useState() {
+        const state = reactive({ user: null })
+        return { state }
+      }
+    `,
+    // Auto-imported computed and watch
+    $`
+      function useComputed() {
+        const count = ref(0)
+        const doubled = computed(() => count.value * 2)
+        watch(count, () => {})
+        return { count, doubled }
+      }
+    `,
+    // Exported function with auto-imported ref
+    $`
+      export function useExportedAutoImport() {
+        const value = ref(0)
+        return { value }
+      }
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { isComposableCall, isComposableName, isReactivityCall, trackVueImports } from '../vue-utils'
+import { isComposableCall, isComposableName, isReactivityCall, trackVueImports, VUE_REACTIVITY_APIS } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-faux-composables'
 export type MessageIds = 'mustUseReactivity'
@@ -21,7 +21,16 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   create: (context) => {
     const vueImports = new Set<string>()
+    const nonVueImports = new Set<string>()
     const composableFunctions = new Map<string, TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression>()
+
+    function isAutoImportedReactivityCall(node: TSESTree.CallExpression): boolean {
+      if (node.callee.type === 'Identifier') {
+        const name = node.callee.name
+        return VUE_REACTIVITY_APIS.has(name) && !nonVueImports.has(name)
+      }
+      return false
+    }
 
     function hasReactivityInStatement(stmt: TSESTree.Statement): boolean {
       if (!stmt)
@@ -65,7 +74,7 @@ export default createEslintRule<Options, MessageIds>({
 
       switch (expr.type) {
         case 'CallExpression':
-          if (isReactivityCall(expr, vueImports) || isComposableCall(expr))
+          if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr))
             return true
           return false
         case 'ObjectExpression':
@@ -98,11 +107,19 @@ export default createEslintRule<Options, MessageIds>({
     return {
       Program() {
         vueImports.clear()
+        nonVueImports.clear()
         composableFunctions.clear()
       },
 
       ImportDeclaration(node) {
         trackVueImports(node, vueImports)
+        if (node.source.value !== 'vue') {
+          for (const spec of node.specifiers) {
+            if (spec.type === 'ImportSpecifier' && spec.imported.type === 'Identifier') {
+              nonVueImports.add(spec.imported.name)
+            }
+          }
+        }
       },
 
       'Program:exit': function () {
