@@ -54,7 +54,7 @@ export default createEslintRule<Options, MessageIds>({
           && isIdentifier(node.callee.property)
           && (node.callee.property.name === 'push' || node.callee.property.name === 'replace')) {
           const method = node.callee.property.name
-          const sourceCode = context.sourceCode || context.getSourceCode()
+          const sourceCode = context.sourceCode
 
           context.report({
             node,

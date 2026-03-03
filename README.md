@@ -35,16 +35,23 @@ The rules are organized into the following categories:
 <!-- rules:start -->
 | Rule | Description |
 | --- | --- |
+| **Link** | |
 | [`link-ascii-only`](./src/rules/link-ascii-only.md) | ensure link URLs contain only ASCII characters |
 | [`link-lowercase`](./src/rules/link-lowercase.md) | ensure link URLs do not contain uppercase characters |
 | [`link-no-double-slashes`](./src/rules/link-no-double-slashes.md) | ensure link URLs do not contain consecutive slashes |
+| [`link-no-underscores`](./src/rules/link-no-underscores.ts) | ensure link URLs do not contain underscores |
 | [`link-no-whitespace`](./src/rules/link-no-whitespace.md) | ensure link URLs do not contain whitespace characters |
+| [`link-require-descriptive-text`](./src/rules/link-require-descriptive-text.ts) | require descriptive link text |
+| [`link-require-href`](./src/rules/link-require-href.ts) | require `href`/`to` attribute on link elements |
+| [`link-trailing-slash`](./src/rules/link-trailing-slash.ts) | enforce trailing slash consistency on link URLs |
+| **Nuxt** | |
 | [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) | enforce awaiting `navigateTo()` calls |
 | [`nuxt-no-redundant-import-meta`](./src/rules/nuxt-no-redundant-import-meta.md) | disallow redundant `import.meta.server` or `import.meta.client` checks in scoped components |
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
 | [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
 | [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) | prefer `navigateTo()` over `router.push()` or `router.replace()` |
 | [`nuxt-prefer-nuxt-link-over-router-link`](./src/rules/nuxt-prefer-nuxt-link-over-router-link.md) | prefer `NuxtLink` over `RouterLink` |
+| **Vue** | |
 | [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) | stop fake composables that don't use Vue reactivity |
 | [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) | don't mix `ref()` and `reactive()` together |
 | [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) | don't pass refs as props - unwrap them first |
@@ -52,6 +59,8 @@ The rules are organized into the following categories:
 | [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) | don't use `.value` in Vue templates |
 | [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) | don't use `toRefs()` on the props object |
 <!-- rules:end -->
+
+The plugin also includes 21 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
 
 ## Installation
 
@@ -63,112 +72,67 @@ pnpm add -D eslint-plugin-harlanzw
 
 ## Usage
 
-### With @antfu/eslint-config
+### Recommended (all rules)
 
 ```js
 // eslint.config.js
+import harlanzw from 'eslint-plugin-harlanzw'
+
+export default [
+  ...harlanzw.configs.recommended,
+]
+```
+
+### Pick categories
+
+```js
+import harlanzw from 'eslint-plugin-harlanzw'
+
+export default [
+  ...harlanzw.configs.link,
+  ...harlanzw.configs.nuxt,
+  ...harlanzw.configs.vue,
+]
+```
+
+Available configs: `link`, `nuxt`, `vue`, `recommended` (all three combined).
+
+### With @antfu/eslint-config
+
+```js
 import antfu from '@antfu/eslint-config'
 import harlanzw from 'eslint-plugin-harlanzw'
 
 export default antfu(
-  {
-    vue: true,
-  },
-  {
-    plugins: {
-      harlanzw
-    },
-    rules: {
-      'harlanzw/link-ascii-only': 'error',
-      'harlanzw/link-lowercase': 'error',
-      'harlanzw/link-no-double-slashes': 'error',
-      'harlanzw/link-no-whitespace': 'error',
-      'harlanzw/nuxt-await-navigate-to': 'error',
-      'harlanzw/nuxt-no-redundant-import-meta': 'error',
-      'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
-      'harlanzw/nuxt-no-side-effects-in-setup': 'error',
-      'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
-      'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
-      'harlanzw/vue-no-faux-composables': 'error',
-      'harlanzw/vue-no-nested-reactivity': 'error',
-      'harlanzw/vue-no-passing-refs-as-props': 'error',
-      'harlanzw/vue-no-reactive-destructuring': 'error',
-      'harlanzw/vue-no-ref-access-in-templates': 'error',
-      'harlanzw/vue-no-torefs-on-props': 'error'
-    }
-  }
+  { vue: true },
+  ...harlanzw.configs.recommended,
 )
 ```
 
 ### With Nuxt ESLint
 
 ```ts
-// eslint.config.mjs
 import harlanzw from 'eslint-plugin-harlanzw'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
-export default withNuxt([{
-  plugins: {
-    harlanzw
-  },
-  rules: {
-    'harlanzw/link-ascii-only': 'error',
-    'harlanzw/link-lowercase': 'error',
-    'harlanzw/link-no-double-slashes': 'error',
-    'harlanzw/link-no-whitespace': 'error',
-    'harlanzw/nuxt-await-navigate-to': 'error',
-    'harlanzw/nuxt-no-redundant-import-meta': 'error',
-    'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
-    'harlanzw/nuxt-no-side-effects-in-setup': 'error',
-    'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
-    'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
-    'harlanzw/vue-no-faux-composables': 'error',
-    'harlanzw/vue-no-nested-reactivity': 'error',
-    'harlanzw/vue-no-passing-refs-as-props': 'error',
-    'harlanzw/vue-no-reactive-destructuring': 'error',
-    'harlanzw/vue-no-ref-access-in-templates': 'error',
-    'harlanzw/vue-no-torefs-on-props': 'error'
-  }
-}])
+export default withNuxt(
+  ...harlanzw.configs.recommended,
+)
 ```
 
-### Standalone Usage
+### Prompt Rules
 
-Add the plugin to your ESLint configuration:
+The plugin includes 21 rules for linting `.prompt.md` and `.skill.md` files. These use a custom prompt language and have separate configs:
 
 ```js
-// eslint.config.js
 import harlanzw from 'eslint-plugin-harlanzw'
-import vueParser from 'vue-eslint-parser'
 
 export default [
-  {
-    files: ['**/*.vue'],
-    languageOptions: {
-      parser: vueParser
-    },
-    plugins: {
-      harlanzw
-    },
-    rules: {
-      'harlanzw/link-ascii-only': 'error',
-      'harlanzw/link-lowercase': 'error',
-      'harlanzw/link-no-double-slashes': 'error',
-      'harlanzw/link-no-whitespace': 'error',
-      'harlanzw/nuxt-await-navigate-to': 'error',
-      'harlanzw/nuxt-no-redundant-import-meta': 'error',
-      'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
-      'harlanzw/nuxt-no-side-effects-in-setup': 'error',
-      'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'error',
-      'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'error',
-      'harlanzw/vue-no-faux-composables': 'error',
-      'harlanzw/vue-no-nested-reactivity': 'error',
-      'harlanzw/vue-no-passing-refs-as-props': 'error',
-      'harlanzw/vue-no-reactive-destructuring': 'error',
-      'harlanzw/vue-no-ref-access-in-templates': 'error',
-      'harlanzw/vue-no-torefs-on-props': 'error'
-    }
-  }
+  ...harlanzw.configs['prompt:recommended'],
+  // or stricter:
+  // ...harlanzw.configs['prompt:strict'],
+  // for skill files:
+  // ...harlanzw.configs['prompt:skill'],
 ]
 ```
 

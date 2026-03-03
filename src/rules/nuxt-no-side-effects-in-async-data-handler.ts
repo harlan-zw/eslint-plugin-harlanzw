@@ -219,7 +219,7 @@ export default createEslintRule<Options, MessageIds>({
             node,
             messageId: 'useCallOnceForSideEffects',
             fix(fixer) {
-              const sourceCode = context.getSourceCode()
+              const sourceCode = context.sourceCode
               const statement = findContainingStatement(node)
               const statementText = sourceCode.getText(statement)
               const indent = getStatementIndentation(statement, sourceCode)

@@ -53,7 +53,7 @@ function fixDoubleSlashesInUrl(url: string): string {
 
 function fixDoubleSlashesInAttr(context: any, attrNode: any, url: string) {
   const fixedUrl = fixDoubleSlashesInUrl(url)
-  const sourceCode = context.getSourceCode()
+  const sourceCode = context.sourceCode
   const attrText = sourceCode.getText(attrNode)
 
   // Replace the URL value while preserving quotes

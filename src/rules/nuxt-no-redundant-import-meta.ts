@@ -19,7 +19,7 @@ export default createEslintRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create: (context) => {
-    const filename = context.getFilename()
+    const filename = context.filename
 
     // Check if the file is a scoped Nuxt component
     const isServerComponent = filename.endsWith('.server.vue') || filename.endsWith('.server.js') || filename.endsWith('.server.ts')

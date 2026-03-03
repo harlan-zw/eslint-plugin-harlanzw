@@ -29,7 +29,7 @@ export default createEslintRule<Options, MessageIds>({
           functionName,
         },
         fix(fixer) {
-          const sourceCode = context.getSourceCode()
+          const sourceCode = context.sourceCode
           const nodeText = sourceCode.getText(node)
 
           // Find the statement containing this node and get its indentation

@@ -24,7 +24,7 @@ function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
 
 function fixUppercaseInUrl(context: any, attrNode: any, url: string) {
   const lowercaseUrl = url.toLowerCase()
-  const sourceCode = context.getSourceCode()
+  const sourceCode = context.sourceCode
   const attrText = sourceCode.getText(attrNode)
 
   // Replace the URL value while preserving quotes

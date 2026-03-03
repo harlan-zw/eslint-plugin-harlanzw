@@ -24,7 +24,7 @@ function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
 
 function fixNonAsciiInUrl(context: any, attrNode: any, url: string) {
   const encodedUrl = encodeURI(url)
-  const sourceCode = context.getSourceCode()
+  const sourceCode = context.sourceCode
   const attrText = sourceCode.getText(attrNode)
 
   // Replace the URL value while preserving quotes

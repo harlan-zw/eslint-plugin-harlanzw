@@ -40,14 +40,14 @@ export default createEslintRule<Options, MessageIds>({
 
                 // Fix opening tag
                 if (startTag) {
-                  const openTagText = context.getSourceCode().getText(startTag)
+                  const openTagText = context.sourceCode.getText(startTag)
                   const fixedOpenTag = openTagText.replace(/router-link|RouterLink/gi, 'NuxtLink')
                   fixes.push(fixer.replaceText(startTag, fixedOpenTag))
                 }
 
                 // Fix closing tag if it exists
                 if (endTag) {
-                  const closeTagText = context.getSourceCode().getText(endTag)
+                  const closeTagText = context.sourceCode.getText(endTag)
                   const fixedCloseTag = closeTagText.replace(/router-link|RouterLink/gi, 'NuxtLink')
                   fixes.push(fixer.replaceText(endTag, fixedCloseTag))
                 }

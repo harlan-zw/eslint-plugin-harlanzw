@@ -33,7 +33,7 @@ export default createEslintRule({
             node: node.id,
             messageId: 'destructuringReactive',
             fix(fixer) {
-              const sourceCode = context.getSourceCode()
+              const sourceCode = context.sourceCode
               const destructuredPattern = sourceCode.getText(node.id)
               const reactiveCall = sourceCode.getText(node.init!)
 
