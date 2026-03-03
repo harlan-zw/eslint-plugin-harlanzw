@@ -144,12 +144,12 @@ export class PromptLanguage {
 
   validateLanguageOptions(): void {}
 
-  parse(file: { body: string }): { ok: true, ast: DocumentNode } {
-    const text = file.body as string
+  parse(file: { body: string | Uint8Array }): { ok: true, ast: DocumentNode } {
+    const text = file.body as string // fileType='text' guarantees string
     const rawLines = text.split(/\r?\n/)
 
     let offset = 0
-    const children: LineNode[] = rawLines.map((value, i) => {
+    const children: LineNode[] = rawLines.map((value: string, i: number) => {
       const lineStart = offset
       const node: LineNode = {
         type: 'line',
@@ -179,7 +179,7 @@ export class PromptLanguage {
     return { ok: true as const, ast }
   }
 
-  createSourceCode(file: { body: string }, parseResult: { ast: DocumentNode }): PromptSourceCode {
+  createSourceCode(file: { body: string | Uint8Array }, parseResult: { ast: DocumentNode }): PromptSourceCode {
     return new PromptSourceCode({
       text: file.body as string,
       ast: parseResult.ast,

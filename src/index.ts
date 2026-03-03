@@ -50,7 +50,7 @@ const plugin: ESLint.Plugin = {
     version,
   },
   languages: {
-    prompt: new PromptLanguage(),
+    prompt: new PromptLanguage() as any,
   },
   // @keep-sorted
   rules: {

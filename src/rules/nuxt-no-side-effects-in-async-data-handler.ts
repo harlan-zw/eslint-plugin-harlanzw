@@ -104,7 +104,7 @@ function isSideEffectInHandler(node: TSESTree.Node): boolean {
   return false
 }
 
-function findSideEffectsInFunction(functionNode: TSESTree.Function): TSESTree.Node[] {
+function findSideEffectsInFunction(functionNode: TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression | TSESTree.FunctionDeclaration): TSESTree.Node[] {
   const sideEffects: TSESTree.Node[] = []
 
   function visit(node: TSESTree.Node) {
@@ -175,11 +175,11 @@ export default createEslintRule<Options, MessageIds>({
         // Find the handler function (usually the second argument, but could be first)
         let handlerArg: TSESTree.Expression | null = null
 
-        if (node.arguments.length >= 2) {
+        if (node.arguments.length >= 2 && node.arguments[1].type !== 'SpreadElement') {
           // Pattern: useAsyncData('key', handler)
           handlerArg = node.arguments[1]
         }
-        else if (node.arguments.length === 1) {
+        else if (node.arguments.length === 1 && node.arguments[0].type !== 'SpreadElement') {
           // Pattern: useAsyncData(handler) - key is auto-generated
           handlerArg = node.arguments[0]
         }
@@ -188,7 +188,7 @@ export default createEslintRule<Options, MessageIds>({
           return
 
         // Check if the handler is a function
-        let handlerFunction: TSESTree.Function | null = null
+        let handlerFunction: TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression | TSESTree.FunctionDeclaration | null = null
 
         if (handlerArg.type === 'FunctionExpression' || handlerArg.type === 'ArrowFunctionExpression') {
           handlerFunction = handlerArg

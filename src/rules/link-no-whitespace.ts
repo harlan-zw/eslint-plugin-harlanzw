@@ -23,7 +23,7 @@ function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
 }
 
 function fixWhitespaceInUrl(context: any, attrNode: any, url: string) {
-  const encodedUrl = url.replace(/\s/g, match => encodeURIComponent(match))
+  const encodedUrl = url.replace(/\s/g, (m: string) => encodeURIComponent(m))
   const sourceCode = context.sourceCode
   const attrText = sourceCode.getText(attrNode)
 
@@ -98,7 +98,7 @@ export default createEslintRule<Options, MessageIds>({
                     messageId: 'noWhitespace',
                     data: { url },
                     fix(fixer) {
-                      const encodedUrl = url.replace(/\s/g, match => encodeURIComponent(match))
+                      const encodedUrl = url.replace(/\s/g, (m: string) => encodeURIComponent(m))
                       return fixer.replaceText(attr.value, `"${encodedUrl}"`)
                     },
                   })

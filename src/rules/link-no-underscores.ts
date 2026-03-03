@@ -44,7 +44,7 @@ export default createEslintRule<Options, MessageIds>({
       }
 
       // Skip external URLs
-      if (/^(https?:)?\/\//.test(url)) {
+      if (/^(?:https?:)?\/\//.test(url)) {
         return
       }
 
@@ -83,7 +83,7 @@ export default createEslintRule<Options, MessageIds>({
             if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
               if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string') {
                 const url = attr.value.value
-                if (/^(https?:)?\/\//.test(url)) {
+                if (/^(?:https?:)?\/\//.test(url)) {
                   continue
                 }
                 if (url.includes('_')) {
