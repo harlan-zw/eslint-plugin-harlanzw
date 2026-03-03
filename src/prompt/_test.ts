@@ -1,5 +1,5 @@
 import { RuleTester } from 'eslint'
-import plugin from '../index'
+import { plugin } from '../index'
 
 export function createPromptRuleTester(): RuleTester {
   return new RuleTester({

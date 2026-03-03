@@ -1,4 +1,5 @@
 import type { ESLint, Linter } from 'eslint'
+import type { LinkRuleOptions } from './link-utils'
 import { version } from '../package.json'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
 import { PromptLanguage } from './prompt/language'
@@ -164,7 +165,18 @@ plugin.configs!['prompt:skill'] = [
   },
 ]
 
-// Link config
+// Link rules that accept LinkRuleOptions
+const LINK_RULES_WITH_OPTIONS = [
+  'link-ascii-only',
+  'link-lowercase',
+  'link-no-double-slashes',
+  'link-no-underscores',
+  'link-no-whitespace',
+  'link-require-descriptive-text',
+  'link-trailing-slash',
+] as const
+
+// Static configs (no options)
 const LINK_FILES = ['**/*.vue', '**/*.jsx', '**/*.tsx']
 plugin.configs!.link = [
   {
@@ -226,7 +238,81 @@ plugin.configs!.recommended = [
   ...plugin.configs!.vue,
 ]
 
-export default plugin
+// Factory options
+export interface HarlanzwOptions {
+  link?: boolean | LinkRuleOptions & { requireTrailingSlash?: boolean }
+  nuxt?: boolean
+  vue?: boolean
+}
+
+function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boolean }): Record<string, Linter.RuleEntry> {
+  const { requireTrailingSlash, ...baseOpts } = linkOpts
+  const rules: Record<string, Linter.RuleEntry> = {
+    'harlanzw/link-require-href': 'error',
+  }
+  for (const ruleName of LINK_RULES_WITH_OPTIONS) {
+    const opts = ruleName === 'link-trailing-slash'
+      ? { ...baseOpts, requireTrailingSlash }
+      : baseOpts
+    rules[`harlanzw/${ruleName}`] = ['warn', opts]
+  }
+  rules['harlanzw/link-no-double-slashes'] = ['error', baseOpts]
+  return rules
+}
+
+/**
+ * Create ESLint flat configs for harlanzw rules.
+ *
+ * @example
+ * ```ts
+ * import harlanzw from 'eslint-plugin-harlanzw'
+ *
+ * export default harlanzw({
+ *   link: { ignoreExternal: true },
+ *   nuxt: true,
+ *   vue: true,
+ * })
+ * ```
+ *
+ * @example With extra configs (like antfu)
+ * ```ts
+ * export default harlanzw(
+ *   { link: true, nuxt: true, vue: true },
+ *   { rules: { 'harlanzw/link-lowercase': 'off' } },
+ * )
+ * ```
+ */
+function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[]): Linter.Config[] {
+  const configs: Linter.Config[] = []
+
+  if (options.link !== false && options.link !== undefined) {
+    const linkOpts = typeof options.link === 'object' ? options.link : {}
+    configs.push({
+      name: 'harlanzw/link',
+      files: LINK_FILES,
+      plugins: { harlanzw: plugin },
+      rules: buildLinkRules(linkOpts),
+    })
+  }
+
+  if (options.nuxt) {
+    configs.push(...plugin.configs!.nuxt as Linter.Config[])
+  }
+
+  if (options.vue) {
+    configs.push(...plugin.configs!.vue as Linter.Config[])
+  }
+
+  configs.push(...extraConfigs)
+
+  return configs
+}
+
+// Attach plugin to factory and export both
+harlanzw.plugin = plugin
+
+export { plugin }
+export default harlanzw
 
 type RuleDefinitions = typeof plugin['rules']
 

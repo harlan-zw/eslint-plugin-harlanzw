@@ -80,10 +80,12 @@ function createRule<
     create: ((
       context: Readonly<RuleContext<TMessageIds, TOptions>>,
     ): RuleListener => {
-      const optionsWithDefault = context.options.map((options, index) => {
+      const defaults = defaultOptions as readonly unknown[]
+      const maxLen = Math.max(context.options.length, defaults?.length || 0)
+      const optionsWithDefault = Array.from({ length: maxLen }, (_, index) => {
         return {
-          ...(defaultOptions as readonly unknown[])?.[index] || {},
-          ...options || {},
+          ...defaults?.[index] || {},
+          ...context.options[index] || {},
         }
       }) as unknown as TOptions
       return create(context, optionsWithDefault)

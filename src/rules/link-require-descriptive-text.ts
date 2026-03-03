@@ -1,9 +1,11 @@
+import type { LinkRuleOptions } from '../link-utils'
+import { linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, shouldSkipLink } from '../link-utils'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'link-require-descriptive-text'
 export type MessageIds = 'nonDescriptive'
-export type Options = []
+export type Options = [LinkRuleOptions]
 
 const BAD_LINK_TEXTS = new Set([
   'click here',
@@ -33,13 +35,21 @@ function getVueElementText(node: any): string {
 }
 
 function getVueAttrValue(node: any, name: string): string | null {
-  if (!node.startTag?.attributes) {
+  if (!node.startTag?.attributes)
     return null
-  }
   for (const attr of node.startTag.attributes) {
-    if (attr.key?.name === name && attr.value?.type === 'VLiteral') {
+    if (attr.key?.name === name && attr.value?.type === 'VLiteral')
       return attr.value.value
-    }
+  }
+  return null
+}
+
+function getVueLinkUrl(node: any): string | null {
+  if (!node.startTag?.attributes)
+    return null
+  for (const attr of node.startTag.attributes) {
+    if ((attr.key?.name === 'href' || attr.key?.name === 'to') && attr.value?.type === 'VLiteral')
+      return attr.value.value
   }
   return null
 }
@@ -51,13 +61,15 @@ export default createEslintRule<Options, MessageIds>({
     docs: {
       description: 'Ensures links have descriptive text content',
     },
-    schema: [],
+    schema: [linkRuleSchema],
     messages: {
       nonDescriptive: 'Link text "{{textContent}}" should be more descriptive.',
     },
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [linkRuleDefaults],
+  create(context, options) {
+    const opts = options[0] || {}
+
     function checkText(text: string | null, node: any) {
       if (!text) {
         context.report({
@@ -80,6 +92,9 @@ export default createEslintRule<Options, MessageIds>({
       return defineTemplateBodyVisitor(context, {
         VElement(node: any) {
           if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink') {
+            const url = getVueLinkUrl(node)
+            if (url && shouldSkipLink(url, node, opts))
+              return
             const text = getVueElementText(node)
               || getVueAttrValue(node, 'title')
               || getVueAttrValue(node, 'aria-label')
@@ -93,6 +108,19 @@ export default createEslintRule<Options, MessageIds>({
       JSXElement(node: any) {
         const elementName = node.openingElement?.name?.name
         if (elementName === 'a' || elementName === 'NuxtLink' || elementName === 'RouterLink') {
+          const attrs = node.openingElement.attributes || []
+
+          // Get URL for exclude check
+          let url: string | null = null
+          for (const attr of attrs) {
+            if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
+              if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string')
+                url = attr.value.value
+            }
+          }
+          if (url && shouldSkipJsxLink(url, attrs, opts))
+            return
+
           const textContent = (node.children || [])
             .filter((child: any) => child.type === 'JSXText')
             .map((child: any) => child.value)
@@ -101,14 +129,12 @@ export default createEslintRule<Options, MessageIds>({
 
           let title: string | null = null
           let ariaLabel: string | null = null
-          for (const attr of node.openingElement.attributes || []) {
+          for (const attr of attrs) {
             if (attr.type === 'JSXAttribute') {
-              if (attr.name?.name === 'title' && attr.value?.type === 'Literal') {
+              if (attr.name?.name === 'title' && attr.value?.type === 'Literal')
                 title = attr.value.value
-              }
-              if (attr.name?.name === 'aria-label' && attr.value?.type === 'Literal') {
+              if (attr.name?.name === 'aria-label' && attr.value?.type === 'Literal')
                 ariaLabel = attr.value.value
-              }
             }
           }
 

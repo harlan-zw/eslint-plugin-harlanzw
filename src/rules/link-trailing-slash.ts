@@ -1,29 +1,14 @@
+import type { LinkRuleOptions } from '../link-utils'
+import { getLinkUrl, linkRuleDefaults, shouldSkipJsxLink, shouldSkipLink } from '../link-utils'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'link-trailing-slash'
 export type MessageIds = 'addTrailingSlash' | 'removeTrailingSlash'
-export type Options = [{ requireTrailingSlash?: boolean }]
+export type Options = [LinkRuleOptions & { requireTrailingSlash?: boolean }]
 
-function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
-  if (!node.startTag?.attributes) {
-    return { url: null, attrNode: null }
-  }
-
-  for (const attr of node.startTag.attributes) {
-    if (attr.key?.name === 'href' || attr.key?.name === 'to') {
-      if (attr.value?.type === 'VLiteral') {
-        return { url: attr.value.value, attrNode: attr }
-      }
-    }
-  }
-
-  return { url: null, attrNode: null }
-}
-
-function shouldSkip(url: string): boolean {
-  return url.startsWith('http') || url.startsWith('#')
-    || url.includes(':') || url === '/' || url === ''
+function shouldSkipUrl(url: string): boolean {
+  return url.startsWith('#') || url.includes(':') || url === '/' || url === ''
 }
 
 export default createEslintRule<Options, MessageIds>({
@@ -42,6 +27,15 @@ export default createEslintRule<Options, MessageIds>({
             type: 'boolean',
             default: false,
           },
+          ignoreExternal: {
+            type: 'boolean',
+            default: true,
+          },
+          exclude: {
+            type: 'array',
+            items: { type: 'string' },
+            default: [],
+          },
         },
         additionalProperties: false,
       },
@@ -51,16 +45,16 @@ export default createEslintRule<Options, MessageIds>({
       removeTrailingSlash: 'URL "{{url}}" should not end with a trailing slash.',
     },
   },
-  defaultOptions: [{ requireTrailingSlash: false }],
+  defaultOptions: [{ ...linkRuleDefaults, ignoreExternal: true, requireTrailingSlash: false }],
   create(context, options) {
-    const { requireTrailingSlash = false } = options[0] || {}
+    const { requireTrailingSlash = false, ...opts } = options[0] || {}
 
     function checkLinkUrl(node: any) {
       const { url, attrNode } = getLinkUrl(node)
-
-      if (!url || !attrNode || shouldSkip(url)) {
+      if (!url || !attrNode || shouldSkipUrl(url))
         return
-      }
+      if (shouldSkipLink(url, node, opts))
+        return
 
       const hasTrailingSlash = url.endsWith('/')
       const sourceCode = context.sourceCode
@@ -91,9 +85,8 @@ export default createEslintRule<Options, MessageIds>({
     if (isVueParser(context as any)) {
       return defineTemplateBodyVisitor(context, {
         VElement(node: any) {
-          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink') {
+          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink')
             checkLinkUrl(node)
-          }
         },
       }, {})
     }
@@ -102,13 +95,15 @@ export default createEslintRule<Options, MessageIds>({
       JSXElement(node: any) {
         const elementName = node.openingElement?.name?.name
         if (elementName === 'a' || elementName === 'NuxtLink' || elementName === 'RouterLink') {
-          for (const attr of node.openingElement.attributes || []) {
+          const attrs = node.openingElement.attributes || []
+          for (const attr of attrs) {
             if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
               if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string') {
                 const url = attr.value.value
-                if (shouldSkip(url)) {
+                if (shouldSkipUrl(url))
                   continue
-                }
+                if (shouldSkipJsxLink(url, attrs, opts))
+                  continue
                 const hasTrailingSlash = url.endsWith('/')
                 if (requireTrailingSlash && !hasTrailingSlash) {
                   context.report({

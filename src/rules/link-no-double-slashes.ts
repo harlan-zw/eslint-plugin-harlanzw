@@ -1,34 +1,16 @@
+import type { LinkRuleOptions } from '../link-utils'
+import { getLinkUrl, linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, shouldSkipLink } from '../link-utils'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'link-no-double-slashes'
 export type MessageIds = 'doubleSlashes'
-export type Options = []
-
-function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
-  if (!node.startTag?.attributes) {
-    return { url: null, attrNode: null }
-  }
-
-  // Check for href or to attributes
-  for (const attr of node.startTag.attributes) {
-    if (attr.key?.name === 'href' || attr.key?.name === 'to') {
-      if (attr.value?.type === 'VLiteral') {
-        return { url: attr.value.value, attrNode: attr }
-      }
-    }
-  }
-
-  return { url: null, attrNode: null }
-}
+export type Options = [LinkRuleOptions]
 
 function fixDoubleSlashesInUrl(url: string): string {
-  // Skip protocol-relative URLs (//example.com) and full URLs
-  if (url.startsWith('//') || url.includes('://')) {
+  if (url.startsWith('//') || url.includes('://'))
     return url
-  }
 
-  // Parse the URL to separate path, search, and hash
   let path = url
   let search = ''
   let hash = ''
@@ -45,20 +27,7 @@ function fixDoubleSlashesInUrl(url: string): string {
     path = path.slice(0, searchIndex)
   }
 
-  // Fix consecutive slashes in the path only
-  const fixedPath = path.replace(/\/+/g, '/')
-
-  return `${fixedPath}${search}${hash}`
-}
-
-function fixDoubleSlashesInAttr(context: any, attrNode: any, url: string) {
-  const fixedUrl = fixDoubleSlashesInUrl(url)
-  const sourceCode = context.sourceCode
-  const attrText = sourceCode.getText(attrNode)
-
-  // Replace the URL value while preserving quotes
-  const fixedAttrText = attrText.replace(url, fixedUrl)
-  return fixedAttrText
+  return `${path.replace(/\/+/g, '/')}${search}${hash}`
 }
 
 export default createEslintRule<Options, MessageIds>({
@@ -69,77 +38,68 @@ export default createEslintRule<Options, MessageIds>({
       description: 'Ensures link URLs do not contain consecutive slashes in the path',
     },
     fixable: 'code',
-    schema: [],
+    schema: [linkRuleSchema],
     messages: {
       doubleSlashes: 'Link URL "{{url}}" should not contain consecutive slashes.',
     },
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [{ ...linkRuleDefaults, ignoreExternal: true }],
+  create(context, options) {
+    const opts = options[0] || {}
+
     function checkLinkUrl(node: any) {
       const { url, attrNode } = getLinkUrl(node)
-
-      if (!url || !attrNode) {
+      if (!url || !attrNode)
         return
-      }
-
       // Skip protocol-relative URLs and full URLs
-      if (url.startsWith('//') || url.includes('://')) {
+      if (url.startsWith('//') || url.includes('://'))
         return
-      }
+      if (shouldSkipLink(url, node, opts))
+        return
 
-      // Check for consecutive slashes (but not at the start for protocol-relative)
       if (/\/{2,}/.test(url)) {
+        const sourceCode = context.sourceCode
+        const attrText = sourceCode.getText(attrNode)
         context.report({
           node,
           messageId: 'doubleSlashes',
           data: { url },
           fix(fixer) {
-            const fixedAttrText = fixDoubleSlashesInAttr(context, attrNode, url)
-            return fixer.replaceText(attrNode, fixedAttrText)
+            return fixer.replaceText(attrNode, attrText.replace(url, fixDoubleSlashesInUrl(url)))
           },
         })
       }
     }
 
-    // For Vue SFC files
     if (isVueParser(context as any)) {
-      const templateVisitor = {
+      return defineTemplateBodyVisitor(context, {
         VElement(node: any) {
-          // Check anchor tags and router links
-          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink') {
+          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink')
             checkLinkUrl(node)
-          }
         },
-      }
-
-      return defineTemplateBodyVisitor(context, templateVisitor, {})
+      }, {})
     }
 
-    // For JSX files
     return {
       JSXElement(node: any) {
         const elementName = node.openingElement?.name?.name
         if (elementName === 'a' || elementName === 'NuxtLink' || elementName === 'RouterLink') {
-          // Check JSX attributes for href/to
-          for (const attr of node.openingElement.attributes || []) {
+          const attrs = node.openingElement.attributes || []
+          for (const attr of attrs) {
             if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
               if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string') {
                 const url = attr.value.value
-
-                // Skip protocol-relative URLs and full URLs
-                if (url.startsWith('//') || url.includes('://')) {
+                if (url.startsWith('//') || url.includes('://'))
                   return
-                }
-
+                if (shouldSkipJsxLink(url, attrs, opts))
+                  continue
                 if (/\/{2,}/.test(url)) {
                   context.report({
                     node,
                     messageId: 'doubleSlashes',
                     data: { url },
                     fix(fixer) {
-                      const fixedUrl = fixDoubleSlashesInUrl(url)
-                      return fixer.replaceText(attr.value, `"${fixedUrl}"`)
+                      return fixer.replaceText(attr.value, `"${fixDoubleSlashesInUrl(url)}"`)
                     },
                   })
                 }

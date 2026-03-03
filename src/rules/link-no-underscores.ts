@@ -1,25 +1,11 @@
+import type { LinkRuleOptions } from '../link-utils'
+import { getLinkUrl, linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, shouldSkipLink } from '../link-utils'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'link-no-underscores'
 export type MessageIds = 'underscores'
-export type Options = []
-
-function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
-  if (!node.startTag?.attributes) {
-    return { url: null, attrNode: null }
-  }
-
-  for (const attr of node.startTag.attributes) {
-    if (attr.key?.name === 'href' || attr.key?.name === 'to') {
-      if (attr.value?.type === 'VLiteral') {
-        return { url: attr.value.value, attrNode: attr }
-      }
-    }
-  }
-
-  return { url: null, attrNode: null }
-}
+export type Options = [LinkRuleOptions]
 
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
@@ -29,37 +15,32 @@ export default createEslintRule<Options, MessageIds>({
       description: 'Ensures link URLs do not contain underscores',
     },
     fixable: 'code',
-    schema: [],
+    schema: [linkRuleSchema],
     messages: {
       underscores: 'Link URL "{{url}}" should not contain underscores.',
     },
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [{ ...linkRuleDefaults, ignoreExternal: true }],
+  create(context, options) {
+    const opts = options[0] || {}
+
     function checkLinkUrl(node: any) {
       const { url, attrNode } = getLinkUrl(node)
-
-      if (!url || !attrNode) {
+      if (!url || !attrNode)
         return
-      }
-
-      // Skip external URLs
-      if (/^(?:https?:)?\/\//.test(url)) {
+      if (shouldSkipLink(url, node, opts))
         return
-      }
 
       if (url.includes('_')) {
         const sourceCode = context.sourceCode
         const attrText = sourceCode.getText(attrNode)
         const fixedUrl = url.replaceAll('_', '-')
-        const fixedAttrText = attrText.replace(url, fixedUrl)
-
         context.report({
           node,
           messageId: 'underscores',
           data: { url },
           fix(fixer) {
-            return fixer.replaceText(attrNode, fixedAttrText)
+            return fixer.replaceText(attrNode, attrText.replace(url, fixedUrl))
           },
         })
       }
@@ -68,9 +49,8 @@ export default createEslintRule<Options, MessageIds>({
     if (isVueParser(context as any)) {
       return defineTemplateBodyVisitor(context, {
         VElement(node: any) {
-          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink') {
+          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink')
             checkLinkUrl(node)
-          }
         },
       }, {})
     }
@@ -79,13 +59,13 @@ export default createEslintRule<Options, MessageIds>({
       JSXElement(node: any) {
         const elementName = node.openingElement?.name?.name
         if (elementName === 'a' || elementName === 'NuxtLink' || elementName === 'RouterLink') {
-          for (const attr of node.openingElement.attributes || []) {
+          const attrs = node.openingElement.attributes || []
+          for (const attr of attrs) {
             if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
               if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string') {
                 const url = attr.value.value
-                if (/^(?:https?:)?\/\//.test(url)) {
+                if (shouldSkipJsxLink(url, attrs, opts))
                   continue
-                }
                 if (url.includes('_')) {
                   const fixedUrl = url.replaceAll('_', '-')
                   context.report({

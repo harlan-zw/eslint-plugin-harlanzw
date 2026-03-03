@@ -1,36 +1,11 @@
+import type { LinkRuleOptions } from '../link-utils'
+import { getLinkUrl, linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, shouldSkipLink } from '../link-utils'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
 export const RULE_NAME = 'link-no-whitespace'
 export type MessageIds = 'noWhitespace'
-export type Options = []
-
-function getLinkUrl(node: any): { url: string | null, attrNode: any | null } {
-  if (!node.startTag?.attributes) {
-    return { url: null, attrNode: null }
-  }
-
-  // Check for href or to attributes
-  for (const attr of node.startTag.attributes) {
-    if (attr.key?.name === 'href' || attr.key?.name === 'to') {
-      if (attr.value?.type === 'VLiteral') {
-        return { url: attr.value.value, attrNode: attr }
-      }
-    }
-  }
-
-  return { url: null, attrNode: null }
-}
-
-function fixWhitespaceInUrl(context: any, attrNode: any, url: string) {
-  const encodedUrl = url.replace(/\s/g, (m: string) => encodeURIComponent(m))
-  const sourceCode = context.sourceCode
-  const attrText = sourceCode.getText(attrNode)
-
-  // Replace the URL value while preserving quotes
-  const fixedAttrText = attrText.replace(url, encodedUrl)
-  return fixedAttrText
-}
+export type Options = [LinkRuleOptions]
 
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
@@ -40,58 +15,57 @@ export default createEslintRule<Options, MessageIds>({
       description: 'Ensures link URLs do not contain whitespace characters',
     },
     fixable: 'code',
-    schema: [],
+    schema: [linkRuleSchema],
     messages: {
       noWhitespace: 'Link URL "{{url}}" should not contain whitespace characters.',
     },
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [linkRuleDefaults],
+  create(context, options) {
+    const opts = options[0] || {}
+
     function checkLinkUrl(node: any) {
       const { url, attrNode } = getLinkUrl(node)
-
-      if (!url || !attrNode) {
+      if (!url || !attrNode)
         return
-      }
+      if (shouldSkipLink(url, node, opts))
+        return
 
-      // Check for whitespace in the URL
       if (/\s/.test(url)) {
+        const sourceCode = context.sourceCode
+        const attrText = sourceCode.getText(attrNode)
         context.report({
           node,
           messageId: 'noWhitespace',
           data: { url },
           fix(fixer) {
-            const fixedAttrText = fixWhitespaceInUrl(context, attrNode, url)
-            return fixer.replaceText(attrNode, fixedAttrText)
+            const encodedUrl = url.replace(/\s/g, (m: string) => encodeURIComponent(m))
+            return fixer.replaceText(attrNode, attrText.replace(url, encodedUrl))
           },
         })
       }
     }
 
-    // For Vue SFC files
     if (isVueParser(context as any)) {
-      const templateVisitor = {
+      return defineTemplateBodyVisitor(context, {
         VElement(node: any) {
-          // Check anchor tags and router links
-          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink') {
+          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink')
             checkLinkUrl(node)
-          }
         },
-      }
-
-      return defineTemplateBodyVisitor(context, templateVisitor, {})
+      }, {})
     }
 
-    // For JSX files
     return {
       JSXElement(node: any) {
         const elementName = node.openingElement?.name?.name
         if (elementName === 'a' || elementName === 'NuxtLink' || elementName === 'RouterLink') {
-          // Check JSX attributes for href/to
-          for (const attr of node.openingElement.attributes || []) {
+          const attrs = node.openingElement.attributes || []
+          for (const attr of attrs) {
             if (attr.type === 'JSXAttribute' && (attr.name?.name === 'href' || attr.name?.name === 'to')) {
               if (attr.value?.type === 'Literal' && typeof attr.value.value === 'string') {
                 const url = attr.value.value
+                if (shouldSkipJsxLink(url, attrs, opts))
+                  continue
                 if (/\s/.test(url)) {
                   context.report({
                     node,

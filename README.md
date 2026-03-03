@@ -72,30 +72,47 @@ pnpm add -D eslint-plugin-harlanzw
 
 ## Usage
 
-### Recommended (all rules)
-
 ```js
 // eslint.config.js
 import harlanzw from 'eslint-plugin-harlanzw'
 
-export default [
-  ...harlanzw.configs.recommended,
-]
+export default harlanzw({
+  link: true,
+  nuxt: true,
+  vue: true,
+})
 ```
 
-### Pick categories
+### Link Options
+
+All link rules share `ignoreExternal` and `exclude` options. Configure them once:
 
 ```js
-import harlanzw from 'eslint-plugin-harlanzw'
-
-export default [
-  ...harlanzw.configs.link,
-  ...harlanzw.configs.nuxt,
-  ...harlanzw.configs.vue,
-]
+export default harlanzw({
+  link: {
+    ignoreExternal: true, // skip http(s):// URLs and elements with `external` attr
+    exclude: ['^/api/', '/OAuth/'], // skip URLs matching any regex pattern
+    requireTrailingSlash: true, // passed to link-trailing-slash
+  },
+  nuxt: true,
+  vue: true,
+})
 ```
 
-Available configs: `link`, `nuxt`, `vue`, `recommended` (all three combined).
+### Extra Configs
+
+Pass additional flat configs as extra arguments:
+
+```js
+export default harlanzw(
+  { link: true, nuxt: true, vue: true },
+  {
+    rules: {
+      'harlanzw/link-lowercase': ['error', { ignoreExternal: true }],
+    },
+  },
+)
+```
 
 ### With @antfu/eslint-config
 
@@ -105,7 +122,7 @@ import harlanzw from 'eslint-plugin-harlanzw'
 
 export default antfu(
   { vue: true },
-  ...harlanzw.configs.recommended,
+  ...harlanzw({ link: true, nuxt: true, vue: true }),
 )
 ```
 
@@ -116,23 +133,39 @@ import harlanzw from 'eslint-plugin-harlanzw'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
-  ...harlanzw.configs.recommended,
+  ...harlanzw({ link: true, nuxt: true, vue: true }),
 )
+```
+
+### Plugin Access
+
+For custom configs or if you need the raw ESLint plugin object:
+
+```js
+import { plugin } from 'eslint-plugin-harlanzw'
+
+export default [
+  ...plugin.configs.recommended, // link + nuxt + vue
+  // or pick:
+  ...plugin.configs.link,
+  ...plugin.configs.nuxt,
+  ...plugin.configs.vue,
+]
 ```
 
 ### Prompt Rules
 
-The plugin includes 21 rules for linting `.prompt.md` and `.skill.md` files. These use a custom prompt language and have separate configs:
+21 rules for linting `.prompt.md` and `.skill.md` files using a custom prompt language:
 
 ```js
-import harlanzw from 'eslint-plugin-harlanzw'
+import { plugin } from 'eslint-plugin-harlanzw'
 
 export default [
-  ...harlanzw.configs['prompt:recommended'],
+  ...plugin.configs['prompt:recommended'],
   // or stricter:
-  // ...harlanzw.configs['prompt:strict'],
+  // ...plugin.configs['prompt:strict'],
   // for skill files:
-  // ...harlanzw.configs['prompt:skill'],
+  // ...plugin.configs['prompt:skill'],
 ]
 ```
 

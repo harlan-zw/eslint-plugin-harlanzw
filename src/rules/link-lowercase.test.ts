@@ -61,6 +61,113 @@ run({
   ],
 })
 
+run({
+  name: `${RULE_NAME} (ignoreExternal)`,
+  rule,
+  valid: [
+    {
+      code: '<NuxtLink to="https://Example.com/Path">Link</NuxtLink>',
+      options: [{ ignoreExternal: true }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    {
+      code: '<a href="https://Example.com">Link</a>',
+      options: [{ ignoreExternal: true }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    {
+      code: '<NuxtLink external to="/API/Callback">Link</NuxtLink>',
+      options: [{ ignoreExternal: true }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+  ],
+  invalid: [
+    // Still reports on internal links
+    {
+      code: '<NuxtLink to="/About">Link</NuxtLink>',
+      options: [{ ignoreExternal: true }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      output: '<NuxtLink to="/about">Link</NuxtLink>',
+      errors: [{ messageId: 'uppercase' }],
+    },
+    // Without option, external links are still reported
+    {
+      code: '<a href="https://Example.com">Link</a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      output: '<a href="https://example.com">Link</a>',
+      errors: [{ messageId: 'uppercase' }],
+    },
+  ],
+})
+
+run({
+  name: `${RULE_NAME} (exclude)`,
+  rule,
+  valid: [
+    {
+      code: '<a href="/API/Callback">Link</a>',
+      options: [{ exclude: ['^/API/'] }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    {
+      code: '<NuxtLink to="/OAuth/Google">Link</NuxtLink>',
+      options: [{ exclude: ['/OAuth/'] }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+  ],
+  invalid: [
+    {
+      code: '<a href="/About">Link</a>',
+      options: [{ exclude: ['^/API/'] }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      output: '<a href="/about">Link</a>',
+      errors: [{ messageId: 'uppercase' }],
+    },
+  ],
+})
+
+runVue({
+  name: `${RULE_NAME} (Vue SFC ignoreExternal)`,
+  rule,
+  valid: [
+    {
+      code: $`
+        <template>
+          <NuxtLink to="https://Example.com/Path">Link</NuxtLink>
+        </template>
+      `,
+      options: [{ ignoreExternal: true }],
+      filename: 'test.vue',
+    },
+    {
+      code: $`
+        <template>
+          <NuxtLink external to="/API/Callback">Link</NuxtLink>
+        </template>
+      `,
+      options: [{ ignoreExternal: true }],
+      filename: 'test.vue',
+    },
+  ],
+  invalid: [
+    {
+      code: $`
+        <template>
+          <NuxtLink to="/About">Link</NuxtLink>
+        </template>
+      `,
+      output: $`
+        <template>
+          <NuxtLink to="/about">Link</NuxtLink>
+        </template>
+      `,
+      options: [{ ignoreExternal: true }],
+      filename: 'test.vue',
+      errors: [{ messageId: 'uppercase' }],
+    },
+  ],
+})
+
 runVue({
   name: `${RULE_NAME} (Vue SFC)`,
   rule,
