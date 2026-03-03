@@ -30,7 +30,7 @@
     "build": "unbuild",
     "dev": "unbuild --stub",
     "lint": "pnpm run dev && eslint . --fix",
-    "release": "pnpm build && bumpp && pnpm -r publish",
+    "release": "pnpm build && bumpp",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
