@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { defineTemplateBodyVisitor, isVueParser, trackVueImports } from '../vue-utils'
+import { defineTemplateBodyVisitor, isVueParser, trackVueImports, VUE_REACTIVITY_APIS } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-nested-reactivity'
 export type MessageIds = 'noNestedInRef' | 'noNestedInReactive' | 'noNestedInShallowRef' | 'noNestedInShallowReactive' | 'noNestedInComputed' | 'noNestedInWatch' | 'noNestedInWatchEffect'
@@ -29,6 +29,7 @@ export default createEslintRule<Options, MessageIds>({
   create: (context) => {
     const reactiveAPIs = new Set(['ref', 'reactive', 'shallowRef', 'shallowReactive', 'computed', 'watch', 'watchEffect'])
     const vueImports = new Set<string>()
+    const nonVueImports = new Set<string>()
     const reactiveVariables = new Map<string, string>() // variable name -> reactive type
 
     function getMessageId(outerType: string): MessageIds {
@@ -47,7 +48,7 @@ export default createEslintRule<Options, MessageIds>({
     function isReactiveCall(node: TSESTree.Node): string | null {
       if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
         const name = node.callee.name
-        if (reactiveAPIs.has(name) && vueImports.has(name)) {
+        if (reactiveAPIs.has(name) && (vueImports.has(name) || (VUE_REACTIVITY_APIS.has(name) && !nonVueImports.has(name)))) {
           return name
         }
       }
@@ -96,7 +97,7 @@ export default createEslintRule<Options, MessageIds>({
     }
 
     function checkComputedCallback(node: TSESTree.CallExpression): void {
-      if (node.callee.type === 'Identifier' && node.callee.name === 'computed' && vueImports.has('computed')) {
+      if (node.callee.type === 'Identifier' && node.callee.name === 'computed' && (vueImports.has('computed') || !nonVueImports.has('computed'))) {
         // Check the callback function for reactive returns
         if (node.arguments.length > 0) {
           const callback = node.arguments[0]
@@ -192,11 +193,19 @@ export default createEslintRule<Options, MessageIds>({
     const scriptVisitor = {
       Program() {
         vueImports.clear()
+        nonVueImports.clear()
         reactiveVariables.clear()
       },
 
       ImportDeclaration(node: any) {
         trackVueImports(node, vueImports)
+        if (node.source.value !== 'vue') {
+          for (const spec of node.specifiers) {
+            if (spec.type === 'ImportSpecifier' && spec.imported.type === 'Identifier') {
+              nonVueImports.add(spec.imported.name)
+            }
+          }
+        }
       },
 
       CallExpression(node: any) {
