@@ -243,6 +243,7 @@ export interface HarlanzwOptions {
   link?: boolean | LinkRuleOptions & { requireTrailingSlash?: boolean }
   nuxt?: boolean
   vue?: boolean
+  prompt?: boolean | 'recommended' | 'strict' | 'skill'
 }
 
 function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boolean }): Record<string, Linter.RuleEntry> {
@@ -293,6 +294,11 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
       plugins: { harlanzw: plugin },
       rules: buildLinkRules(linkOpts),
     })
+  }
+
+  if (options.prompt !== false) {
+    const preset = typeof options.prompt === 'string' ? options.prompt : 'recommended'
+    configs.push(...plugin.configs![`prompt:${preset}`] as Linter.Config[])
   }
 
   if (options.nuxt) {
