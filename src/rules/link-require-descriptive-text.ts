@@ -1,0 +1,120 @@
+import { createEslintRule } from '../utils'
+import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
+
+export const RULE_NAME = 'link-require-descriptive-text'
+export type MessageIds = 'nonDescriptive'
+export type Options = []
+
+const BAD_LINK_TEXTS = new Set([
+  'click here',
+  'click this',
+  'go',
+  'here',
+  'this',
+  'start',
+  'right here',
+  'more',
+  'learn more',
+  'read more',
+  'continue',
+  'link',
+  'view',
+  'details',
+  'read',
+  'discover',
+])
+
+function getVueElementText(node: any): string {
+  return (node.children || [])
+    .filter((child: any) => child.type === 'VText')
+    .map((child: any) => child.value)
+    .join('')
+    .trim()
+}
+
+function getVueAttrValue(node: any, name: string): string | null {
+  if (!node.startTag?.attributes) {
+    return null
+  }
+  for (const attr of node.startTag.attributes) {
+    if (attr.key?.name === name && attr.value?.type === 'VLiteral') {
+      return attr.value.value
+    }
+  }
+  return null
+}
+
+export default createEslintRule<Options, MessageIds>({
+  name: RULE_NAME,
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description: 'Ensures links have descriptive text content',
+    },
+    schema: [],
+    messages: {
+      nonDescriptive: 'Link text "{{textContent}}" should be more descriptive.',
+    },
+  },
+  defaultOptions: [],
+  create(context) {
+    function checkText(text: string | null, node: any) {
+      if (!text) {
+        context.report({
+          node,
+          messageId: 'nonDescriptive',
+          data: { textContent: 'Missing link text, title, or aria-label.' },
+        })
+        return
+      }
+      if (BAD_LINK_TEXTS.has(text.trim().toLowerCase())) {
+        context.report({
+          node,
+          messageId: 'nonDescriptive',
+          data: { textContent: text },
+        })
+      }
+    }
+
+    if (isVueParser(context as any)) {
+      return defineTemplateBodyVisitor(context, {
+        VElement(node: any) {
+          if (node.name === 'a' || node.name === 'nuxtlink' || node.name === 'routerlink') {
+            const text = getVueElementText(node)
+              || getVueAttrValue(node, 'title')
+              || getVueAttrValue(node, 'aria-label')
+            checkText(text, node)
+          }
+        },
+      }, {})
+    }
+
+    return {
+      JSXElement(node: any) {
+        const elementName = node.openingElement?.name?.name
+        if (elementName === 'a' || elementName === 'NuxtLink' || elementName === 'RouterLink') {
+          const textContent = (node.children || [])
+            .filter((child: any) => child.type === 'JSXText')
+            .map((child: any) => child.value)
+            .join('')
+            .trim()
+
+          let title: string | null = null
+          let ariaLabel: string | null = null
+          for (const attr of node.openingElement.attributes || []) {
+            if (attr.type === 'JSXAttribute') {
+              if (attr.name?.name === 'title' && attr.value?.type === 'Literal') {
+                title = attr.value.value
+              }
+              if (attr.name?.name === 'aria-label' && attr.value?.type === 'Literal') {
+                ariaLabel = attr.value.value
+              }
+            }
+          }
+
+          checkText(textContent || title || ariaLabel, node)
+        }
+      },
+    }
+  },
+})
