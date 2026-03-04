@@ -233,6 +233,15 @@ run({
         return { value }
       }
     `,
+    // Async function calling another composable with await
+    $`
+      export async function useStats() {
+        const { data: stats } = await useFetch('/api/stats.json', {
+          key: 'stats',
+        })
+        return { stats }
+      }
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

@@ -83,6 +83,8 @@ export default createEslintRule<Options, MessageIds>({
         case 'ArrayExpression':
           return expr.elements.some(elem =>
             hasReactivityInExpression(elem as TSESTree.Expression))
+        case 'AwaitExpression':
+          return hasReactivityInExpression(expr.argument)
         default:
           return false
       }
