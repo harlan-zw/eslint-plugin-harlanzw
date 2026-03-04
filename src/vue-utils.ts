@@ -37,6 +37,59 @@ export const VUE_REACTIVITY_APIS = new Set([
   'onScopeDispose',
 ])
 
+// VueUse reactive APIs that don't follow the use* pattern
+export const VUEUSE_REACTIVITY_APIS = new Set([
+  // Watch variants
+  'whenever',
+  'watchArray',
+  'watchAtMost',
+  'watchDebounced',
+  'watchDeep',
+  'watchIgnorable',
+  'watchImmediate',
+  'watchOnce',
+  'watchPausable',
+  'watchThrottled',
+  'watchTriggerable',
+  'watchWithFilter',
+  'debouncedWatch',
+  'throttledWatch',
+  'until',
+  // Computed variants
+  'computedAsync',
+  'computedEager',
+  'computedInject',
+  'computedWithControl',
+  // Reactive utilities
+  'reactiveComputed',
+  'reactiveOmit',
+  'reactivePick',
+  'toReactive',
+  // Ref utilities
+  'controlledRef',
+  'debouncedRef',
+  'throttledRef',
+  'refAutoReset',
+  'refDebounced',
+  'refDefault',
+  'refThrottled',
+  'refWithControl',
+  'extendRef',
+  'syncRef',
+  'syncRefs',
+  'templateRef',
+  // State management
+  'createGlobalState',
+  'createInjectionState',
+  'createSharedComposable',
+  // Event/lifecycle hooks
+  'onClickOutside',
+  'onKeyStroke',
+  'onLongPress',
+  'onStartTyping',
+  'createEventHook',
+])
+
 /**
  * Side effect functions that should be moved to onMounted in Vue script setup.
  * These functions create persistent effects that need cleanup during SSR.

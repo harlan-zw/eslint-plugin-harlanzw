@@ -242,6 +242,84 @@ run({
         return { stats }
       }
     `,
+    // Composable returning member expression of another composable call
+    $`
+      function useNuxtScriptRuntimeConfig() {
+        return useRuntimeConfig().public['nuxt-scripts']
+      }
+    `,
+    // Composable with reactivity inside new Promise callback
+    $`
+      function useElementVisibility(element) {
+        return new Promise((resolve) => {
+          const observer = useIntersectionObserver(element, (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) resolve(true)
+            }
+          })
+        })
+      }
+    `,
+    // Composable with reactivity nested in callbacks
+    $`
+      function useScriptTriggerIdleTimeout(options) {
+        return new Promise((resolve) => {
+          onNuxtReady(() => {
+            const { start, stop } = useTimeoutFn(() => {
+              resolve(true)
+            }, options.timeout)
+            start()
+          })
+        })
+      }
+    `,
+    // Composable using tryOnScopeDispose
+    $`
+      function useScriptTriggerServiceWorker() {
+        return new Promise((resolve) => {
+          tryOnScopeDispose(() => resolve(false))
+        })
+      }
+    `,
+    // Composable with assignment expression containing composable call
+    $`
+      function useObserver(element) {
+        let observer
+        observer = useIntersectionObserver(element, () => {})
+        return observer
+      }
+    `,
+    // VueUse whenever
+    $`
+      function useAutoSave(data) {
+        whenever(data, (val) => save(val))
+      }
+    `,
+    // VueUse watchDebounced
+    $`
+      function useDebouncedSearch(query) {
+        watchDebounced(query, (val) => search(val), { debounce: 300 })
+      }
+    `,
+    // VueUse computedAsync
+    $`
+      function useAsyncData(id) {
+        const data = computedAsync(() => fetchData(id.value))
+        return { data }
+      }
+    `,
+    // VueUse onClickOutside
+    $`
+      function useDropdown(el) {
+        onClickOutside(el, () => close())
+      }
+    `,
+    // VueUse createGlobalState
+    $`
+      const useGlobalCounter = createGlobalState(() => {
+        return { count: 0 }
+      })
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

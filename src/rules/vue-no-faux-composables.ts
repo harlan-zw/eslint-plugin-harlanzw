@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { isComposableCall, isComposableName, isReactivityCall, trackVueImports, VUE_REACTIVITY_APIS } from '../vue-utils'
+import { isComposableCall, isComposableName, isReactivityCall, trackVueImports, VUE_REACTIVITY_APIS, VUEUSE_REACTIVITY_APIS } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-faux-composables'
 export type MessageIds = 'mustUseReactivity'
@@ -27,7 +27,7 @@ export default createEslintRule<Options, MessageIds>({
     function isAutoImportedReactivityCall(node: TSESTree.CallExpression): boolean {
       if (node.callee.type === 'Identifier') {
         const name = node.callee.name
-        return VUE_REACTIVITY_APIS.has(name) && !nonVueImports.has(name)
+        return (VUE_REACTIVITY_APIS.has(name) || VUEUSE_REACTIVITY_APIS.has(name)) && !nonVueImports.has(name)
       }
       return false
     }
@@ -68,15 +68,36 @@ export default createEslintRule<Options, MessageIds>({
       }
     }
 
+    function isReactiveLifecycleCall(node: TSESTree.CallExpression): boolean {
+      return node.callee.type === 'Identifier' && /^tryOn[A-Z]/.test(node.callee.name)
+    }
+
+    function hasReactivityInArg(arg: TSESTree.CallExpression['arguments'][number]): boolean {
+      if (arg.type === 'ArrowFunctionExpression' || arg.type === 'FunctionExpression') {
+        if (arg.body.type === 'BlockStatement')
+          return arg.body.body.some(stmt => hasReactivityInStatement(stmt))
+        return hasReactivityInExpression(arg.body)
+      }
+      if (arg.type === 'SpreadElement')
+        return hasReactivityInExpression(arg.argument)
+      return hasReactivityInExpression(arg)
+    }
+
     function hasReactivityInExpression(expr: TSESTree.Expression | null): boolean {
       if (!expr)
         return false
 
       switch (expr.type) {
         case 'CallExpression':
-          if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr))
+          if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr) || isReactiveLifecycleCall(expr))
             return true
-          return false
+          return expr.arguments.some(arg => hasReactivityInArg(arg))
+        case 'NewExpression':
+          return expr.arguments.some(arg => hasReactivityInArg(arg))
+        case 'MemberExpression':
+          return hasReactivityInExpression(expr.object as TSESTree.Expression)
+        case 'AssignmentExpression':
+          return hasReactivityInExpression(expr.right)
         case 'ObjectExpression':
           return expr.properties.some(prop =>
             prop.type === 'Property' && hasReactivityInExpression(prop.value as TSESTree.Expression))
@@ -85,6 +106,10 @@ export default createEslintRule<Options, MessageIds>({
             hasReactivityInExpression(elem as TSESTree.Expression))
         case 'AwaitExpression':
           return hasReactivityInExpression(expr.argument)
+        case 'ConditionalExpression':
+          return hasReactivityInExpression(expr.consequent) || hasReactivityInExpression(expr.alternate)
+        case 'LogicalExpression':
+          return hasReactivityInExpression(expr.left) || hasReactivityInExpression(expr.right)
         default:
           return false
       }
