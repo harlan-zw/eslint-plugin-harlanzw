@@ -57,6 +57,88 @@ run({
         count: ref(0)
       }
     `,
+    // watch with ref source is standard usage
+    $`
+      import { ref, watch } from 'vue'
+
+      const count = ref(0)
+      watch(count, (val) => {
+        console.log(val)
+      })
+    `,
+    // watch with computed source
+    $`
+      import { computed, watch } from 'vue'
+
+      const doubled = computed(() => 42)
+      watch(doubled, (val) => {
+        console.log(val)
+      })
+    `,
+    // watch with getter function
+    $`
+      import { ref, watch } from 'vue'
+
+      const count = ref(0)
+      watch(() => count.value, (val) => {
+        console.log(val)
+      })
+    `,
+    // watchEffect accessing refs is standard usage
+    $`
+      import { ref, watchEffect } from 'vue'
+
+      const count = ref(0)
+      watchEffect(() => {
+        console.log(count.value)
+      })
+    `,
+    // watch with array of ref sources
+    $`
+      import { ref, watch } from 'vue'
+
+      const count = ref(0)
+      const name = ref('test')
+      watch([count, name], ([c, n]) => {
+        console.log(c, n)
+      })
+    `,
+    // watch callback reading multiple .value refs (snapshot pattern)
+    $`
+      import { ref, watch } from 'vue'
+
+      const template = ref('default')
+      const title = ref('Hello')
+      const description = ref('World')
+      const output = ref('')
+      watch(template, (newVal) => {
+        output.value = title.value + ' ' + description.value
+      })
+    `,
+    // watch callback assigning to a ref
+    $`
+      import { ref, watch } from 'vue'
+
+      const source = ref(0)
+      const derived = ref('')
+      watch(source, (val) => {
+        derived.value = String(val)
+      })
+    `,
+    // watchEffect with multiple ref reads and writes
+    $`
+      import { ref, watchEffect } from 'vue'
+
+      const input = ref('')
+      const output = ref('')
+      const error = ref(null)
+      watchEffect(() => {
+        if (input.value.length > 0) {
+          output.value = input.value.toUpperCase()
+          error.value = null
+        }
+      })
+    `,
   ],
   invalid: [
     // Direct nesting: reactive with ref
@@ -228,19 +310,6 @@ run({
         messageId: 'noNestedInRef',
       }],
     },
-    // Watch inside reactive
-    {
-      code: $`
-        import { reactive, watch } from 'vue'
-        
-        const state = reactive({
-          watcher: watch(() => {}, () => {})
-        })
-      `,
-      errors: [{
-        messageId: 'noNestedInReactive',
-      }],
-    },
     // Mixed computed and ref nesting
     {
       code: $`
@@ -369,7 +438,7 @@ run({
     {
       code: $`
         import { computed, reactive, ref } from 'vue'
-        
+
         const computedWithReactive = computed(() => ({
           foo: reactive({ bar: 'baz' }),
           bar: ref('qux'),
@@ -379,6 +448,64 @@ run({
         { messageId: 'noNestedInComputed' }, // reactive call
         { messageId: 'noNestedInComputed' }, // ref call
       ],
+    },
+    // Nesting reactive({ ref }) inside watch callback is still caught
+    {
+      code: $`
+        import { ref, reactive, watch } from 'vue'
+
+        const source = ref(0)
+        watch(source, () => {
+          const state = reactive({ count: ref(0) })
+        })
+      `,
+      errors: [
+        { messageId: 'noNestedInReactive' },
+      ],
+    },
+    // Nesting ref inside reactive inside watchEffect callback is still caught
+    {
+      code: $`
+        import { ref, reactive, watchEffect } from 'vue'
+
+        watchEffect(() => {
+          const state = reactive({
+            name: ref('test'),
+            count: ref(0),
+          })
+        })
+      `,
+      errors: [
+        { messageId: 'noNestedInReactive' },
+        { messageId: 'noNestedInReactive' },
+      ],
+    },
+    // Computed returning ref inside watch callback is still caught
+    {
+      code: $`
+        import { ref, computed, watch } from 'vue'
+
+        const source = ref(0)
+        watch(source, () => {
+          const bad = computed(() => ref(0))
+        })
+      `,
+      errors: [
+        { messageId: 'noNestedInComputed' },
+      ],
+    },
+    // Watch inside reactive is still caught (watch as nested, not outer)
+    {
+      code: $`
+        import { reactive, watch } from 'vue'
+
+        const state = reactive({
+          watcher: watch(() => {}, () => {})
+        })
+      `,
+      errors: [{
+        messageId: 'noNestedInReactive',
+      }],
     },
   ],
 })

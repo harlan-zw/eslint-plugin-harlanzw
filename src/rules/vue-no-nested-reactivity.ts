@@ -3,7 +3,7 @@ import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser, trackVueImports, VUE_REACTIVITY_APIS } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-nested-reactivity'
-export type MessageIds = 'noNestedInRef' | 'noNestedInReactive' | 'noNestedInShallowRef' | 'noNestedInShallowReactive' | 'noNestedInComputed' | 'noNestedInWatch' | 'noNestedInWatchEffect'
+export type MessageIds = 'noNestedInRef' | 'noNestedInReactive' | 'noNestedInShallowRef' | 'noNestedInShallowReactive' | 'noNestedInComputed' | 'noNestedInWatch' | 'noNestedInWatchEffect' | 'reactiveInWatchCallback' | 'reactiveInWatchEffectCallback'
 export type Options = []
 
 export default createEslintRule<Options, MessageIds>({
@@ -169,6 +169,10 @@ export default createEslintRule<Options, MessageIds>({
 
     function checkForNestedReactivity(node: TSESTree.CallExpression, outerType: string): void {
       if (!node.arguments.length)
+        return
+
+      // watch/watchEffect args are supposed to be reactive sources - don't flag them
+      if (outerType === 'watch' || outerType === 'watchEffect')
         return
 
       const arg = node.arguments[0]
