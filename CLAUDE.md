@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is `eslint-plugin-harlanzw` - Harlan's experimental ESLint rules for Vue projects, particularly focused on link hygiene, Nuxt best practices, and Vue reactivity patterns. The plugin provides 20 link/nuxt/vue rules and 21 prompt linting rules.
+This is `eslint-plugin-harlanzw` - Harlan's experimental ESLint rules for Vue projects, particularly focused on link hygiene, Nuxt best practices, and Vue reactivity patterns. The plugin provides 21 link/nuxt/vue rules and 21 prompt linting rules.
 
 ## Development Commands
 
@@ -55,7 +55,7 @@ Each rule follows a consistent pattern:
 3. Documentation file (e.g., `vue-no-ref-access.md`) - for rules with extensive docs
 4. Rules are created using the `createEslintRule` helper from `src/utils.ts`
 
-### Plugin Rules (20 link/nuxt/vue + 21 prompt)
+### Plugin Rules (21 link/nuxt/vue + 21 prompt)
 
 **Link rules (8):**
 - `link-ascii-only` - Ensure link URLs contain only ASCII characters
@@ -75,21 +75,23 @@ Each rule follows a consistent pattern:
 - `nuxt-prefer-navigate-to-over-router-push-replace` - Prefer navigateTo over router methods
 - `nuxt-prefer-nuxt-link-over-router-link` - Prefer NuxtLink over RouterLink components
 
-**Vue rules (6):**
+**Vue rules (7):**
 - `vue-no-faux-composables` - Prevents fake composables that don't use Vue reactivity
 - `vue-no-nested-reactivity` - Prevents mixing ref() and reactive() patterns
 - `vue-no-passing-refs-as-props` - Requires unwrapping refs before passing as props
 - `vue-no-reactive-destructuring` - Prevents destructuring reactive objects (loses reactivity)
 - `vue-no-ref-access-in-templates` - Prevents using .value in Vue templates
 - `vue-no-torefs-on-props` - Prevents using toRefs() on props object
+- `vue-require-composable-prefix` - Enforces use* prefix for functions using Vue reactivity
 
 **Shared configs:** `link`, `nuxt`, `vue`, `recommended` (all three), `prompt:recommended`, `prompt:strict`, `prompt:skill`
 
 ### Key Utilities
 - `VUE_REACTIVITY_APIS` - Set of all Vue reactivity function names
 - `createEslintRule` - Main rule creation helper with automatic docs URL generation
+- `createReactivityChecker` - Factory returning `hasReactivityInStatement`/`hasReactivityInExpression` helpers, shared by composable rules
 - Vue template visitor support for SFC analysis
-- Import tracking for Vue reactivity APIs
+- Import tracking for Vue reactivity APIs (`trackVueImports`, `trackNonVueImports`)
 - AST utilities for function calls, awaits, returns, and scope analysis
 
 ### Build Configuration

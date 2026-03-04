@@ -17,6 +17,7 @@ Nuxt 3.17+ ships the [`<NuxtTime>`](https://nuxt.com/docs/4.x/api/components/nux
 
 - `new Date('2024-01-01')` or `new Date(timestamp)` — deterministic, always safe
 - Any Date call inside `onMounted`, lifecycle hooks, event handlers, or client guards
+- Inside server handlers (`defineEventHandler`, `defineCachedEventHandler`, `defineNitroPlugin`, `defineTask`) — these never hydrate
 - `Date.parse()` — deterministic
 
 ## ❌ Incorrect

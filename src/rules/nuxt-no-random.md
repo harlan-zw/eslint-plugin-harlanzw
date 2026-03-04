@@ -19,8 +19,8 @@ During SSR this produces one order, but during client hydration it produces a di
 The rule flags these calls when they **execute during component setup**:
 
 - `Math.random()`
-- `crypto.randomUUID()`
-- `crypto.getRandomValues()`
+- `crypto.randomUUID()` / `window.crypto.randomUUID()` / `globalThis.crypto.randomUUID()`
+- `crypto.getRandomValues()` / `window.crypto.getRandomValues()` / `globalThis.crypto.getRandomValues()`
 
 Including inline callbacks that execute synchronously (e.g. `.sort()`, `.map()`, `.filter()`).
 
@@ -34,6 +34,7 @@ The rule ignores calls in contexts that are **client-only** or **deferred**:
 - Inside `watch()` callbacks (deferred, not executed during setup)
 - Inside named functions (event handlers, utility functions defined but not called during setup)
 - Inside class methods
+- Inside server handlers (`defineEventHandler`, `defineCachedEventHandler`, `defineNitroPlugin`, `defineTask`) — these never hydrate
 
 ## ❌ Incorrect
 
