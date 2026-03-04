@@ -1,5 +1,7 @@
 import type { ESLint, Linter } from 'eslint'
 import type { LinkRuleOptions } from './link-utils'
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { version } from '../package.json'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
 import { PromptLanguage } from './prompt/language'
@@ -246,6 +248,20 @@ export interface HarlanzwOptions {
   prompt?: boolean | 'recommended' | 'strict' | 'skill'
 }
 
+const PROMPT_MARKERS = [
+  '.claude',
+  '.cursor',
+  '.github/copilot-instructions.md',
+  '.windsurfrules',
+  '.clinerules',
+  '.goose',
+  '.amp',
+  'CLAUDE.md',
+  'AGENTS.md',
+  '.cursorrules',
+  '.gemini',
+]
+
 function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boolean }): Record<string, Linter.RuleEntry> {
   const { requireTrailingSlash, ...baseOpts } = linkOpts
   const rules: Record<string, Linter.RuleEntry> = {
@@ -284,9 +300,10 @@ function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boo
  * ```
  */
 function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[]): Linter.Config[] {
+  const detected = detectFramework()
   const configs: Linter.Config[] = []
 
-  if (options.link !== false && options.link !== undefined) {
+  if (options.link !== false) {
     const linkOpts = typeof options.link === 'object' ? options.link : {}
     configs.push({
       name: 'harlanzw/link',
@@ -296,16 +313,19 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     })
   }
 
-  if (options.prompt !== false) {
+  const enablePrompt = options.prompt ?? detected.prompt
+  if (enablePrompt) {
     const preset = typeof options.prompt === 'string' ? options.prompt : 'recommended'
     configs.push(...plugin.configs![`prompt:${preset}`] as Linter.Config[])
   }
 
-  if (options.nuxt) {
+  const enableNuxt = options.nuxt ?? detected.nuxt
+  if (enableNuxt) {
     configs.push(...plugin.configs!.nuxt as Linter.Config[])
   }
 
-  if (options.vue) {
+  const enableVue = options.vue ?? detected.vue
+  if (enableVue) {
     configs.push(...plugin.configs!.vue as Linter.Config[])
   }
 
@@ -314,8 +334,25 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
   return configs
 }
 
+function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean } {
+  const cwd = process.cwd()
+  const nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
+  let vue = nuxt
+  if (!vue) {
+    try {
+      const pkg = JSON.parse(readFileSync(resolve(cwd, 'package.json'), 'utf-8'))
+      const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+      vue = !!(deps.vue || deps.nuxt)
+    }
+    catch {}
+  }
+  const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))
+  return { nuxt, vue, prompt }
+}
+
 // Attach plugin to factory and export both
 harlanzw.plugin = plugin
+harlanzw.detectFramework = detectFramework
 
 export { plugin }
 export default harlanzw
