@@ -72,18 +72,32 @@ export const COMMON_CONTEXT_VARIABLES = new Set([
 ])
 
 export const PROMPT_FILES = [
+  // Claude Code — root + nested CLAUDE.md are auto-loaded
   '**/CLAUDE.md',
-  '**/.claude/**/*.md',
-  '**/AGENTS.md',
+  // Claude Code — skills
+  '**/SKILL.md',
+  // Claude Code — commands (loaded on invoke)
+  '**/.claude/commands/**/*.md',
+  // Gemini
+  '**/.gemini/style_guide.md',
+  '**/GEMINI.md',
+  // GitHub Copilot
   '**/.github/copilot-instructions.md',
+  // Cursor
   '**/.cursorrules',
   '**/.cursor/rules/**/*.md',
   '**/.cursor/rules/**/*.mdc',
-  '**/SKILL.md',
+  // Windsurf
   '**/.windsurfrules',
+  // Cline
   '**/.clinerules',
+  // Goose
   '**/.goose/instructions.md',
+  // Amp
   '**/.amp/RULES.md',
+  // Codex
+  '**/AGENTS.md',
+  // Generic prompt files
   '**/*.prompt',
   '**/*.prompt.md',
 ]
