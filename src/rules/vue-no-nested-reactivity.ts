@@ -23,6 +23,8 @@ export default createEslintRule<Options, MessageIds>({
       noNestedInComputed: 'Avoid nesting reactivity primitives inside computed().',
       noNestedInWatch: 'Avoid nesting reactivity primitives inside watch().',
       noNestedInWatchEffect: 'Avoid nesting reactivity primitives inside watchEffect().',
+      reactiveInWatchCallback: 'Avoid creating reactive primitives inside watch() callbacks. They will be recreated on every trigger.',
+      reactiveInWatchEffectCallback: 'Avoid creating reactive primitives inside watchEffect() callbacks. They will be recreated on every run.',
     },
   },
   defaultOptions: [],
