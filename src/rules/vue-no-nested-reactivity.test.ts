@@ -449,7 +449,7 @@ run({
         { messageId: 'noNestedInComputed' }, // ref call
       ],
     },
-    // Nesting reactive({ ref }) inside watch callback is still caught
+    // Nesting reactive({ ref }) inside watch callback — both nesting AND callback errors
     {
       code: $`
         import { ref, reactive, watch } from 'vue'
@@ -460,10 +460,12 @@ run({
         })
       `,
       errors: [
+        { messageId: 'reactiveInWatchCallback' },
         { messageId: 'noNestedInReactive' },
+        { messageId: 'reactiveInWatchCallback' },
       ],
     },
-    // Nesting ref inside reactive inside watchEffect callback is still caught
+    // Nesting ref inside reactive inside watchEffect callback
     {
       code: $`
         import { ref, reactive, watchEffect } from 'vue'
@@ -476,11 +478,14 @@ run({
         })
       `,
       errors: [
+        { messageId: 'reactiveInWatchEffectCallback' },
         { messageId: 'noNestedInReactive' },
+        { messageId: 'reactiveInWatchEffectCallback' },
         { messageId: 'noNestedInReactive' },
+        { messageId: 'reactiveInWatchEffectCallback' },
       ],
     },
-    // Computed returning ref inside watch callback is still caught
+    // Computed returning ref inside watch callback
     {
       code: $`
         import { ref, computed, watch } from 'vue'
@@ -491,7 +496,83 @@ run({
         })
       `,
       errors: [
+        { messageId: 'reactiveInWatchCallback' },
         { messageId: 'noNestedInComputed' },
+        { messageId: 'reactiveInWatchCallback' },
+      ],
+    },
+    // computed() created inside watch callback
+    {
+      code: $`
+        import { ref, computed, watch } from 'vue'
+
+        const source = ref(0)
+        watch(source, () => {
+          const doubled = computed(() => source.value * 2)
+        })
+      `,
+      errors: [
+        { messageId: 'reactiveInWatchCallback' },
+      ],
+    },
+    // ref() created inside watch callback
+    {
+      code: $`
+        import { ref, watch } from 'vue'
+
+        const source = ref(0)
+        watch(source, () => {
+          const copy = ref(source.value)
+        })
+      `,
+      errors: [
+        { messageId: 'reactiveInWatchCallback' },
+      ],
+    },
+    // reactive() created inside watchEffect callback
+    {
+      code: $`
+        import { ref, reactive, watchEffect } from 'vue'
+
+        const count = ref(0)
+        watchEffect(() => {
+          const state = reactive({ count: count.value })
+        })
+      `,
+      errors: [
+        { messageId: 'reactiveInWatchEffectCallback' },
+      ],
+    },
+    // computed() created inside watchEffect callback
+    {
+      code: $`
+        import { ref, computed, watchEffect } from 'vue'
+
+        const count = ref(0)
+        watchEffect(() => {
+          const doubled = computed(() => count.value * 2)
+        })
+      `,
+      errors: [
+        { messageId: 'reactiveInWatchEffectCallback' },
+      ],
+    },
+    // Multiple reactive primitives inside watch callback
+    {
+      code: $`
+        import { ref, reactive, computed, watch } from 'vue'
+
+        const source = ref(0)
+        watch(source, () => {
+          const count = ref(0)
+          const state = reactive({ name: 'test' })
+          const doubled = computed(() => count.value * 2)
+        })
+      `,
+      errors: [
+        { messageId: 'reactiveInWatchCallback' },
+        { messageId: 'reactiveInWatchCallback' },
+        { messageId: 'reactiveInWatchCallback' },
       ],
     },
     // Watch inside reactive is still caught (watch as nested, not outer)

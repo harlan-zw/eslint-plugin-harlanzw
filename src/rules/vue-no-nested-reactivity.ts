@@ -30,6 +30,7 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   create: (context) => {
     const reactiveAPIs = new Set(['ref', 'reactive', 'shallowRef', 'shallowReactive', 'computed', 'watch', 'watchEffect'])
+    const stateCreatingAPIs = new Set(['ref', 'reactive', 'shallowRef', 'shallowReactive', 'computed'])
     const vueImports = new Set<string>()
     const nonVueImports = new Set<string>()
     const reactiveVariables = new Map<string, string>() // variable name -> reactive type
@@ -196,6 +197,40 @@ export default createEslintRule<Options, MessageIds>({
       }
     }
 
+    function getEnclosingWatchType(node: TSESTree.Node): 'watch' | 'watchEffect' | null {
+      let current: TSESTree.Node | undefined = node.parent
+      while (current) {
+        if (
+          (current.type === 'ArrowFunctionExpression' || current.type === 'FunctionExpression')
+          && current.parent?.type === 'CallExpression'
+          && current.parent.callee.type === 'Identifier'
+        ) {
+          const callee = current.parent.callee.name
+          const isVueWatch = vueImports.has(callee) || (VUE_REACTIVITY_APIS.has(callee) && !nonVueImports.has(callee))
+          if (isVueWatch) {
+            if (callee === 'watchEffect' && current.parent.arguments[0] === current)
+              return 'watchEffect'
+            if (callee === 'watch' && current.parent.arguments[1] === current)
+              return 'watch'
+          }
+        }
+        current = current.parent
+      }
+      return null
+    }
+
+    function checkReactiveInWatchCallback(node: TSESTree.CallExpression, reactiveType: string): void {
+      if (!stateCreatingAPIs.has(reactiveType))
+        return
+      const watchType = getEnclosingWatchType(node)
+      if (watchType) {
+        context.report({
+          node,
+          messageId: watchType === 'watch' ? 'reactiveInWatchCallback' : 'reactiveInWatchEffectCallback',
+        })
+      }
+    }
+
     const scriptVisitor = {
       Program() {
         vueImports.clear()
@@ -218,6 +253,7 @@ export default createEslintRule<Options, MessageIds>({
         const reactiveType = isReactiveCall(node)
         if (reactiveType) {
           checkForNestedReactivity(node, reactiveType)
+          checkReactiveInWatchCallback(node, reactiveType)
         }
 
         // Also check computed callbacks for reactive returns
@@ -240,6 +276,7 @@ export default createEslintRule<Options, MessageIds>({
         const reactiveType = isReactiveCall(node)
         if (reactiveType) {
           checkForNestedReactivity(node, reactiveType)
+          checkReactiveInWatchCallback(node, reactiveType)
         }
 
         // Also check computed callbacks for reactive returns
