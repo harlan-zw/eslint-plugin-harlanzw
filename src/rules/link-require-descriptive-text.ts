@@ -26,20 +26,28 @@ const BAD_LINK_TEXTS = new Set([
   'discover',
 ])
 
-function getVueElementText(node: any): string {
-  return (node.children || [])
+function getVueElementText(node: any): string | null {
+  const children = node.children || []
+  // Trust dynamic content: child components, expression containers, slots
+  if (children.some((child: any) => child.type === 'VElement' || child.type === 'VExpressionContainer'))
+    return '[dynamic]'
+  return children
     .filter((child: any) => child.type === 'VText')
     .map((child: any) => child.value)
     .join('')
-    .trim()
+    .trim() || null
 }
 
 function getVueAttrValue(node: any, name: string): string | null {
   if (!node.startTag?.attributes)
     return null
   for (const attr of node.startTag.attributes) {
+    // Static attribute: aria-label="text"
     if (attr.key?.name === name && attr.value?.type === 'VLiteral')
       return attr.value.value
+    // v-bind directive: :aria-label="expr" — trust it has a value
+    if (attr.directive && attr.key?.name?.name === 'bind' && attr.key?.argument?.name === name)
+      return '[dynamic]'
   }
   return null
 }

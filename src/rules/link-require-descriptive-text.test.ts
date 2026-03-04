@@ -54,6 +54,42 @@ runVue({
       `,
       filename: 'test.vue',
     },
+    {
+      code: $`
+        <template>
+          <NuxtLink to="/" :aria-label="backLabel">
+            <UIcon name="i-carbon-arrow-left" />
+          </NuxtLink>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    {
+      code: $`
+        <template>
+          <a href="/page" :title="pageTitle"></a>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    {
+      code: $`
+        <template>
+          <NuxtLink to="/page">
+            <UIcon name="i-carbon-home" />
+          </NuxtLink>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    {
+      code: $`
+        <template>
+          <a href="/page">{{ linkText }}</a>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
   ],
   invalid: [
     {
