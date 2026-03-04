@@ -2,6 +2,7 @@ import type { ESLint, Linter } from 'eslint'
 import type { LinkRuleOptions } from './link-utils'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import process from 'node:process'
 import { version } from '../package.json'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
 import { PromptLanguage } from './prompt/language'
@@ -35,9 +36,11 @@ import linkRequireDescriptiveText from './rules/link-require-descriptive-text'
 import linkRequireHref from './rules/link-require-href'
 import linkTrailingSlash from './rules/link-trailing-slash'
 import nuxtAwaitNavigateTo from './rules/nuxt-await-navigate-to'
+import nuxtNoRandom from './rules/nuxt-no-random'
 import nuxtNoRedundantImportMeta from './rules/nuxt-no-redundant-import-meta'
 import nuxtNoSideEffectsInAsyncDataHandler from './rules/nuxt-no-side-effects-in-async-data-handler'
 import nuxtNoSideEffectsInSetup from './rules/nuxt-no-side-effects-in-setup'
+import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
 import vueNoFauxComposables from './rules/vue-no-faux-composables'
@@ -46,6 +49,7 @@ import vueNoPassingRefsAsProps from './rules/vue-no-passing-refs-as-props'
 import vueNoReactiveDestructuring from './rules/vue-no-reactive-destructuring'
 import vueNoRefAccessInTemplates from './rules/vue-no-ref-access-in-templates'
 import vueNoTorefsOnProps from './rules/vue-no-torefs-on-props'
+import vueRequireComposablePrefix from './rules/vue-require-composable-prefix'
 
 const plugin: ESLint.Plugin = {
   meta: {
@@ -66,9 +70,11 @@ const plugin: ESLint.Plugin = {
     'link-require-href': linkRequireHref,
     'link-trailing-slash': linkTrailingSlash,
     'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
+    'nuxt-no-random': nuxtNoRandom,
     'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
     'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
     'nuxt-no-side-effects-in-setup': nuxtNoSideEffectsInSetup,
+    'nuxt-no-unsafe-date': nuxtNoUnsafeDate,
     'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
     'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
     'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
@@ -98,6 +104,7 @@ const plugin: ESLint.Plugin = {
     'vue-no-reactive-destructuring': vueNoReactiveDestructuring,
     'vue-no-ref-access-in-templates': vueNoRefAccessInTemplates,
     'vue-no-torefs-on-props': vueNoTorefsOnProps,
+    'vue-require-composable-prefix': vueRequireComposablePrefix,
   },
   configs: {} as Record<string, Linter.Config[]>,
 }
@@ -207,9 +214,11 @@ plugin.configs!.nuxt = [
     plugins: { harlanzw: plugin },
     rules: {
       'harlanzw/nuxt-await-navigate-to': 'error',
+      'harlanzw/nuxt-no-random': 'error',
       'harlanzw/nuxt-no-redundant-import-meta': 'error',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
+      'harlanzw/nuxt-no-unsafe-date': 'warn',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'warn',
       'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'warn',
     },
@@ -229,6 +238,7 @@ plugin.configs!.vue = [
       'harlanzw/vue-no-reactive-destructuring': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'warn',
       'harlanzw/vue-no-torefs-on-props': 'warn',
+      'harlanzw/vue-require-composable-prefix': 'warn',
     },
   },
 ]

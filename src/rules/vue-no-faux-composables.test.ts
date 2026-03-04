@@ -320,6 +320,10 @@ run({
         return { count: 0 }
       })
     `,
+    // Expression-body arrow with reactivity
+    $`
+      const useValue = () => ref(0)
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

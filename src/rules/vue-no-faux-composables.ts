@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
-import { isComposableCall, isComposableName, isReactivityCall, trackVueImports, VUE_REACTIVITY_APIS, VUEUSE_REACTIVITY_APIS } from '../vue-utils'
+import { createReactivityChecker, isComposableName, trackNonVueImports, trackVueImports } from '../vue-utils'
 
 export const RULE_NAME = 'vue-no-faux-composables'
 export type MessageIds = 'mustUseReactivity'
@@ -24,103 +24,19 @@ export default createEslintRule<Options, MessageIds>({
     const nonVueImports = new Set<string>()
     const composableFunctions = new Map<string, TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression>()
 
-    function isAutoImportedReactivityCall(node: TSESTree.CallExpression): boolean {
-      if (node.callee.type === 'Identifier') {
-        const name = node.callee.name
-        return (VUE_REACTIVITY_APIS.has(name) || VUEUSE_REACTIVITY_APIS.has(name)) && !nonVueImports.has(name)
-      }
-      return false
-    }
-
-    function hasReactivityInStatement(stmt: TSESTree.Statement): boolean {
-      if (!stmt)
-        return false
-
-      switch (stmt.type) {
-        case 'ExpressionStatement':
-          return hasReactivityInExpression(stmt.expression)
-        case 'VariableDeclaration':
-          return stmt.declarations.some(decl =>
-            hasReactivityInExpression(decl.init))
-        case 'ReturnStatement':
-          return hasReactivityInExpression(stmt.argument)
-        case 'BlockStatement':
-          return stmt.body.some(s => hasReactivityInStatement(s))
-        case 'IfStatement':
-          return hasReactivityInStatement(stmt.consequent)
-            || (stmt.alternate ? hasReactivityInStatement(stmt.alternate) : false)
-        case 'WhileStatement':
-        case 'DoWhileStatement':
-          return hasReactivityInStatement(stmt.body)
-        case 'ForStatement':
-        case 'ForInStatement':
-        case 'ForOfStatement':
-          return hasReactivityInStatement(stmt.body)
-        case 'TryStatement':
-          return hasReactivityInStatement(stmt.block)
-            || (stmt.handler ? hasReactivityInStatement(stmt.handler.body) : false)
-            || (stmt.finalizer ? hasReactivityInStatement(stmt.finalizer) : false)
-        case 'SwitchStatement':
-          return stmt.cases.some(switchCase =>
-            switchCase.consequent.some(s => hasReactivityInStatement(s)))
-        default:
-          return false
-      }
-    }
-
-    function isReactiveLifecycleCall(node: TSESTree.CallExpression): boolean {
-      return node.callee.type === 'Identifier' && /^tryOn[A-Z]/.test(node.callee.name)
-    }
-
-    function hasReactivityInArg(arg: TSESTree.CallExpression['arguments'][number]): boolean {
-      if (arg.type === 'ArrowFunctionExpression' || arg.type === 'FunctionExpression') {
-        if (arg.body.type === 'BlockStatement')
-          return arg.body.body.some(stmt => hasReactivityInStatement(stmt))
-        return hasReactivityInExpression(arg.body)
-      }
-      if (arg.type === 'SpreadElement')
-        return hasReactivityInExpression(arg.argument)
-      return hasReactivityInExpression(arg)
-    }
-
-    function hasReactivityInExpression(expr: TSESTree.Expression | null): boolean {
-      if (!expr)
-        return false
-
-      switch (expr.type) {
-        case 'CallExpression':
-          if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr) || isReactiveLifecycleCall(expr))
-            return true
-          return expr.arguments.some(arg => hasReactivityInArg(arg))
-        case 'NewExpression':
-          return expr.arguments.some(arg => hasReactivityInArg(arg))
-        case 'MemberExpression':
-          return hasReactivityInExpression(expr.object as TSESTree.Expression)
-        case 'AssignmentExpression':
-          return hasReactivityInExpression(expr.right)
-        case 'ObjectExpression':
-          return expr.properties.some(prop =>
-            prop.type === 'Property' && hasReactivityInExpression(prop.value as TSESTree.Expression))
-        case 'ArrayExpression':
-          return expr.elements.some(elem =>
-            hasReactivityInExpression(elem as TSESTree.Expression))
-        case 'AwaitExpression':
-          return hasReactivityInExpression(expr.argument)
-        case 'ConditionalExpression':
-          return hasReactivityInExpression(expr.consequent) || hasReactivityInExpression(expr.alternate)
-        case 'LogicalExpression':
-          return hasReactivityInExpression(expr.left) || hasReactivityInExpression(expr.right)
-        default:
-          return false
-      }
-    }
+    const { hasReactivityInStatement, hasReactivityInExpression } = createReactivityChecker(vueImports, nonVueImports)
 
     function checkFunctionForReactivity(functionNode: TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression, functionName: string): void {
-      if (!functionNode.body || functionNode.body.type !== 'BlockStatement')
+      if (!functionNode.body)
         return
 
-      const hasReactivity = functionNode.body.body.some(stmt =>
-        hasReactivityInStatement(stmt))
+      let hasReactivity: boolean
+      if (functionNode.body.type === 'BlockStatement') {
+        hasReactivity = functionNode.body.body.some(stmt => hasReactivityInStatement(stmt))
+      }
+      else {
+        hasReactivity = hasReactivityInExpression(functionNode.body)
+      }
 
       if (!hasReactivity) {
         context.report({
@@ -140,13 +56,7 @@ export default createEslintRule<Options, MessageIds>({
 
       ImportDeclaration(node) {
         trackVueImports(node, vueImports)
-        if (node.source.value !== 'vue') {
-          for (const spec of node.specifiers) {
-            if (spec.type === 'ImportSpecifier' && spec.imported.type === 'Identifier') {
-              nonVueImports.add(spec.imported.name)
-            }
-          }
-        }
+        trackNonVueImports(node, nonVueImports)
       },
 
       'Program:exit': function () {
