@@ -295,4 +295,4 @@ export const HEDGING_WORDS: string[] = [
   'nearly',
 ]
 
-export const CONTENT_FILES = ['content/**/*.md']
+export const CONTENT_FILES = ['**/content/**/*.md', '**/docs/**/*.md']
