@@ -46,8 +46,8 @@ export function isInsideCompoundIdentifier(line: string, matchStart: number, mat
   const prevPrev = matchStart > 1 ? line[matchStart - 2] : ''
   const nextNext = matchEnd + 1 < line.length ? line[matchEnd + 1] : ''
 
-  // Inside quoted attribute value (e.g., lang="html", key="javascript")
-  if (prevChar === '"' || nextChar === '"')
+  // Inside attribute-like context (e.g., lang="html", key="javascript", {url="/mcp"})
+  if (prevChar === '"' || nextChar === '"' || prevChar === '=' || nextChar === '=' || prevChar === '{' || nextChar === '}')
     return true
   // Left side: separator before match with a word char before the separator
   if (COMPOUND_SEPARATOR.test(prevChar) && /\w/.test(prevPrev))

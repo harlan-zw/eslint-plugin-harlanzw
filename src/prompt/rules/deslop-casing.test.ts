@@ -28,6 +28,9 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
     'Use vite-ssg for static sites.',
     'Use https://example.com for testing.',
     ':github-repo-card{repo="nuxt"}',
+    // Attribute-like contexts — do not modify
+    '::install-button{url="/mcp" ide="cursor"}',
+    'Set the url="/api" parameter.',
     // Underscore compound identifiers — do not modify
     'The SEO_audit_site function runs daily.',
     // Slash compound identifiers — do not modify (scoped packages)
