@@ -40,7 +40,7 @@ export default {
           // Track matched ranges to avoid overlapping reports
           const matched: [number, number][] = []
 
-          for (const { regex, phrase, replacement } of COMPILED) {
+          for (const { regex, replacement } of COMPILED) {
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {

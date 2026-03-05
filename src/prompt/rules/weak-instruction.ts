@@ -33,7 +33,6 @@ export default {
           const line = lines[i]
           for (let wi = 0; wi < COMPILED.length; wi++) {
             const regex = COMPILED[wi]
-            const pattern = STRENGTH_PATTERNS.weak[wi]
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {

@@ -33,7 +33,6 @@ export default {
           const line = lines[i]
           for (let qi = 0; qi < COMPILED.length; qi++) {
             const regex = COMPILED[qi]
-            const quantifier = AMBIGUOUS_QUANTIFIERS[qi]
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
