@@ -31,6 +31,7 @@ The rules are organized into the following categories:
 - **Link Rules** - Ensure link URLs are clean, accessible, and SEO-friendly
 - **Nuxt Rules** - Best practices for Nuxt applications
 - **Vue Rules** - Vue composition API and reactivity best practices
+- **AI Deslop Rules** - Clean AI-generated slop from content markdown
 
 <!-- rules:start -->
 | Rule | Description |
@@ -58,6 +59,17 @@ The rules are organized into the following categories:
 | [`vue-no-reactive-destructuring`](./src/rules/vue-no-reactive-destructuring.md) | avoid destructuring reactive objects |
 | [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) | don't use `.value` in Vue templates |
 | [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) | don't use `toRefs()` on the props object |
+| [`vue-require-composable-prefix`](./src/rules/vue-require-composable-prefix.ts) | enforce `use*` prefix for functions using Vue reactivity |
+| **AI Deslop** | |
+| [`ai-deslop-adverbs`](./src/prompt/rules/deslop-adverbs.ts) | remove unnecessary adverbs that add no meaning (e.g. "significantly", "fundamentally") |
+| [`ai-deslop-autolink`](./src/prompt/rules/deslop-autolink.ts) | auto-link first mention of known tech terms to their canonical URLs |
+| [`ai-deslop-buzzwords`](./src/prompt/rules/deslop-buzzwords.ts) | replace AI-generated buzzword phrases with simpler alternatives (e.g. "leverage" → "use") |
+| [`ai-deslop-casing`](./src/prompt/rules/deslop-casing.ts) | enforce correct casing for tech terms, brands, and abbreviations (e.g. "github" → "GitHub") |
+| [`ai-deslop-filler`](./src/prompt/rules/deslop-filler.ts) | remove AI-generated filler sentences and phrases (e.g. "it's worth noting that") |
+| [`ai-deslop-hedging`](./src/prompt/rules/deslop-hedging.ts) | remove hedging/qualifying words that weaken copy (e.g. "very", "really", "quite", "just") |
+| [`ai-deslop-no-exclamation`](./src/prompt/rules/deslop-no-exclamation.ts) | remove exclamation marks from content prose |
+| [`ai-deslop-passive-voice`](./src/prompt/rules/deslop-passive-voice.ts) | flag passive voice constructions (e.g. "is generated" → rewrite in active voice) |
+| [`ai-deslop-weak-opener`](./src/prompt/rules/deslop-weak-opener.ts) | flag weak sentence openers like "There is" and "It is possible to" |
 <!-- rules:end -->
 
 The plugin also includes 21 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
@@ -152,6 +164,39 @@ export default [
   ...plugin.configs.vue,
 ]
 ```
+
+### AI Deslop Rules
+
+9 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
+
+```js
+// eslint.config.js
+export default harlanzw({
+  content: true,
+})
+```
+
+Or use the raw config:
+
+```js
+import { plugin } from 'eslint-plugin-harlanzw'
+
+export default [
+  ...plugin.configs.content,
+]
+```
+
+| Rule | What it does |
+| --- | --- |
+| `ai-deslop-buzzwords` | Replaces overused AI phrases with plain alternatives ("leverage" → "use", "delve into" → "explore") |
+| `ai-deslop-filler` | Removes filler phrases that add nothing ("it's worth noting that", "at the end of the day") |
+| `ai-deslop-adverbs` | Strips unnecessary adverbs ("significantly", "fundamentally", "essentially") |
+| `ai-deslop-casing` | Fixes tech term casing using a 300+ term dictionary ("github" → "GitHub", "typescript" → "TypeScript") |
+| `ai-deslop-autolink` | Links first mention of tech terms to their canonical URLs ("Nuxt" → `[Nuxt](https://nuxt.com)`) |
+| `ai-deslop-hedging` | Strips hedging words that weaken copy ("very", "really", "quite", "just", "somewhat") |
+| `ai-deslop-no-exclamation` | Replaces exclamation marks with periods in content prose |
+| `ai-deslop-passive-voice` | Flags passive voice ("is generated", "was created") for active rewriting |
+| `ai-deslop-weak-opener` | Flags weak expletive openers ("There is", "It is possible to") |
 
 ### Prompt Rules
 

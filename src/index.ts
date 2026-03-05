@@ -13,6 +13,10 @@ import aiDeslopAutolink from './prompt/rules/deslop-autolink'
 import aiDeslopBuzzwords from './prompt/rules/deslop-buzzwords'
 import aiDeslopCasing from './prompt/rules/deslop-casing'
 import aiDeslopFiller from './prompt/rules/deslop-filler'
+import aiDeslopHedging from './prompt/rules/deslop-hedging'
+import aiDeslopNoExclamation from './prompt/rules/deslop-no-exclamation'
+import aiDeslopPassiveVoice from './prompt/rules/deslop-passive-voice'
+import aiDeslopWeakOpener from './prompt/rules/deslop-weak-opener'
 import promptDuplicateHeading from './prompt/rules/duplicate-heading'
 import promptEmptySection from './prompt/rules/empty-section'
 import promptEmptyVariable from './prompt/rules/empty-variable'
@@ -72,6 +76,10 @@ const plugin: ESLint.Plugin = {
     'ai-deslop-buzzwords': aiDeslopBuzzwords,
     'ai-deslop-casing': aiDeslopCasing,
     'ai-deslop-filler': aiDeslopFiller,
+    'ai-deslop-hedging': aiDeslopHedging,
+    'ai-deslop-no-exclamation': aiDeslopNoExclamation,
+    'ai-deslop-passive-voice': aiDeslopPassiveVoice,
+    'ai-deslop-weak-opener': aiDeslopWeakOpener,
     'link-ascii-only': linkAsciiOnly,
     'link-lowercase': linkLowercase,
     'link-no-double-slashes': linkNoDoubleSlashes,
@@ -191,6 +199,10 @@ const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-casing': 'error',
   'harlanzw/ai-deslop-filler': 'error',
   'harlanzw/ai-deslop-adverbs': 'error',
+  'harlanzw/ai-deslop-hedging': 'warn',
+  'harlanzw/ai-deslop-no-exclamation': 'warn',
+  'harlanzw/ai-deslop-passive-voice': 'warn',
+  'harlanzw/ai-deslop-weak-opener': 'warn',
   'harlanzw/ai-deslop-autolink': 'warn',
 }
 
