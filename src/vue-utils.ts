@@ -1,5 +1,4 @@
-import type { TSESTree } from '@typescript-eslint/utils'
-import type { Rule } from 'eslint'
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import { isAtTopLevel } from './ast-utils'
 
 export type VueTemplateListener = Record<string, (node: any) => void>
@@ -170,7 +169,7 @@ export function isVueParser(context: any): boolean {
 export function defineTemplateBodyVisitor(
   context: any,
   templateVisitor: VueTemplateListener,
-  scriptVisitor?: Rule.RuleListener,
+  scriptVisitor?: TSESLint.RuleListener,
 ) {
   const parserServices = getParserServices(context)
   if (!parserServices?.defineTemplateBodyVisitor) {
