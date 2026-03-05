@@ -45,8 +45,8 @@ export default {
               if (word === 'rather' && line.slice(match.index + match[0].length).startsWith('than'))
                 continue
 
-              // "not just" / "isn't just" / "aren't just" etc. — removing "just" reverses meaning
-              if (word === 'just' && /(?:\bnot|n't)\s+$/.test(line.slice(Math.max(0, match.index - 10), match.index)))
+              // "not just" / "isn't just" / "no longer just" / "more than just" / "rather than just" etc. — removing "just" reverses meaning
+              if (word === 'just' && /(?:\bnot|n't|no longer|more than|rather than)\s+$/.test(line.slice(Math.max(0, match.index - 20), match.index)))
                 continue
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length

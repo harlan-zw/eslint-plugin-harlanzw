@@ -15,6 +15,13 @@ ruleTester.run('harlanzw/ai-deslop-hedging', rule, {
     // "not just" preserves contrast meaning
     'It\'s not just about search engines.',
     'SEO isn\'t just about keywords.',
+    // "no longer just" — removing "just" reverses meaning
+    'It\'s no longer just about blue links.',
+    'You are no longer just optimizing for human users.',
+    // "more than just" — removing "just" changes meaning
+    'It\'s more than just a timestamp.',
+    // "rather than just" — removing "just" changes meaning
+    'Search engines now index entities rather than just keywords.',
   ],
   invalid: [
     {

@@ -2,7 +2,7 @@
 // Only the correct casing is used as key (matches post-casing-fix text)
 export const AUTOLINK_DICTIONARY: Record<string, string> = {
   // === Frameworks & Runtimes ===
-  'Nuxt': 'https://nuxt.com',
+
   'Vue': 'https://vuejs.org',
   'React': 'https://react.dev',
   'Next.js': 'https://nextjs.org',
