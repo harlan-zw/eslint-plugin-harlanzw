@@ -259,7 +259,7 @@ export function createReactivityChecker(vueImports: Set<string>, nonVueImports: 
 
     switch (expr.type) {
       case 'CallExpression':
-        if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || (isComposableCall(expr) && !(expr.callee.type === 'Identifier' && nonVueImports.has(expr.callee.name))) || isReactiveLifecycleCall(expr))
+        if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr) || isReactiveLifecycleCall(expr))
           return true
         return expr.arguments.some(arg => hasReactivityInArg(arg))
       case 'NewExpression':
@@ -274,6 +274,11 @@ export function createReactivityChecker(vueImports: Set<string>, nonVueImports: 
       case 'ArrayExpression':
         return expr.elements.some(elem =>
           hasReactivityInExpression(elem as TSESTree.Expression))
+      case 'ArrowFunctionExpression':
+      case 'FunctionExpression':
+        if (expr.body.type === 'BlockStatement')
+          return expr.body.body.some(stmt => hasReactivityInStatement(stmt))
+        return hasReactivityInExpression(expr.body)
       case 'AwaitExpression':
         return hasReactivityInExpression(expr.argument)
       case 'ConditionalExpression':

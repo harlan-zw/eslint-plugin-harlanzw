@@ -324,6 +324,40 @@ run({
     $`
       const useValue = () => ref(0)
     `,
+    // Returns a function that calls a composable
+    $`
+      function useCounter() {
+        return () => {
+          const count = ref(0)
+          return count
+        }
+      }
+    `,
+    // Returns arrow function calling composable
+    $`
+      const useFactory = () => () => useSomething()
+    `,
+    // Composable with local helpers returning composable call with callback
+    $`
+      function useScriptRybbitAnalytics(_options) {
+        const isReady = () => typeof window !== 'undefined'
+        const flush = () => {}
+        const callOrQueue = (method, ...args) => {}
+        return useRegistryScript('rybbitAnalytics', (options) => {
+          return { scriptInput: {} }
+        }, _options)
+      }
+    `,
+    // Composable importing use* from non-vue package and calling it
+    $`
+      import { useRegistryScript } from '../utils'
+
+      function useScriptRybbitAnalytics(_options) {
+        return useRegistryScript('rybbitAnalytics', (options) => {
+          return { scriptInput: {} }
+        }, _options)
+      }
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

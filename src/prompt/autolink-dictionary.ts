@@ -91,8 +91,6 @@ export const AUTOLINK_DICTIONARY: Record<string, string> = {
   'WebSocket': 'https://developer.mozilla.org/en-US/docs/Web/API/WebSocket',
 
   // === Brands ===
-  'YouTube': 'https://youtube.com',
-  'LinkedIn': 'https://linkedin.com',
   'StackBlitz': 'https://stackblitz.com',
   'CodePen': 'https://codepen.io',
   'CodeSandbox': 'https://codesandbox.io',
