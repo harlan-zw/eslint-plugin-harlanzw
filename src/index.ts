@@ -5,8 +5,14 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import { version } from '../package.json'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
+import { CONTENT_FILES } from './prompt/deslop-constants'
 import { PromptLanguage } from './prompt/language'
 import promptAmbiguousQuantifier from './prompt/rules/ambiguous-quantifier'
+import aiDeslopAdverbs from './prompt/rules/deslop-adverbs'
+import aiDeslopAutolink from './prompt/rules/deslop-autolink'
+import aiDeslopBuzzwords from './prompt/rules/deslop-buzzwords'
+import aiDeslopCasing from './prompt/rules/deslop-casing'
+import aiDeslopFiller from './prompt/rules/deslop-filler'
 import promptDuplicateHeading from './prompt/rules/duplicate-heading'
 import promptEmptySection from './prompt/rules/empty-section'
 import promptEmptyVariable from './prompt/rules/empty-variable'
@@ -61,6 +67,11 @@ const plugin: ESLint.Plugin = {
   },
   // @keep-sorted
   rules: {
+    'ai-deslop-adverbs': aiDeslopAdverbs,
+    'ai-deslop-autolink': aiDeslopAutolink,
+    'ai-deslop-buzzwords': aiDeslopBuzzwords,
+    'ai-deslop-casing': aiDeslopCasing,
+    'ai-deslop-filler': aiDeslopFiller,
     'link-ascii-only': linkAsciiOnly,
     'link-lowercase': linkLowercase,
     'link-no-double-slashes': linkNoDoubleSlashes,
@@ -174,6 +185,25 @@ plugin.configs!['prompt:skill'] = [
   },
 ]
 
+// AI deslop config: content markdown
+const deslopRules: Record<string, Linter.RuleSeverity> = {
+  'harlanzw/ai-deslop-buzzwords': 'error',
+  'harlanzw/ai-deslop-casing': 'error',
+  'harlanzw/ai-deslop-filler': 'error',
+  'harlanzw/ai-deslop-adverbs': 'error',
+  'harlanzw/ai-deslop-autolink': 'warn',
+}
+
+plugin.configs!.content = [
+  {
+    name: 'harlanzw/content',
+    files: CONTENT_FILES,
+    language: 'harlanzw/prompt',
+    plugins: { harlanzw: plugin },
+    rules: deslopRules,
+  },
+]
+
 // Link rules that accept LinkRuleOptions
 const LINK_RULES_WITH_OPTIONS = [
   'link-ascii-only',
@@ -256,6 +286,7 @@ export interface HarlanzwOptions {
   nuxt?: boolean
   vue?: boolean
   prompt?: boolean | 'recommended' | 'strict' | 'skill'
+  content?: boolean
 }
 
 const PROMPT_MARKERS = [
@@ -337,6 +368,10 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
   const enableVue = options.vue ?? detected.vue
   if (enableVue) {
     configs.push(...plugin.configs!.vue as Linter.Config[])
+  }
+
+  if (options.content) {
+    configs.push(...plugin.configs!.content as Linter.Config[])
   }
 
   configs.push(...extraConfigs)
