@@ -9,24 +9,24 @@ export type Options = []
 /**
  * Side effect patterns that should be avoided in useAsyncData/useFetch handlers
  */
+/**
+ * Side effect method names — always a side effect regardless of receiver
+ */
 const SIDE_EFFECT_PATTERNS = new Set([
-  // Store/State mutations
+  // Store/State mutations ($ prefix makes these unambiguous)
   '$patch',
   '$state',
   '$subscribe',
   '$onAction',
   '$dispose',
-  'useState',
-  'updateState',
-  'mutateState',
 
-  // Navigation
+  // Nuxt-specific
   'navigateTo',
-  'push',
-  'replace',
-  'go',
-  'back',
-  'forward',
+  'useState',
+
+  // Analytics/Tracking (direct calls)
+  'gtag',
+  'fbq',
 
   // DOM manipulation
   'getElementById',
@@ -36,27 +36,39 @@ const SIDE_EFFECT_PATTERNS = new Set([
   'appendChild',
   'removeChild',
   'setAttribute',
-  'classList',
-
-  // Global assignments (detected via assignment patterns)
-  // These will be handled separately
-
-  // Analytics/Tracking
-  'gtag',
-  'fbq',
-  'analytics',
-  'track',
-  'identify',
-  'page',
-
-  // Logging (debatable - may allow console methods)
-  'console',
 
   // Timer/Animation functions
   'setTimeout',
   'setInterval',
   'requestAnimationFrame',
   'requestIdleCallback',
+])
+
+/**
+ * Methods that are only side effects when called on specific receivers.
+ * Avoids false positives like String.replace(), Array.push(), etc.
+ */
+const RECEIVER_SCOPED_METHODS: Record<string, Set<string>> = {
+  // Navigation — only on router instances
+  push: new Set(['router', '$router']),
+  replace: new Set(['router', '$router']),
+  go: new Set(['router', '$router']),
+  back: new Set(['router', '$router']),
+  forward: new Set(['router', '$router']),
+  // Analytics — only on analytics/tracking objects
+  track: new Set(['analytics', 'mixpanel', 'segment']),
+  identify: new Set(['analytics', 'mixpanel', 'segment']),
+  page: new Set(['analytics', 'mixpanel', 'segment']),
+}
+
+/**
+ * Receiver objects that are always side-effecting (any method call on them)
+ */
+const SIDE_EFFECT_RECEIVERS = new Set([
+  'console',
+  'gtag',
+  'fbq',
+  'classList',
 ])
 
 /**
@@ -79,17 +91,22 @@ function isSideEffectInHandler(node: TSESTree.Node): boolean {
     if (node.callee.type === 'Identifier') {
       return SIDE_EFFECT_PATTERNS.has(node.callee.name)
     }
-    // Check for member expressions like store.$patch(), console.log()
-    if (node.callee.type === 'MemberExpression') {
-      if (node.callee.property.type === 'Identifier') {
-        if (SIDE_EFFECT_PATTERNS.has(node.callee.property.name)) {
-          return true
-        }
-      }
-      // Check for object.method patterns where object is a side effect
-      if (node.callee.object.type === 'Identifier') {
-        return SIDE_EFFECT_PATTERNS.has(node.callee.object.name)
-      }
+    // Check for member expressions like store.$patch(), console.log(), router.push()
+    if (node.callee.type === 'MemberExpression' && node.callee.property.type === 'Identifier') {
+      const method = node.callee.property.name
+
+      // Always-side-effect method names (e.g., $patch, getElementById)
+      if (SIDE_EFFECT_PATTERNS.has(method))
+        return true
+
+      // Receiver-scoped methods (e.g., router.push but NOT array.push)
+      const allowedReceivers = RECEIVER_SCOPED_METHODS[method]
+      if (allowedReceivers && node.callee.object.type === 'Identifier' && allowedReceivers.has(node.callee.object.name))
+        return true
+
+      // Any call on a known side-effect receiver (e.g., console.anything, gtag.anything)
+      if (node.callee.object.type === 'Identifier' && SIDE_EFFECT_RECEIVERS.has(node.callee.object.name))
+        return true
     }
   }
 

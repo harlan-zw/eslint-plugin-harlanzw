@@ -12,6 +12,11 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
     'Use VS Code for development.',
     '```\njavascript is great\n```',
     'Node.js is a runtime.',
+    // Inside link URL — do not modify
+    'Check [the docs](https://github.com/nuxt/nuxt) for details.',
+    'Read the [ESLint guide](https://eslint.org/docs/latest).',
+    // Inside inline code — do not modify
+    'Run `npm install typescript` to install.',
   ],
   invalid: [
     {
@@ -51,6 +56,12 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
       code: 'MacOS is an operating system.',
       errors: [{ messageId: 'casing', data: { found: 'MacOS', correct: 'macOS' } }],
       output: 'macOS is an operating system.',
+    },
+    {
+      // Fix casing in link text but not in URL
+      code: 'Use [github](https://github.com) for hosting.',
+      errors: [{ messageId: 'casing', data: { found: 'github', correct: 'GitHub' } }],
+      output: 'Use [GitHub](https://github.com) for hosting.',
     },
   ],
 })

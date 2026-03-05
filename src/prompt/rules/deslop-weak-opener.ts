@@ -1,5 +1,5 @@
 import type { DocumentNode } from '../types'
-import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Weak expletive constructions at sentence start
 const WEAK_OPENERS = [
@@ -49,6 +49,7 @@ export default {
             continue
 
           const line = lines[i]
+          const scopes = parseLineScopes(line)
           // Strip leading markdown (list markers, heading markers)
           const stripped = line.replace(/^(?:[#>*+-]|\d+\.)\s+/, '')
           const offset = line.length - stripped.length
@@ -62,6 +63,9 @@ export default {
 
               const matchStart = offset
               const matchEnd = offset + opener.length
+
+              if (isInScope(scopes, matchStart, matchEnd, ['code', 'link-url']))
+                continue
 
               context.report({
                 loc: {

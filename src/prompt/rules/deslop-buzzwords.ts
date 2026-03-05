@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { BUZZWORD_PHRASES } from '../deslop-constants'
-import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Sort phrases longest-first so longer matches take priority over shorter substrings
 const SORTED_PHRASES = Object.entries(BUZZWORD_PHRASES)
@@ -36,6 +36,7 @@ export default {
 
           const line = lines[i]
           const lineNode = node.children[i]
+          const scopes = parseLineScopes(line)
 
           // Track matched ranges to avoid overlapping reports
           const matched: [number, number][] = []
@@ -49,6 +50,8 @@ export default {
 
               // Skip if this range overlaps with an already-matched longer phrase
               if (matched.some(([s, e]) => matchStart >= s && matchEnd <= e))
+                continue
+              if (isInScope(scopes, matchStart, matchEnd, ['code', 'link-url']))
                 continue
               matched.push([matchStart, matchEnd])
 

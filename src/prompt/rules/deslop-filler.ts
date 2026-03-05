@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { FILLER_PHRASES } from '../deslop-constants'
-import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Pre-compile regexes at module level
 const COMPILED = FILLER_PHRASES.map((phrase) => {
@@ -32,11 +32,14 @@ export default {
 
           const line = lines[i]
           const lineNode = node.children[i]
+          const scopes = parseLineScopes(line)
 
           for (const { regex, phrase } of COMPILED) {
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
+              if (isInScope(scopes, match.index, match.index + match[0].length, ['code', 'link-url']))
+                continue
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length
 

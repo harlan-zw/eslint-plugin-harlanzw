@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { AUTOLINK_DICTIONARY } from '../autolink-dictionary'
-import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Sort entries longest-first so multi-word entries match before single-word
 const SORTED_ENTRIES = Object.entries(AUTOLINK_DICTIONARY)
@@ -15,10 +15,10 @@ const DEDUPED_ENTRIES = SORTED_ENTRIES.filter(([name, url]) => {
   return true
 })
 
-// Pre-compile regexes — match the term only when NOT already inside a markdown link
+// Pre-compile regexes — simple word boundary match (scope checking replaces the old lookahead hacks)
 const COMPILED = DEDUPED_ENTRIES.map(([name, url]) => {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return { name, url, regex: new RegExp(`(?<!\\[)\\b${escaped}\\b(?!\\])(?!\\()`, 'g') }
+  return { name, url, regex: new RegExp(`\\b${escaped}\\b`, 'g') }
 })
 
 export default {
@@ -52,6 +52,7 @@ export default {
             continue
 
           const lineNode = node.children[i]
+          const scopes = parseLineScopes(line)
 
           for (const { name, url, regex } of COMPILED) {
             if (linkedUrls.has(url))
@@ -60,19 +61,11 @@ export default {
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
-              // Verify this isn't inside an existing markdown link
-              // Check if preceded by [ or followed by ]( pattern
-              const before = line.slice(0, match.index)
-              const after = line.slice(match.index + match[0].length)
+              const matchStart = match.index
+              const matchEnd = match.index + match[0].length
 
-              // Skip if inside [text](url) — either as text or url part
-              if (before.includes('[') && !before.includes(']'))
-                continue
-              if (after.startsWith(']('))
-                continue
-              // Skip if inside inline code
-              const backticksBefore = (before.match(/`/g) || []).length
-              if (backticksBefore % 2 === 1)
+              // Skip if inside any markdown link (text or URL) or inline code
+              if (isInScope(scopes, matchStart, matchEnd, ['link-text', 'link-url', 'code']))
                 continue
 
               const startOffset = lineNode.position.start.offset + match.index

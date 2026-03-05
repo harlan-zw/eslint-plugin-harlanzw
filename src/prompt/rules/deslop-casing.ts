@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { CASING_DICTIONARY } from '../casing-dictionary'
-import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Sort entries longest-first so multi-word entries match before single-word
 const SORTED_ENTRIES = Object.entries(CASING_DICTIONARY)
@@ -36,6 +36,7 @@ export default {
 
           const line = lines[i]
           const lineNode = node.children[i]
+          const scopes = parseLineScopes(line)
           const matched: [number, number][] = []
 
           for (const { regex, correct } of COMPILED) {
@@ -52,6 +53,9 @@ export default {
 
               // Skip if overlapping with a longer match
               if (matched.some(([s, e]) => matchStart >= s && matchEnd <= e))
+                continue
+              // Skip if inside a link URL or inline code
+              if (isInScope(scopes, matchStart, matchEnd, ['link-url', 'code']))
                 continue
               matched.push([matchStart, matchEnd])
 

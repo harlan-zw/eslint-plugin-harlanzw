@@ -14,6 +14,14 @@ ruleTester.run('harlanzw/ai-deslop-autolink', rule, {
     // In heading (skip headings)
     '# Using Nuxt for SSR',
     '## TypeScript Support',
+    // Inside link URL — do not auto-link terms found in URLs
+    'Check [Unhead](https://unhead.unjs.io/) for details.',
+    // Inside link text — do not nest links
+    'Use [Nuxt and Vue](https://example.com) together.',
+    // Inside inline code
+    'Run `Nuxt` in dev mode.',
+    // Term already linked with different text
+    'Use [the framework](https://nuxt.com) for SSR.',
   ],
   invalid: [
     {
