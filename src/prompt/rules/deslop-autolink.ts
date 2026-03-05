@@ -21,6 +21,9 @@ const COMPILED = DEDUPED_ENTRIES.map(([name, url]) => {
   return { name, url, regex: new RegExp(`\\b${escaped}\\b`, 'g') }
 })
 
+// Regex to extract all markdown link URLs from a line: [text](url)
+const LINK_URL_RE = /\[[^\]]*\]\(([^)]+)\)/g
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -40,7 +43,17 @@ export default {
         const frontmatterEnd = getFrontmatterEnd(lines)
 
         // Track which URLs have been linked (first-occurrence-only)
+        // Pre-scan for URLs already present as markdown links to avoid re-linking on ESLint re-runs
         const linkedUrls = new Set<string>()
+        const allUrls = new Set(COMPILED.map(c => c.url))
+        for (const line of lines) {
+          LINK_URL_RE.lastIndex = 0
+          let urlMatch: RegExpExecArray | null
+          while ((urlMatch = LINK_URL_RE.exec(line)) !== null) {
+            if (allUrls.has(urlMatch[1]))
+              linkedUrls.add(urlMatch[1])
+          }
+        }
 
         for (let i = 0; i < lines.length; i++) {
           if (shouldSkipLine(i, codeBlockLines, frontmatterEnd))
@@ -66,6 +79,12 @@ export default {
 
               // Skip if inside any markdown link (text or URL) or inline code
               if (isInScope(scopes, matchStart, matchEnd, ['link-text', 'link-url', 'code']))
+                continue
+
+              // Skip if next word starts with a capital letter (compound name like "Nuxt SEO", "Tailwind CSS")
+              const afterMatch = line.slice(matchEnd)
+              const nextWordMatch = afterMatch.match(/^\s+(\S)/)
+              if (nextWordMatch && nextWordMatch[1] >= 'A' && nextWordMatch[1] <= 'Z')
                 continue
 
               const startOffset = lineNode.position.start.offset + match.index

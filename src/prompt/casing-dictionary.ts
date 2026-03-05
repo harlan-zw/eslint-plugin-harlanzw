@@ -332,4 +332,16 @@ export const CASING_DICTIONARY: Record<string, string> = {
   'whatsapp': 'WhatsApp',
   'wordpress': 'WordPress',
   'xstate': 'XState',
+
+  // === AI & Search ===
+  'gemini': 'Gemini',
+  'perplexity': 'Perplexity',
+
+  // === SEO Tools ===
+  'ahrefs': 'Ahrefs',
+  'semrush': 'SEMrush',
+  'screaming frog': 'Screaming Frog',
+
+  // === Monitoring ===
+  'sentry': 'Sentry',
 }

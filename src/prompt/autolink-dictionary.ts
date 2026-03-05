@@ -30,7 +30,6 @@ export const AUTOLINK_DICTIONARY: Record<string, string> = {
   'TypeScript': 'https://typescriptlang.org',
   'JavaScript': 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
   'Rust': 'https://rust-lang.org',
-  'Go': 'https://go.dev',
   'Python': 'https://python.org',
 
   // === CSS ===
@@ -92,6 +91,8 @@ export const AUTOLINK_DICTIONARY: Record<string, string> = {
   'Zod': 'https://zod.dev',
   'ChatGPT': 'https://chatgpt.com',
   'OpenAI': 'https://openai.com',
+  'Gemini': 'https://gemini.google.com',
+  'Perplexity': 'https://perplexity.ai',
   'VS Code': 'https://code.visualstudio.com',
   'WebAssembly': 'https://webassembly.org',
   'WebSocket': 'https://developer.mozilla.org/en-US/docs/Web/API/WebSocket',
@@ -103,4 +104,12 @@ export const AUTOLINK_DICTIONARY: Record<string, string> = {
   'CodePen': 'https://codepen.io',
   'CodeSandbox': 'https://codesandbox.io',
   'UnJS': 'https://unjs.io',
+
+  // === SEO Tools ===
+  'Ahrefs': 'https://ahrefs.com',
+  'SEMrush': 'https://semrush.com',
+  'Screaming Frog': 'https://screamingfrog.co.uk',
+
+  // === Monitoring ===
+  'Sentry': 'https://sentry.io',
 }

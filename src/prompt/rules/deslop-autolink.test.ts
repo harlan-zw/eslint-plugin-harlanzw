@@ -22,6 +22,11 @@ ruleTester.run('harlanzw/ai-deslop-autolink', rule, {
     'Run `Nuxt` in dev mode.',
     // Term already linked with different text
     'Use [the framework](https://nuxt.com) for SSR.',
+    // Compound name — next word capitalized (e.g. "Nuxt SEO")
+    'Nuxt SEO is a great module.',
+    'Use Nuxt UI for components.',
+    // Already linked on a previous line (pre-scan catches it)
+    '[Nuxt](https://nuxt.com) is great.\nNuxt is also fast.',
   ],
   invalid: [
     {
