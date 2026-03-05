@@ -55,6 +55,10 @@ export default createEslintRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create: (context) => {
+    const filename = context.filename || context.getFilename()
+    if (!filename.endsWith('.vue'))
+      return {}
+
     function checkCallScript(node: TSESTree.CallExpression) {
       const isNow = isDateNowCall(node)
       const isCall = !isNow && isDateFunctionCall(node)

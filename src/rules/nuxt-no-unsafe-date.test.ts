@@ -43,6 +43,7 @@ run({
       code: $`
         const ts = Date.now()
       `,
+      filename: 'test.vue',
       errors: [{ messageId: 'noDateNow' }],
     },
     // Top-level new Date()
@@ -50,6 +51,7 @@ run({
       code: $`
         const now = new Date()
       `,
+      filename: 'test.vue',
       errors: [{ messageId: 'noNewDate' }],
     },
     // Date() as function (without new)
@@ -57,6 +59,7 @@ run({
       code: $`
         const now = Date()
       `,
+      filename: 'test.vue',
       errors: [{ messageId: 'noDateCall' }],
     },
     // new Date() inside defineComponent setup() — Options API
@@ -68,6 +71,7 @@ run({
           }
         })
       `,
+      filename: 'test.vue',
       errors: [{ messageId: 'noNewDate' }],
     },
   ],

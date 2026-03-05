@@ -31,7 +31,7 @@ export default createEslintRule<Options, MessageIds>({
     const { hasReactivityInStatement, hasReactivityInExpression } = createReactivityChecker(vueImports, nonVueImports)
 
     function isExcludedName(name: string): boolean {
-      return /^define[A-Z]/.test(name) || name === 'setup'
+      return /^define[A-Z]/.test(name) || /^create[A-Z]/.test(name) || name === 'setup'
     }
 
     function checkFunctionForReactivity(

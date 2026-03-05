@@ -258,7 +258,7 @@ export function createReactivityChecker(vueImports: Set<string>, nonVueImports: 
 
     switch (expr.type) {
       case 'CallExpression':
-        if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr) || isReactiveLifecycleCall(expr))
+        if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || (isComposableCall(expr) && !(expr.callee.type === 'Identifier' && nonVueImports.has(expr.callee.name))) || isReactiveLifecycleCall(expr))
           return true
         return expr.arguments.some(arg => hasReactivityInArg(arg))
       case 'NewExpression':

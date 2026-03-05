@@ -113,7 +113,7 @@ run({
       code: $`
         import { reactive } from 'vue'
 
-        function createCounter() {
+        function makeCounter() {
           const state = reactive({ count: 0 })
           return { state }
         }
