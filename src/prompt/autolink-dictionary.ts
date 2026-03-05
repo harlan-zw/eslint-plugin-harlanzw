@@ -3,7 +3,6 @@
 export const AUTOLINK_DICTIONARY: Record<string, string> = {
   // === Frameworks & Runtimes ===
 
-  'Vue': 'https://vuejs.org',
   'React': 'https://react.dev',
   'Next.js': 'https://nextjs.org',
   'Angular': 'https://angular.dev',

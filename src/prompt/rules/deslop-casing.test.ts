@@ -28,6 +28,8 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
     'Use vite-ssg for static sites.',
     'Use https://example.com for testing.',
     ':github-repo-card{repo="nuxt"}',
+    // Underscore compound identifiers — do not modify
+    'The SEO_audit_site function runs daily.',
   ],
   invalid: [
     {

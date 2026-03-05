@@ -11,7 +11,7 @@ const COMPILED = SORTED_ENTRIES.map(([key, correct]) => {
   const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   // Prose-level word boundaries: match only when surrounded by whitespace,
   // punctuation, or markdown syntax — not inside attribute values like {lang="html"}
-  const B = `[\\s.,\\[\\]():;!?*_#>/-]`
+  const B = `[\\s.,\\[\\]():;!?*#>/-]`
   return { regex: new RegExp(`(?:^|(?<=${B}))${escaped}(?=$|${B})`, 'gi'), correct }
 })
 
@@ -66,9 +66,9 @@ export default {
               const nextChar = matchEnd < line.length ? line[matchEnd] : ''
               const prevPrev = matchStart > 1 ? line[matchStart - 2] : ''
               const nextNext = matchEnd + 1 < line.length ? line[matchEnd + 1] : ''
-              if ((prevChar === '-' || prevChar === '.') && /\w/.test(prevPrev))
+              if ((prevChar === '-' || prevChar === '.' || prevChar === '_') && /\w/.test(prevPrev))
                 continue
-              if ((nextChar === '-' || nextChar === '.') && /\w/.test(nextNext))
+              if ((nextChar === '-' || nextChar === '.' || nextChar === '_') && /\w/.test(nextNext))
                 continue
               // Skip URL protocols (e.g., https://)
               if (line.slice(matchEnd, matchEnd + 3) === '://')
