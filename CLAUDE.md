@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is `eslint-plugin-harlanzw` - Harlan's experimental ESLint rules for Vue projects, particularly focused on link hygiene, Nuxt best practices, and Vue reactivity patterns. The plugin provides 23 link/nuxt/vue rules, 9 AI deslop rules for cleaning AI-generated content, and 21 prompt linting rules.
+This is `eslint-plugin-harlanzw` - Harlan's experimental ESLint rules for Vue projects, particularly focused on link hygiene, Nuxt best practices, and Vue reactivity patterns. The plugin provides 23 link/nuxt/vue rules, 10 AI deslop rules for cleaning AI-generated content, and 21 prompt linting rules.
 
 ## Development Commands
 
@@ -55,7 +55,7 @@ Each rule follows a consistent pattern:
 3. Documentation file (e.g., `vue-no-ref-access.md`) - for rules with extensive docs
 4. Rules are created using the `createEslintRule` helper from `src/utils.ts`
 
-### Plugin Rules (23 link/nuxt/vue + 9 deslop + 21 prompt)
+### Plugin Rules (23 link/nuxt/vue + 10 deslop + 21 prompt)
 
 **Link rules (8):**
 - `link-ascii-only` - Ensure link URLs contain only ASCII characters
@@ -86,13 +86,14 @@ Each rule follows a consistent pattern:
 - `vue-no-torefs-on-props` - Prevents using toRefs() on props object
 - `vue-require-composable-prefix` - Enforces use* prefix for functions using Vue reactivity
 
-**AI Deslop rules (9):** Target `content/**/*.md` — clean AI-generated slop from content
+**AI Deslop rules (10):** Target `content/**/*.md` — clean AI-generated slop from content
 - `ai-deslop-adverbs` - Remove unnecessary adverbs ("significantly", "fundamentally")
 - `ai-deslop-autolink` - Auto-link first mention of tech terms to canonical URLs
 - `ai-deslop-buzzwords` - Replace AI buzzwords with plain alternatives ("leverage" → "use")
 - `ai-deslop-casing` - Enforce correct tech term casing ("github" → "GitHub")
 - `ai-deslop-filler` - Remove filler phrases ("it's worth noting that", "at the end of the day")
 - `ai-deslop-hedging` - Remove hedging/qualifying words ("very", "really", "quite", "just")
+- `ai-deslop-no-em-dash` - Replace em dashes with plain dashes ("—" → " - ")
 - `ai-deslop-no-exclamation` - Remove exclamation marks from content prose
 - `ai-deslop-passive-voice` - Flag passive voice constructions ("is generated" → rewrite actively)
 - `ai-deslop-weak-opener` - Flag weak sentence openers ("There is", "It is possible to")

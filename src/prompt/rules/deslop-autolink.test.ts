@@ -25,6 +25,12 @@ ruleTester.run('harlanzw/ai-deslop-autolink', rule, {
     // Compound name — next word capitalized (e.g. "Nuxt SEO")
     'Nuxt SEO is a great module.',
     'Use Nuxt UI for components.',
+    // Component shorthand — do not break
+    ':GitHub-repo-card{repo="nuxt"}',
+    // Hyphenated compounds — do not break
+    'Use nuxt-ESLint for linting.',
+    // Dot-suffixed names — do not break (Vue.js, Node.js)
+    'Vue.js is a framework.',
     // Already linked on a previous line (pre-scan catches it)
     '[Nuxt](https://nuxt.com) is great.\nNuxt is also fast.',
   ],
@@ -35,9 +41,9 @@ ruleTester.run('harlanzw/ai-deslop-autolink', rule, {
       output: '[Nuxt](https://nuxt.com) is a great framework.',
     },
     {
-      code: 'Use TypeScript for type safety.',
-      errors: [{ messageId: 'autolink', data: { name: 'TypeScript', url: 'https://typescriptlang.org' } }],
-      output: 'Use [TypeScript](https://typescriptlang.org) for type safety.',
+      code: 'Use Vitest for testing.',
+      errors: [{ messageId: 'autolink', data: { name: 'Vitest', url: 'https://vitest.dev' } }],
+      output: 'Use [Vitest](https://vitest.dev) for testing.',
     },
     {
       code: 'Deploy to GitHub easily.',

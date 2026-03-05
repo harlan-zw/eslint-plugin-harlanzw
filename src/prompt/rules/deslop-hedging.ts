@@ -40,6 +40,14 @@ export default {
             while ((match = regex.exec(line)) !== null) {
               if (isInScope(scopes, match.index, match.index + match[0].length, ['code', 'link-url']))
                 continue
+
+              // "rather than" is a valid comparative, not hedging
+              if (word === 'rather' && line.slice(match.index + match[0].length).startsWith('than'))
+                continue
+
+              // "not just" / "isn't just" / "aren't just" etc. — removing "just" reverses meaning
+              if (word === 'just' && /(?:\bnot|n't)\s+$/.test(line.slice(Math.max(0, match.index - 10), match.index)))
+                continue
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length
 

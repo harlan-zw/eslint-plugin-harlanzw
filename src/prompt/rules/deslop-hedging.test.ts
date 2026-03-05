@@ -9,6 +9,12 @@ ruleTester.run('harlanzw/ai-deslop-hedging', rule, {
     'The API handles requests.',
     '```\nThis is very fast.\n```',
     'Use the `quite` option for filtering.',
+    // "rather than" is a valid comparative, not hedging
+    'Use hyphens rather than underscores.',
+    'Deploy within minutes rather than hours.',
+    // "not just" preserves contrast meaning
+    'It\'s not just about search engines.',
+    'SEO isn\'t just about keywords.',
   ],
   invalid: [
     {

@@ -21,6 +21,13 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
     '`<title>`{lang="html"}',
     '{lang="html"}',
     'key="javascript"',
+    // Compound identifiers — do not modify
+    'Install nuxt-seo for SEO support.',
+    'Generate a sitemap.xml file.',
+    'Create an index.html page.',
+    'Use vite-ssg for static sites.',
+    'Use https://example.com for testing.',
+    ':github-repo-card{repo="nuxt"}',
   ],
   invalid: [
     {

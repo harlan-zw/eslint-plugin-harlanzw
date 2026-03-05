@@ -81,6 +81,17 @@ export default {
               if (isInScope(scopes, matchStart, matchEnd, ['link-text', 'link-url', 'code']))
                 continue
 
+              // Skip if part of a compound identifier (e.g., :github-repo-card, nuxt-seo)
+              const prevAutoChar = matchStart > 0 ? line[matchStart - 1] : ''
+              if (prevAutoChar === ':' || prevAutoChar === '-')
+                continue
+              const nextAutoChar = matchEnd < line.length ? line[matchEnd] : ''
+              if (nextAutoChar === '-')
+                continue
+              // Skip if followed by .ext (framework names like Vue.js, Node.js)
+              if (nextAutoChar === '.' && matchEnd + 1 < line.length && /[a-z]/i.test(line[matchEnd + 1]))
+                continue
+
               // Skip if next word starts with a capital letter (compound name like "Nuxt SEO", "Tailwind CSS")
               const afterMatch = line.slice(matchEnd)
               const nextWordMatch = afterMatch.match(/^\s+(\S)/)

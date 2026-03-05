@@ -60,6 +60,19 @@ export default {
               // Skip if inside a link URL or inline code
               if (isInScope(scopes, matchStart, matchEnd, ['link-url', 'code']))
                 continue
+
+              // Skip if part of a compound identifier (e.g., nuxt-seo, sitemap.xml, vite-ssg)
+              const prevChar = matchStart > 0 ? line[matchStart - 1] : ''
+              const nextChar = matchEnd < line.length ? line[matchEnd] : ''
+              const prevPrev = matchStart > 1 ? line[matchStart - 2] : ''
+              const nextNext = matchEnd + 1 < line.length ? line[matchEnd + 1] : ''
+              if ((prevChar === '-' || prevChar === '.') && /\w/.test(prevPrev))
+                continue
+              if ((nextChar === '-' || nextChar === '.') && /\w/.test(nextNext))
+                continue
+              // Skip URL protocols (e.g., https://)
+              if (line.slice(matchEnd, matchEnd + 3) === '://')
+                continue
               matched.push([matchStart, matchEnd])
 
               const startOffset = lineNode.position.start.offset + matchStart

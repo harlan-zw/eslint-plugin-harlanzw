@@ -26,12 +26,6 @@ export const AUTOLINK_DICTIONARY: Record<string, string> = {
   'Turborepo': 'https://turbo.build/repo',
   'Biome': 'https://biomejs.dev',
 
-  // === Languages ===
-  'TypeScript': 'https://typescriptlang.org',
-  'JavaScript': 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-  'Rust': 'https://rust-lang.org',
-  'Python': 'https://python.org',
-
   // === CSS ===
   'Tailwind CSS': 'https://tailwindcss.com',
   'TailwindCSS': 'https://tailwindcss.com',

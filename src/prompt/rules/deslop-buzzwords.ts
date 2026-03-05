@@ -9,7 +9,12 @@ const SORTED_PHRASES = Object.entries(BUZZWORD_PHRASES)
 // Pre-compile regexes at module level
 const COMPILED = SORTED_PHRASES.map(([phrase, replacement]) => {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), phrase, replacement }
+  const isSingleWord = !phrase.includes(' ') && !phrase.includes('-') && !phrase.includes('.')
+  // Single-word entries require an adjacent word (min 2-word context) to reduce false positives
+  const pattern = isSingleWord
+    ? `(?<=\\S\\s)\\b${escaped}\\b|\\b${escaped}\\b(?=\\s\\S)`
+    : `\\b${escaped}\\b`
+  return { regex: new RegExp(pattern, 'gi'), phrase, replacement }
 })
 
 export default {
