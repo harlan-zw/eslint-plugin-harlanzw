@@ -3,78 +3,23 @@ import { run, runVue } from './_test'
 import rule, { RULE_NAME } from './nuxt-no-unsafe-date'
 
 run({
-  name: RULE_NAME,
+  name: `${RULE_NAME} (non-Vue files)`,
   rule,
   valid: [
-    // Date.now() inside a named function
+    // Non-Vue files are always valid — rule only applies to .vue files
+    $`
+      const ts = Date.now()
+    `,
+    $`
+      const now = new Date()
+    `,
     $`
       function getTimestamp() {
         return Date.now()
       }
     `,
-    // new Date() inside a named function
-    $`
-      function getCurrentDate() {
-        return new Date()
-      }
-    `,
-    // new Date() with args is deterministic — safe
-    $`
-      const d = new Date('2024-01-01')
-    `,
-    // new Date() with timestamp arg — safe
-    $`
-      const d = new Date(1704067200000)
-    `,
-    // Date.parse is deterministic — safe
-    $`
-      const ts = Date.parse('2024-01-01')
-    `,
-    // Date.now() inside defineEventHandler — server only, no hydration
-    $`
-      export default defineEventHandler(() => {
-        return Date.now()
-      })
-    `,
   ],
-  invalid: [
-    // Top-level Date.now()
-    {
-      code: $`
-        const ts = Date.now()
-      `,
-      filename: 'test.vue',
-      errors: [{ messageId: 'noDateNow' }],
-    },
-    // Top-level new Date()
-    {
-      code: $`
-        const now = new Date()
-      `,
-      filename: 'test.vue',
-      errors: [{ messageId: 'noNewDate' }],
-    },
-    // Date() as function (without new)
-    {
-      code: $`
-        const now = Date()
-      `,
-      filename: 'test.vue',
-      errors: [{ messageId: 'noDateCall' }],
-    },
-    // new Date() inside defineComponent setup() — Options API
-    {
-      code: $`
-        export default defineComponent({
-          setup() {
-            return { now: new Date() }
-          }
-        })
-      `,
-      filename: 'test.vue',
-      errors: [{ messageId: 'noNewDate' }],
-    },
-  ],
+  invalid: [],
 })
 
 runVue({

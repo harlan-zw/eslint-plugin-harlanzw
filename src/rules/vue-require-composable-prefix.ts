@@ -21,6 +21,10 @@ export default createEslintRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create: (context) => {
+    const filename = context.filename || context.getFilename()
+    if (filename.endsWith('.vue') || (!/[/\\]composables[/\\]/.test(filename) && !filename.startsWith('composables/')))
+      return {}
+
     const vueImports = new Set<string>()
     const nonVueImports = new Set<string>()
     const candidateFunctions = new Map<string, {

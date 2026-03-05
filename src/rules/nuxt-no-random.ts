@@ -86,18 +86,17 @@ export default createEslintRule<Options, MessageIds>({
       reportRandom(context, node, false)
     }
 
-    if (isVueParser(context as any)) {
-      return defineTemplateBodyVisitor(context, {
-        // Template expressions — always execute during render
-        CallExpression(node: any) {
-          if (isMathRandomCall(node) || isCryptoRandomCall(node))
-            reportRandom(context, node, true)
-        },
-      }, {
-        CallExpression: checkScript,
-      })
-    }
+    if (!isVueParser(context as any))
+      return {}
 
-    return { CallExpression: checkScript }
+    return defineTemplateBodyVisitor(context, {
+      // Template expressions — always execute during render
+      CallExpression(node: any) {
+        if (isMathRandomCall(node) || isCryptoRandomCall(node))
+          reportRandom(context, node, true)
+      },
+    }, {
+      CallExpression: checkScript,
+    })
   },
 })

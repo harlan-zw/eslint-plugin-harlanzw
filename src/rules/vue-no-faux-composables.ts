@@ -20,6 +20,10 @@ export default createEslintRule<Options, MessageIds>({
   },
   defaultOptions: [],
   create: (context) => {
+    const filename = context.filename || context.getFilename()
+    if (filename.endsWith('.vue'))
+      return {}
+
     const vueImports = new Set<string>()
     const nonVueImports = new Set<string>()
     const composableFunctions = new Map<string, TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression>()

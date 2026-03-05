@@ -106,9 +106,6 @@ export default createEslintRule<Options, MessageIds>({
       })
     }
 
-    return {
-      CallExpression: checkCallScript,
-      NewExpression: checkNewScript,
-    }
+    return {}
   },
 })

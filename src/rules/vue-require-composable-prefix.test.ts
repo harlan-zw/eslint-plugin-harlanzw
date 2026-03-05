@@ -2,88 +2,115 @@ import { unindent as $ } from 'eslint-vitest-rule-tester'
 import { run } from './_test'
 import rule, { RULE_NAME } from './vue-require-composable-prefix'
 
+const filename = 'composables/test.ts'
+
 run({
   name: RULE_NAME,
   rule,
   valid: [
     // Already prefixed with use
-    $`
-      import { ref } from 'vue'
+    {
+      code: $`
+        import { ref } from 'vue'
 
-      function useCounter() {
-        const count = ref(0)
-        return { count }
-      }
-    `,
-    // No reactivity — not a composable
-    $`
-      function helper() {
-        let count = 0
-        return { count }
-      }
-    `,
-    // defineStore callback with ref — excluded
-    $`
-      import { ref } from 'vue'
-
-      const defineStore = (fn) => fn()
-      function defineMyStore() {
-        const count = ref(0)
-        return { count }
-      }
-    `,
-    // setup function — excluded
-    $`
-      import { ref } from 'vue'
-
-      function setup() {
-        const count = ref(0)
-        return { count }
-      }
-    `,
-    // Nested function inside composable — not top-level
-    $`
-      import { ref } from 'vue'
-
-      function useCounter() {
-        function inner() {
+        function useCounter() {
           const count = ref(0)
-          return count
+          return { count }
         }
-        return inner()
-      }
-    `,
+      `,
+      filename,
+    },
+    // No reactivity — not a composable
+    {
+      code: $`
+        function helper() {
+          let count = 0
+          return { count }
+        }
+      `,
+      filename,
+    },
+    // defineStore callback with ref — excluded
+    {
+      code: $`
+        import { ref } from 'vue'
+
+        const defineStore = (fn) => fn()
+        function defineMyStore() {
+          const count = ref(0)
+          return { count }
+        }
+      `,
+      filename,
+    },
+    // setup function — excluded
+    {
+      code: $`
+        import { ref } from 'vue'
+
+        function setup() {
+          const count = ref(0)
+          return { count }
+        }
+      `,
+      filename,
+    },
+    // Nested function inside composable — not top-level
+    {
+      code: $`
+        import { ref } from 'vue'
+
+        function useCounter() {
+          function inner() {
+            const count = ref(0)
+            return count
+          }
+          return inner()
+        }
+      `,
+      filename,
+    },
     // Non-Vue import of ref — no reactivity detected
-    $`
-      import { ref } from 'some-other-library'
+    {
+      code: $`
+        import { ref } from 'some-other-library'
 
-      function getRef() {
-        const value = ref(0)
-        return { value }
-      }
-    `,
+        function getRef() {
+          const value = ref(0)
+          return { value }
+        }
+      `,
+      filename,
+    },
     // Anonymous arrow — no name to check
-    $`
-      import { ref } from 'vue'
+    {
+      code: $`
+        import { ref } from 'vue'
 
-      export default () => {
-        const count = ref(0)
-        return { count }
-      }
-    `,
+        export default () => {
+          const count = ref(0)
+          return { count }
+        }
+      `,
+      filename,
+    },
     // defineComponent — excluded
-    $`
-      import { ref } from 'vue'
+    {
+      code: $`
+        import { ref } from 'vue'
 
-      function defineComponent() {
-        const count = ref(0)
-        return { count }
-      }
-    `,
+        function defineComponent() {
+          const count = ref(0)
+          return { count }
+        }
+      `,
+      filename,
+    },
   ],
   invalid: [
     // Function declaration calling ref
     {
+      filename,
       code: $`
         import { ref } from 'vue'
 
@@ -98,6 +125,7 @@ run({
     },
     // Function calling another composable (useFetch)
     {
+      filename,
       code: $`
         function fetchData() {
           const { data } = useFetch('/api/data')
@@ -110,6 +138,7 @@ run({
     },
     // Function with reactive()
     {
+      filename,
       code: $`
         import { reactive } from 'vue'
 
@@ -124,6 +153,7 @@ run({
     },
     // Function with computed()
     {
+      filename,
       code: $`
         import { computed } from 'vue'
 
@@ -138,6 +168,7 @@ run({
     },
     // Exported function with auto-imported ref
     {
+      filename,
       code: $`
         export function getData() {
           const data = ref(null)
@@ -150,6 +181,7 @@ run({
     },
     // Arrow function with ref
     {
+      filename,
       code: $`
         import { ref } from 'vue'
 
@@ -164,6 +196,7 @@ run({
     },
     // Expression-body arrow with reactivity
     {
+      filename,
       code: $`
         import { ref } from 'vue'
 

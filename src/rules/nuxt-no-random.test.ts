@@ -3,87 +3,23 @@ import { run, runVue } from './_test'
 import rule, { RULE_NAME } from './nuxt-no-random'
 
 run({
-  name: RULE_NAME,
+  name: `${RULE_NAME} (non-Vue files)`,
   rule,
   valid: [
-    // Math.random() inside a named function (not executed during setup)
+    // Non-Vue files are always valid — rule only applies to .vue files
+    $`
+      const x = Math.random()
+    `,
+    $`
+      const id = crypto.randomUUID()
+    `,
     $`
       function shuffle(arr) {
         return arr.sort(() => Math.random() - 0.5)
       }
     `,
-    // Math.random() in a class method
-    $`
-      class Foo {
-        bar() { return Math.random() }
-      }
-    `,
-    // Not Math.random()
-    $`
-      const x = Math.floor(42)
-    `,
-    // crypto inside a named function
-    $`
-      function generateId() {
-        return crypto.randomUUID()
-      }
-    `,
-    // Math.random() inside defineEventHandler — server only, no hydration
-    $`
-      export default defineEventHandler(() => {
-        return Math.random()
-      })
-    `,
   ],
-  invalid: [
-    // Top-level Math.random() (simulates script setup)
-    {
-      code: $`
-        const x = Math.random()
-      `,
-      errors: [{ messageId: 'noMathRandom' }],
-    },
-    // Math.random() in a sort at top level
-    {
-      code: $`
-        const items = [1, 2, 3].sort(() => Math.random() - 0.5)
-      `,
-      errors: [{ messageId: 'noMathRandom' }],
-    },
-    // crypto.randomUUID() at top level
-    {
-      code: $`
-        const id = crypto.randomUUID()
-      `,
-      errors: [{ messageId: 'noCryptoRandom' }],
-    },
-    // crypto.getRandomValues() at top level
-    {
-      code: $`
-        const arr = new Uint8Array(16)
-        crypto.getRandomValues(arr)
-      `,
-      errors: [{ messageId: 'noCryptoRandom' }],
-    },
-    // Math.random() inside defineComponent setup() — Options API
-    {
-      code: $`
-        export default defineComponent({
-          setup() {
-            return { x: Math.random() }
-          }
-        })
-      `,
-      errors: [{ messageId: 'noMathRandom' }],
-    },
-    // window.crypto.randomUUID() at top level
-    {
-      code: $`
-        const id = window.crypto.randomUUID()
-      `,
-      errors: [{ messageId: 'noCryptoRandom' }],
-    },
-  ],
+  invalid: [],
 })
 
 runVue({
