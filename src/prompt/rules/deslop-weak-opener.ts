@@ -38,7 +38,7 @@ export default {
   },
   create(context: any) {
     return {
-      document(node: DocumentNode) {
+      document(_node: DocumentNode) {
         const sourceCode = context.sourceCode
         const lines: string[] = sourceCode.lines
         const codeBlockLines = getCodeBlockLines(lines)
@@ -49,7 +49,6 @@ export default {
             continue
 
           const line = lines[i]
-          const lineNode = node.children[i]
           // Strip leading markdown (list markers, heading markers)
           const stripped = line.replace(/^(?:[#>*+-]|\d+\.)\s+/, '')
           const offset = line.length - stripped.length

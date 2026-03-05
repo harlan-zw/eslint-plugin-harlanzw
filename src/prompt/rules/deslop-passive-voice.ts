@@ -117,7 +117,7 @@ const PAST_PARTICIPLES = [
 const PARTICIPLES_PATTERN = PAST_PARTICIPLES.join('|')
 // Match: is/are/was/were/be/been/being + optional adverb + past participle
 const PASSIVE_REGEX = new RegExp(
-  `\\b(is|are|was|were|be|been|being)\\s+(?:\\w+ly\\s+)?(?:${PARTICIPLES_PATTERN})\\b`,
+  `\\b(?:is|are|was|were|be|been|being)\\s+(?:\\w+ly\\s+)?(?:${PARTICIPLES_PATTERN})\\b`,
   'gi',
 )
 
@@ -132,7 +132,7 @@ export default {
   },
   create(context: any) {
     return {
-      document(node: DocumentNode) {
+      document(_node: DocumentNode) {
         const sourceCode = context.sourceCode
         const lines: string[] = sourceCode.lines
         const codeBlockLines = getCodeBlockLines(lines)
@@ -143,8 +143,6 @@ export default {
             continue
 
           const line = lines[i]
-          const lineNode = node.children[i]
-
           // Reset regex state
           PASSIVE_REGEX.lastIndex = 0
           let match: RegExpExecArray | null
