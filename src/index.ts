@@ -382,7 +382,8 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     configs.push(...plugin.configs!.vue as Linter.Config[])
   }
 
-  if (options.content) {
+  const enableContent = options.content ?? detected.content
+  if (enableContent) {
     configs.push(...plugin.configs!.content as Linter.Config[])
   }
 
@@ -391,7 +392,7 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
   return configs
 }
 
-function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean } {
+function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, content: boolean } {
   const cwd = process.cwd()
   const nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
   let vue = nuxt
@@ -404,7 +405,8 @@ function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean } {
     catch {}
   }
   const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))
-  return { nuxt, vue, prompt }
+  const content = existsSync(resolve(cwd, 'content')) || existsSync(resolve(cwd, 'docs'))
+  return { nuxt, vue, prompt, content }
 }
 
 // Attach plugin to factory and export both
