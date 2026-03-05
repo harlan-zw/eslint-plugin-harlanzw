@@ -33,6 +33,9 @@ ruleTester.run('harlanzw/ai-deslop-autolink', rule, {
     'Vue.js is a framework.',
     // Already linked on a previous line (pre-scan catches it)
     '[Nuxt](https://nuxt.com) is great.\nNuxt is also fast.',
+    // MDC component lines — do not autolink inside component attributes
+    ':YouTubeVideo{videoId="OyVI8zmDqWU" title="[Nuxt](https://nuxt.com) 3 SEO (intro to Nuxt SEO)"}',
+    '::card{title="Using Nuxt for SSR"}',
   ],
   invalid: [
     {

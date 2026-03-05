@@ -15,10 +15,10 @@ const DEDUPED_ENTRIES = SORTED_ENTRIES.filter(([name, url]) => {
   return true
 })
 
-// Pre-compile regexes — simple word boundary match (scope checking replaces the old lookahead hacks)
+// Pre-compile regexes — require whitespace or start/end of line around matches (strict word boundary)
 const COMPILED = DEDUPED_ENTRIES.map(([name, url]) => {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return { name, url, regex: new RegExp(`\\b${escaped}\\b`, 'g') }
+  return { name, url, regex: new RegExp(`(?<=\\s|^)${escaped}(?=\\s|$|[.,;:!?)])`, 'g') }
 })
 
 // Regex to extract all markdown link URLs from a line: [text](url)
@@ -62,6 +62,9 @@ export default {
           const line = lines[i]
           // Skip heading lines — typically don't want links in headings
           if (line.trimStart().startsWith('#'))
+            continue
+          // Skip MDC component lines — :ComponentName{...} or ::component-name
+          if (/^:{1,2}\w/.test(line.trimStart()))
             continue
 
           const lineNode = node.children[i]
