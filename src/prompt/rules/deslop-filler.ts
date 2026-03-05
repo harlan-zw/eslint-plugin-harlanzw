@@ -36,7 +36,7 @@ export default {
 
               // If the filler is at the start of a sentence, capitalize the next char
               const afterMatch = line.slice(match.index + match[0].length)
-              const needsCapitalize = match.index === 0 || line[match.index - 1] === ' ' && (match.index < 2 || line[match.index - 2] === '.')
+              const needsCapitalize = match.index === 0 || (line[match.index - 1] === ' ' && (match.index < 2 || line[match.index - 2] === '.'))
 
               context.report({
                 loc: {
@@ -46,7 +46,7 @@ export default {
                 messageId: 'filler',
                 data: { found: phrase },
                 fix(fixer: any) {
-                  let replacement = ''
+                  const replacement = ''
                   if (needsCapitalize && afterMatch.length > 0) {
                     // Capitalize the character after removal
                     const nextChar = afterMatch[0]
