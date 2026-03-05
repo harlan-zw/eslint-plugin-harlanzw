@@ -1,6 +1,6 @@
-import { findContainingStatement, getStatementIndentation, isInFunction } from '../ast-utils'
+import { findContainingStatement, getNodeScope, getStatementIndentation } from '../ast-utils'
 import { createEslintRule } from '../utils'
-import { isInVueScriptSetup, isSideEffectCall, SIDE_EFFECT_CLEANUP_MAP, SIDE_EFFECT_FUNCTIONS } from '../vue-utils'
+import { isSideEffectCall, SIDE_EFFECT_CLEANUP_MAP, SIDE_EFFECT_FUNCTIONS } from '../vue-utils'
 
 export const RULE_NAME = 'nuxt-no-side-effects-in-setup'
 export type MessageIds = 'noSideEffectsInSetup'
@@ -94,12 +94,9 @@ ${indent}})`
           return
         }
 
-        const inVueScriptSetup = isInVueScriptSetup(node)
-        const inFunction = isInFunction(node)
-
-        // Only report if we're in Vue script setup but NOT inside a function
-        // (being inside a function like onMounted is fine)
-        if (inVueScriptSetup && !inFunction) {
+        // Single parent walk for both checks
+        const { atTopLevel } = getNodeScope(node)
+        if (atTopLevel) {
           const functionName = node.callee.type === 'Identifier' ? node.callee.name : 'unknown'
           reportSideEffect(node, functionName)
         }
@@ -110,12 +107,9 @@ ${indent}})`
           return
         }
 
-        const inVueScriptSetup = isInVueScriptSetup(node)
-        const inFunction = isInFunction(node)
-
-        // Only report if we're in Vue script setup but NOT inside a function
-        // (being inside a function like onMounted is fine)
-        if (inVueScriptSetup && !inFunction) {
+        // Single parent walk for both checks
+        const { atTopLevel } = getNodeScope(node)
+        if (atTopLevel) {
           const functionName = node.callee.type === 'Identifier' ? node.callee.name : 'unknown'
           reportSideEffect(node, functionName)
         }

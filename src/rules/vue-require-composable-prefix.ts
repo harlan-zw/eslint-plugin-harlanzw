@@ -6,6 +6,9 @@ export const RULE_NAME = 'vue-require-composable-prefix'
 export type MessageIds = 'requirePrefix'
 export type Options = []
 
+const DEFINE_RE = /^define[A-Z]/
+const CREATE_RE = /^create[A-Z]/
+
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   meta: {
@@ -35,7 +38,7 @@ export default createEslintRule<Options, MessageIds>({
     const { hasReactivityInStatement, hasReactivityInExpression } = createReactivityChecker(vueImports, nonVueImports)
 
     function isExcludedName(name: string): boolean {
-      return /^define[A-Z]/.test(name) || /^create[A-Z]/.test(name) || name === 'setup'
+      return DEFINE_RE.test(name) || CREATE_RE.test(name) || name === 'setup'
     }
 
     function checkFunctionForReactivity(

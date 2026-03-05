@@ -2,6 +2,12 @@ import type { DocumentNode } from '../types'
 import { FILLER_PHRASES } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+// Pre-compile regexes at module level
+const COMPILED = FILLER_PHRASES.map((phrase) => {
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return { regex: new RegExp(`\\b${escaped}\\s*,?\\s*`, 'gi'), phrase }
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -27,8 +33,8 @@ export default {
           const line = lines[i]
           const lineNode = node.children[i]
 
-          for (const phrase of FILLER_PHRASES) {
-            const regex = new RegExp(`\\b${phrase}\\s*,?\\s*`, 'gi')
+          for (const { regex, phrase } of COMPILED) {
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const startOffset = lineNode.position.start.offset + match.index

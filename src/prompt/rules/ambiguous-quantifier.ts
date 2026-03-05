@@ -2,6 +2,12 @@ import type { DocumentNode } from '../types'
 import { AMBIGUOUS_QUANTIFIERS, QUANTIFIER_SUGGESTIONS } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+// Pre-compile regexes at module level
+const COMPILED = AMBIGUOUS_QUANTIFIERS.map((quantifier) => {
+  const escaped = quantifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`\\b${escaped}\\b`, 'gi')
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -25,8 +31,10 @@ export default {
             continue
 
           const line = lines[i]
-          for (const quantifier of AMBIGUOUS_QUANTIFIERS) {
-            const regex = new RegExp(`\\b${quantifier}\\b`, 'gi')
+          for (let qi = 0; qi < COMPILED.length; qi++) {
+            const regex = COMPILED[qi]
+            const quantifier = AMBIGUOUS_QUANTIFIERS[qi]
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const suggestion = QUANTIFIER_SUGGESTIONS[match[0].toLowerCase()] ?? 'a specific value'

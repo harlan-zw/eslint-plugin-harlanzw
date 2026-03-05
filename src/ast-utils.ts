@@ -69,6 +69,26 @@ export function isAtTopLevel(node: TSESTree.Node): boolean {
   return false
 }
 
+/**
+ * Single parent walk that determines both scope properties.
+ * Use instead of calling isAtTopLevel + isInFunction separately.
+ */
+export function getNodeScope(node: TSESTree.Node): { atTopLevel: boolean, inFunction: boolean } {
+  let parent: TSESTree.Node | undefined = node.parent
+  while (parent) {
+    if (parent.type === 'FunctionDeclaration'
+      || parent.type === 'FunctionExpression'
+      || parent.type === 'ArrowFunctionExpression') {
+      return { atTopLevel: false, inFunction: true }
+    }
+    if (parent.type === 'Program') {
+      return { atTopLevel: true, inFunction: false }
+    }
+    parent = parent.parent
+  }
+  return { atTopLevel: false, inFunction: false }
+}
+
 export function isCallExpression(node: TSESTree.Node): node is TSESTree.CallExpression {
   return node.type === 'CallExpression'
 }

@@ -1,6 +1,5 @@
-import { isAwaited, isFunctionCall, isInAsyncFunction, isInFunction, isReturned } from '../ast-utils'
+import { getNodeScope, isAwaited, isFunctionCall, isInAsyncFunction, isReturned } from '../ast-utils'
 import { createEslintRule } from '../utils'
-import { isInVueScriptSetup } from '../vue-utils'
 
 export const RULE_NAME = 'nuxt-await-navigate-to'
 export type MessageIds = 'mustAwaitNavigateTo' | 'mustAwaitOrReturnNavigateTo'
@@ -28,10 +27,9 @@ export default createEslintRule<Options, MessageIds>({
           return
         }
 
-        const inFunction = isInFunction(node)
-        const inVueScriptSetup = isInVueScriptSetup(node)
+        const { inFunction, atTopLevel: inVueScriptSetup } = getNodeScope(node)
 
-        if (inVueScriptSetup && !inFunction) {
+        if (inVueScriptSetup) {
           // Top level in Vue script setup - must be awaited
           if (!isAwaited(node)) {
             context.report({

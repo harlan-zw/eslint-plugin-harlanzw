@@ -2,6 +2,12 @@ import type { DocumentNode } from '../types'
 import { STRENGTH_PATTERNS, WEAK_TO_STRONG } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+// Pre-compile regexes at module level
+const COMPILED = STRENGTH_PATTERNS.weak.map((pattern) => {
+  const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`\\b${escaped}\\b`, 'gi')
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -25,8 +31,10 @@ export default {
             continue
 
           const line = lines[i]
-          for (const pattern of STRENGTH_PATTERNS.weak) {
-            const regex = new RegExp(`\\b${pattern}\\b`, 'gi')
+          for (let wi = 0; wi < COMPILED.length; wi++) {
+            const regex = COMPILED[wi]
+            const pattern = STRENGTH_PATTERNS.weak[wi]
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const suggestion = WEAK_TO_STRONG[match[0].toLowerCase()] ?? 'Must'

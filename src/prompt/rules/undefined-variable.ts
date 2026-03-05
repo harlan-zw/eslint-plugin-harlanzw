@@ -45,9 +45,9 @@ export default {
           const line = lines[i]
 
           for (const defPattern of definitionPatterns) {
-            const regex = new RegExp(defPattern.source, defPattern.flags)
+            defPattern.lastIndex = 0
             let match: RegExpExecArray | null
-            while ((match = regex.exec(line)) !== null)
+            while ((match = defPattern.exec(line)) !== null)
               definedVars.add(match[1].toLowerCase())
           }
 

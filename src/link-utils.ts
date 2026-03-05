@@ -54,12 +54,23 @@ export function hasJsxExternalAttr(attrs: any[]): boolean {
   )
 }
 
+const excludeCache = new Map<string, RegExp>()
+
+function getExcludeRegex(pattern: string): RegExp {
+  let regex = excludeCache.get(pattern)
+  if (!regex) {
+    regex = new RegExp(pattern)
+    excludeCache.set(pattern, regex)
+  }
+  return regex
+}
+
 export function shouldSkipLink(url: string, node: any, options: LinkRuleOptions): boolean {
   if (options.ignoreExternal && (isExternalUrl(url) || hasExternalAttr(node)))
     return true
   if (options.exclude?.length) {
     for (const pattern of options.exclude) {
-      if (new RegExp(pattern).test(url))
+      if (getExcludeRegex(pattern).test(url))
         return true
     }
   }
@@ -71,7 +82,7 @@ export function shouldSkipJsxLink(url: string, attrs: any[], options: LinkRuleOp
     return true
   if (options.exclude?.length) {
     for (const pattern of options.exclude) {
-      if (new RegExp(pattern).test(url))
+      if (getExcludeRegex(pattern).test(url))
         return true
     }
   }

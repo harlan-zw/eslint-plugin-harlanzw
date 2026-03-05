@@ -2,6 +2,11 @@ import type { DocumentNode } from '../types'
 import { VAGUE_TERMS } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+// Pre-compile regexes at module level
+const COMPILED = VAGUE_TERMS.map((term) => {
+  return new RegExp(`\\bbe ${term}\\b|\\bin a ${term}\\b`, 'gi')
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -24,8 +29,9 @@ export default {
             continue
 
           const line = lines[i]
-          for (const term of VAGUE_TERMS) {
-            const regex = new RegExp(`\\bbe ${term}\\b|\\bin a ${term}\\b`, 'gi')
+          for (let vi = 0; vi < COMPILED.length; vi++) {
+            const regex = COMPILED[vi]
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               context.report({

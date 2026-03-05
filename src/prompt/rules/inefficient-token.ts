@@ -8,6 +8,12 @@ const poorlyTokenized = [
   /\d{10,}/g,
 ]
 
+// Pre-compile verbose phrase regexes at module level
+const COMPILED_PHRASES = Object.entries(INEFFICIENT_PHRASES).map(([phrase, replacement]) => {
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), replacement }
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -37,9 +43,9 @@ export default {
 
           // Check poorly tokenized strings
           for (const pattern of poorlyTokenized) {
-            const regex = new RegExp(pattern.source, pattern.flags)
+            pattern.lastIndex = 0
             let match: RegExpExecArray | null
-            while ((match = regex.exec(line)) !== null) {
+            while ((match = pattern.exec(line)) !== null) {
               const key = `${match.index}:${match[0].length}`
               if (reported.has(key))
                 continue
@@ -58,8 +64,8 @@ export default {
           }
 
           // Check verbose phrases (fixable)
-          for (const [phrase, replacement] of Object.entries(INEFFICIENT_PHRASES)) {
-            const regex = new RegExp(`\\b${phrase}\\b`, 'gi')
+          for (const { regex, replacement } of COMPILED_PHRASES) {
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const startOffset = lineNode.position.start.offset + match.index

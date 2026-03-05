@@ -2,6 +2,11 @@ import type { DocumentNode } from '../types'
 import { UNNECESSARY_ADVERBS } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+// Pre-compile regexes at module level
+const COMPILED = UNNECESSARY_ADVERBS.map((adverb) => {
+  return { regex: new RegExp(`\\b${adverb}\\s+`, 'gi'), adverb }
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -27,9 +32,8 @@ export default {
           const line = lines[i]
           const lineNode = node.children[i]
 
-          for (const adverb of UNNECESSARY_ADVERBS) {
-            // Match the adverb with surrounding whitespace to clean up spacing
-            const regex = new RegExp(`\\b${adverb}\\s+`, 'gi')
+          for (const { regex, adverb } of COMPILED) {
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const startOffset = lineNode.position.start.offset + match.index

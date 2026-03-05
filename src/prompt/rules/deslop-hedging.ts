@@ -2,6 +2,12 @@ import type { DocumentNode } from '../types'
 import { HEDGING_WORDS } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+// Pre-compile regexes at module level
+const COMPILED = HEDGING_WORDS.map((word) => {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return { regex: new RegExp(`\\b${escaped}\\s+`, 'gi'), word }
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -27,9 +33,8 @@ export default {
           const line = lines[i]
           const lineNode = node.children[i]
 
-          for (const word of HEDGING_WORDS) {
-            const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-            const regex = new RegExp(`\\b${escaped}\\s+`, 'gi')
+          for (const { regex, word } of COMPILED) {
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const startOffset = lineNode.position.start.offset + match.index

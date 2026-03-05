@@ -27,9 +27,9 @@ export default {
           if (shouldSkipLine(i, codeBlockLines, frontmatterEnd))
             continue
 
-          const regex = new RegExp(instructionRegex.source, instructionRegex.flags)
+          instructionRegex.lastIndex = 0
           let match: RegExpExecArray | null
-          while ((match = regex.exec(lines[i])) !== null) {
+          while ((match = instructionRegex.exec(lines[i])) !== null) {
             const normalized = match[1].toLowerCase().trim().replace(/\s+/g, ' ')
             if (normalized.length > 10) {
               const existing = instructionPatterns.get(normalized) ?? []

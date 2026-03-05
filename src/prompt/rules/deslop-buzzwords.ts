@@ -6,6 +6,12 @@ import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 const SORTED_PHRASES = Object.entries(BUZZWORD_PHRASES)
   .sort((a, b) => b[0].length - a[0].length)
 
+// Pre-compile regexes at module level
+const COMPILED = SORTED_PHRASES.map(([phrase, replacement]) => {
+  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), phrase, replacement }
+})
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -34,9 +40,8 @@ export default {
           // Track matched ranges to avoid overlapping reports
           const matched: [number, number][] = []
 
-          for (const [phrase, replacement] of SORTED_PHRASES) {
-            const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-            const regex = new RegExp(`\\b${escaped}\\b`, 'gi')
+          for (const { regex, phrase, replacement } of COMPILED) {
+            regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
               const matchStart = match.index

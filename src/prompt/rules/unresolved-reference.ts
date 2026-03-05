@@ -31,9 +31,9 @@ export default {
 
           const line = lines[i]
           for (const pattern of unresolvedPatterns) {
-            const regex = new RegExp(pattern.source, pattern.flags)
+            pattern.lastIndex = 0
             let match: RegExpExecArray | null
-            while ((match = regex.exec(line)) !== null) {
+            while ((match = pattern.exec(line)) !== null) {
               context.report({
                 loc: {
                   start: { line: i + 1, column: match.index + 1 },

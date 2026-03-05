@@ -193,6 +193,9 @@ plugin.configs!['prompt:skill'] = [
   },
 ]
 
+// Ignore AI agent directories from non-prompt rules
+const CODE_IGNORES = ['.claude/**', '.cursor/**', '.github/copilot-instructions.md']
+
 // AI deslop config: content markdown
 const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-buzzwords': 'error',
@@ -210,6 +213,7 @@ plugin.configs!.content = [
   {
     name: 'harlanzw/content',
     files: CONTENT_FILES,
+    ignores: CODE_IGNORES,
     language: 'harlanzw/prompt',
     plugins: { harlanzw: plugin },
     rules: deslopRules,
@@ -233,6 +237,7 @@ plugin.configs!.link = [
   {
     name: 'harlanzw/link',
     files: LINK_FILES,
+    ignores: CODE_IGNORES,
     plugins: { harlanzw: plugin },
     rules: {
       'harlanzw/link-ascii-only': 'warn',
@@ -253,6 +258,7 @@ plugin.configs!.nuxt = [
   {
     name: 'harlanzw/nuxt',
     files: NUXT_VUE_FILES,
+    ignores: CODE_IGNORES,
     plugins: { harlanzw: plugin },
     rules: {
       'harlanzw/nuxt-await-navigate-to': 'error',
@@ -272,6 +278,7 @@ plugin.configs!.vue = [
   {
     name: 'harlanzw/vue',
     files: NUXT_VUE_FILES,
+    ignores: CODE_IGNORES,
     plugins: { harlanzw: plugin },
     rules: {
       'harlanzw/vue-no-faux-composables': 'error',
@@ -354,15 +361,14 @@ function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boo
  */
 function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[]): Linter.Config[] {
   const detected = detectFramework()
-  const configs: Linter.Config[] = [
-    { name: 'harlanzw/ignores', ignores: ['.claude/**'] },
-  ]
+  const configs: Linter.Config[] = []
 
   if (options.link !== false) {
     const linkOpts = typeof options.link === 'object' ? options.link : {}
     configs.push({
       name: 'harlanzw/link',
       files: LINK_FILES,
+      ignores: CODE_IGNORES,
       plugins: { harlanzw: plugin },
       rules: buildLinkRules(linkOpts),
     })
