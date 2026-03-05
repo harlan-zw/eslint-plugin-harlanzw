@@ -9,7 +9,10 @@ const SORTED_ENTRIES = Object.entries(CASING_DICTIONARY)
 // Pre-compile regexes
 const COMPILED = SORTED_ENTRIES.map(([key, correct]) => {
   const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), correct }
+  // Prose-level word boundaries: match only when surrounded by whitespace,
+  // punctuation, or markdown syntax — not inside attribute values like {lang="html"}
+  const B = `[\\s.,\\[\\]():;!?*_#>/-]`
+  return { regex: new RegExp(`(?:^|(?<=${B}))${escaped}(?=$|${B})`, 'gi'), correct }
 })
 
 export default {

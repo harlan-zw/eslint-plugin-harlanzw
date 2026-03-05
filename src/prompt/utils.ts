@@ -56,7 +56,10 @@ export function parseLineScopes(line: string): MarkdownScope[] {
     if (line[i] === '`') {
       const openStart = i
       let ticks = 0
-      while (i < line.length && line[i] === '`') { ticks++; i++ }
+      while (i < line.length && line[i] === '`') {
+        ticks++
+        i++
+      }
       // Find matching closing backtick sequence
       const closeIdx = line.indexOf('`'.repeat(ticks), i)
       if (closeIdx !== -1) {
@@ -84,9 +87,15 @@ export function parseLineScopes(line: string): MarkdownScope[] {
           // Skip inline code within link text
           const bt = i
           let n = 0
-          while (i < line.length && line[i] === '`') { n++; i++ }
+          while (i < line.length && line[i] === '`') {
+            n++
+            i++
+          }
           const ci = line.indexOf('`'.repeat(n), i)
-          if (ci !== -1) { i = ci + n; continue }
+          if (ci !== -1) {
+            i = ci + n
+            continue
+          }
           i = bt + 1
           continue
         }

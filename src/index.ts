@@ -12,6 +12,7 @@ import aiDeslopAdverbs from './prompt/rules/deslop-adverbs'
 import aiDeslopAutolink from './prompt/rules/deslop-autolink'
 import aiDeslopBuzzwords from './prompt/rules/deslop-buzzwords'
 import aiDeslopCasing from './prompt/rules/deslop-casing'
+import aiDeslopCodeLang from './prompt/rules/deslop-code-lang'
 import aiDeslopFiller from './prompt/rules/deslop-filler'
 import aiDeslopHedging from './prompt/rules/deslop-hedging'
 import aiDeslopNoExclamation from './prompt/rules/deslop-no-exclamation'
@@ -75,6 +76,7 @@ const plugin: ESLint.Plugin = {
     'ai-deslop-autolink': aiDeslopAutolink,
     'ai-deslop-buzzwords': aiDeslopBuzzwords,
     'ai-deslop-casing': aiDeslopCasing,
+    'ai-deslop-code-lang': aiDeslopCodeLang,
     'ai-deslop-filler': aiDeslopFiller,
     'ai-deslop-hedging': aiDeslopHedging,
     'ai-deslop-no-exclamation': aiDeslopNoExclamation,
@@ -207,6 +209,7 @@ const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-passive-voice': 'warn',
   'harlanzw/ai-deslop-weak-opener': 'warn',
   'harlanzw/ai-deslop-autolink': 'warn',
+  'harlanzw/ai-deslop-code-lang': 'warn',
 }
 
 plugin.configs!.content = [

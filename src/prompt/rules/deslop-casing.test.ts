@@ -17,6 +17,10 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
     'Read the [ESLint guide](https://eslint.org/docs/latest).',
     // Inside inline code — do not modify
     'Run `npm install typescript` to install.',
+    // Inside non-prose boundaries — do not modify
+    '`<title>`{lang="html"}',
+    '{lang="html"}',
+    'key="javascript"',
   ],
   invalid: [
     {
