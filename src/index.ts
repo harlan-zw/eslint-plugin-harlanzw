@@ -354,7 +354,9 @@ function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boo
  */
 function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[]): Linter.Config[] {
   const detected = detectFramework()
-  const configs: Linter.Config[] = []
+  const configs: Linter.Config[] = [
+    { name: 'harlanzw/ignores', ignores: ['.claude/**'] },
+  ]
 
   if (options.link !== false) {
     const linkOpts = typeof options.link === 'object' ? options.link : {}
