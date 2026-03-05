@@ -7,14 +7,9 @@ ruleTester.run('harlanzw/ai-deslop-adverbs', rule, {
   valid: [
     'This improves performance.',
     'The change reduces bundle size.',
-    '```\nThis is significantly faster.\n```',
+    '```\nThis is fundamentally different.\n```',
   ],
   invalid: [
-    {
-      code: 'This significantly improves performance.',
-      errors: [{ messageId: 'adverb' }],
-      output: 'This improves performance.',
-    },
     {
       code: 'It fundamentally changes the architecture.',
       errors: [{ messageId: 'adverb' }],
@@ -38,9 +33,9 @@ ruleTester.run('harlanzw/ai-deslop-adverbs', rule, {
     },
     // Capital preservation after list marker
     {
-      code: '- Significantly reduces bundle size.',
+      code: '- Fundamentally changes the design.',
       errors: [{ messageId: 'adverb' }],
-      output: '- Reduces bundle size.',
+      output: '- Changes the design.',
     },
   ],
 })

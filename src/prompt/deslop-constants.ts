@@ -218,7 +218,6 @@ export const FILLER_PHRASES: string[] = [
 
 // Unnecessary adverbs that add no meaning
 export const UNNECESSARY_ADVERBS: string[] = [
-  'significantly',
   'fundamentally',
   'essentially',
   'literally',
@@ -247,7 +246,6 @@ export const UNNECESSARY_ADVERBS: string[] = [
   'absolutely',
   'completely',
   'entirely',
-  'fully',
   'perfectly',
 ]
 
@@ -267,7 +265,6 @@ export const HEDGING_WORDS: string[] = [
   'mostly',
   'largely',
   'practically',
-  'nearly',
 ]
 
 export const CONTENT_FILES = ['**/content/**/*.md', '**/docs/**/*.md', '**/README.md']
