@@ -30,6 +30,11 @@ ruleTester.run('harlanzw/ai-deslop-casing', rule, {
     ':github-repo-card{repo="nuxt"}',
     // Underscore compound identifiers — do not modify
     'The SEO_audit_site function runs daily.',
+    // Slash compound identifiers — do not modify (scoped packages)
+    'Install @nuxtjs/seo for SEO support.',
+    'The @nuxtjs/seo module is great.',
+    // Scoped packages with @ prefix
+    '@nuxtjs/sitemap is available.',
   ],
   invalid: [
     {

@@ -54,5 +54,17 @@ ruleTester.run('harlanzw/ai-deslop-hedging', rule, {
       errors: [{ messageId: 'hedging' }],
       output: 'It works out of the box.',
     },
+    // Capital preservation at sentence start
+    {
+      code: 'Just write the tests first.',
+      errors: [{ messageId: 'hedging' }],
+      output: 'Write the tests first.',
+    },
+    // Capital preservation after list marker
+    {
+      code: '- Just use the default config.',
+      errors: [{ messageId: 'hedging' }],
+      output: '- Use the default config.',
+    },
   ],
 })

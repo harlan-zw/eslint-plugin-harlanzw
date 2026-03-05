@@ -25,6 +25,12 @@ ruleTester.run('harlanzw/ai-deslop-filler', rule, {
       errors: [{ messageId: 'filler' }],
       output: 'Performance, Vue excels.',
     },
+    // Capital preservation after list marker
+    {
+      code: '- Furthermore the API is stable.',
+      errors: [{ messageId: 'filler' }],
+      output: '- The API is stable.',
+    },
     {
       code: 'Needless to say, testing is important.',
       errors: [{ messageId: 'filler' }],

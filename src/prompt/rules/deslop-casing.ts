@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { CASING_DICTIONARY } from '../casing-dictionary'
-import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Sort entries longest-first so multi-word entries match before single-word
 const SORTED_ENTRIES = Object.entries(CASING_DICTIONARY)
@@ -9,10 +9,7 @@ const SORTED_ENTRIES = Object.entries(CASING_DICTIONARY)
 // Pre-compile regexes
 const COMPILED = SORTED_ENTRIES.map(([key, correct]) => {
   const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  // Prose-level word boundaries: match only when surrounded by whitespace,
-  // punctuation, or markdown syntax — not inside attribute values like {lang="html"}
-  const B = `[\\s.,\\[\\]():;!?*#>/-]`
-  return { regex: new RegExp(`(?:^|(?<=${B}))${escaped}(?=$|${B})`, 'gi'), correct }
+  return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), correct }
 })
 
 export default {
@@ -61,17 +58,8 @@ export default {
               if (isInScope(scopes, matchStart, matchEnd, ['link-url', 'code']))
                 continue
 
-              // Skip if part of a compound identifier (e.g., nuxt-seo, sitemap.xml, vite-ssg)
-              const prevChar = matchStart > 0 ? line[matchStart - 1] : ''
-              const nextChar = matchEnd < line.length ? line[matchEnd] : ''
-              const prevPrev = matchStart > 1 ? line[matchStart - 2] : ''
-              const nextNext = matchEnd + 1 < line.length ? line[matchEnd + 1] : ''
-              if ((prevChar === '-' || prevChar === '.' || prevChar === '_') && /\w/.test(prevPrev))
-                continue
-              if ((nextChar === '-' || nextChar === '.' || nextChar === '_') && /\w/.test(nextNext))
-                continue
-              // Skip URL protocols (e.g., https://)
-              if (line.slice(matchEnd, matchEnd + 3) === '://')
+              // Skip if part of a compound identifier (e.g., nuxt-seo, sitemap.xml, @nuxtjs/seo)
+              if (isInsideCompoundIdentifier(line, matchStart, matchEnd))
                 continue
               matched.push([matchStart, matchEnd])
 

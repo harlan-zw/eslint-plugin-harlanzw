@@ -1,5 +1,5 @@
 import type { DocumentNode } from '../types'
-import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Common past participles for passive voice detection
 // Kept conservative to reduce false positives
@@ -148,6 +148,8 @@ export default {
           PASSIVE_REGEX.lastIndex = 0
           let match: RegExpExecArray | null
           while ((match = PASSIVE_REGEX.exec(line)) !== null) {
+            if (isInsideCompoundIdentifier(line, match.index, match.index + match[0].length))
+              continue
             if (isInScope(scopes, match.index, match.index + match[0].length, ['code', 'link-url']))
               continue
             context.report({

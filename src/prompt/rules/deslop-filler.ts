@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { FILLER_PHRASES } from '../deslop-constants'
-import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Pre-compile regexes at module level
 const COMPILED = FILLER_PHRASES.map((phrase) => {
@@ -38,14 +38,19 @@ export default {
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
+              if (isInsideCompoundIdentifier(line, match.index, match.index + match[0].length))
+                continue
               if (isInScope(scopes, match.index, match.index + match[0].length, ['code', 'link-url']))
                 continue
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length
 
-              // If the filler is at the start of a sentence, capitalize the next char
               const afterMatch = line.slice(match.index + match[0].length)
-              const needsCapitalize = match.index === 0 || (line[match.index - 1] === ' ' && (match.index < 2 || line[match.index - 2] === '.'))
+              // Check if the filler is at a sentence boundary
+              const textBefore = line.slice(0, match.index)
+              const isAtSentenceStart = match.index === 0
+                || /^[-*>\s#\d.]+$/.test(textBefore)
+                || /\.\s+$/.test(textBefore)
 
               context.report({
                 loc: {
@@ -55,9 +60,7 @@ export default {
                 messageId: 'filler',
                 data: { found: phrase },
                 fix(fixer: any) {
-                  const replacement = ''
-                  if (needsCapitalize && afterMatch.length > 0) {
-                    // Capitalize the character after removal
+                  if (isAtSentenceStart && afterMatch.length > 0) {
                     const nextChar = afterMatch[0]
                     if (nextChar >= 'a' && nextChar <= 'z') {
                       return [
@@ -66,7 +69,7 @@ export default {
                       ]
                     }
                   }
-                  return fixer.replaceTextRange([startOffset, endOffset], replacement)
+                  return fixer.replaceTextRange([startOffset, endOffset], '')
                 },
               })
             }

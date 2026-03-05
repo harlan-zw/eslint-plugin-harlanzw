@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { HEDGING_WORDS } from '../deslop-constants'
-import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Pre-compile regexes at module level
 const COMPILED = HEDGING_WORDS.map((word) => {
@@ -38,6 +38,8 @@ export default {
             regex.lastIndex = 0
             let match: RegExpExecArray | null
             while ((match = regex.exec(line)) !== null) {
+              if (isInsideCompoundIdentifier(line, match.index, match.index + match[0].length))
+                continue
               if (isInScope(scopes, match.index, match.index + match[0].length, ['code', 'link-url']))
                 continue
 
@@ -51,6 +53,12 @@ export default {
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length
 
+              // Check if the match is at a sentence boundary (start of line or after ". ")
+              const textBefore = line.slice(0, match.index)
+              const isAtSentenceStart = match.index === 0
+                || /^[-*>\s#\d.]+$/.test(textBefore)
+                || /\.\s+$/.test(textBefore)
+
               context.report({
                 loc: {
                   start: { line: i + 1, column: match.index + 1 },
@@ -59,6 +67,14 @@ export default {
                 messageId: 'hedging',
                 data: { found: word },
                 fix(fixer: any) {
+                  const afterText = line.slice(match!.index + match![0].length)
+                  // If at sentence start and next char is lowercase, capitalize it
+                  if (isAtSentenceStart && afterText.length > 0 && afterText[0] >= 'a' && afterText[0] <= 'z') {
+                    return [
+                      fixer.replaceTextRange([startOffset, endOffset], ''),
+                      fixer.replaceTextRange([endOffset, endOffset + 1], afterText[0].toUpperCase()),
+                    ]
+                  }
                   return fixer.replaceTextRange([startOffset, endOffset], '')
                 },
               })

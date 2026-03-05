@@ -30,5 +30,17 @@ ruleTester.run('harlanzw/ai-deslop-adverbs', rule, {
       errors: [{ messageId: 'adverb' }],
       output: 'Performance improved.',
     },
+    // Capital preservation at sentence start
+    {
+      code: 'Essentially the build step is optional.',
+      errors: [{ messageId: 'adverb' }],
+      output: 'The build step is optional.',
+    },
+    // Capital preservation after list marker
+    {
+      code: '- Significantly reduces bundle size.',
+      errors: [{ messageId: 'adverb' }],
+      output: '- Reduces bundle size.',
+    },
   ],
 })

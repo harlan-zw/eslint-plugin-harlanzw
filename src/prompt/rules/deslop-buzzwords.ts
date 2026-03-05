@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { BUZZWORD_PHRASES } from '../deslop-constants'
-import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Sort phrases longest-first so longer matches take priority over shorter substrings
 const SORTED_PHRASES = Object.entries(BUZZWORD_PHRASES)
@@ -9,12 +9,7 @@ const SORTED_PHRASES = Object.entries(BUZZWORD_PHRASES)
 // Pre-compile regexes at module level
 const COMPILED = SORTED_PHRASES.map(([phrase, replacement]) => {
   const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const isSingleWord = !phrase.includes(' ') && !phrase.includes('-') && !phrase.includes('.')
-  // Single-word entries require an adjacent word (min 2-word context) to reduce false positives
-  const pattern = isSingleWord
-    ? `(?<=\\S\\s)\\b${escaped}\\b|\\b${escaped}\\b(?=\\s\\S)`
-    : `\\b${escaped}\\b`
-  return { regex: new RegExp(pattern, 'gi'), phrase, replacement }
+  return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), phrase, replacement }
 })
 
 export default {
@@ -56,6 +51,8 @@ export default {
               // Skip if this range overlaps with an already-matched longer phrase
               if (matched.some(([s, e]) => matchStart >= s && matchEnd <= e))
                 continue
+              if (isInsideCompoundIdentifier(line, matchStart, matchEnd))
+                continue
               if (isInScope(scopes, matchStart, matchEnd, ['code', 'link-url']))
                 continue
               matched.push([matchStart, matchEnd])
@@ -63,8 +60,14 @@ export default {
               const startOffset = lineNode.position.start.offset + matchStart
               const endOffset = startOffset + match[0].length
 
+              // Check if the match is at a sentence boundary (start of line or after ". ")
+              const textBefore = line.slice(0, matchStart)
+              const isAtSentenceStart = matchStart === 0
+                || /^[-*>\s#\d.]+$/.test(textBefore)
+                || /\.\s+$/.test(textBefore)
+
               // Preserve original casing for the replacement
-              const fixedReplacement = match[0][0] === match[0][0].toUpperCase() && replacement
+              const fixedReplacement = (isAtSentenceStart || (match[0][0] === match[0][0].toUpperCase())) && replacement
                 ? replacement[0].toUpperCase() + replacement.slice(1)
                 : replacement
 

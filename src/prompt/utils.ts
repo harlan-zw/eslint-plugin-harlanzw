@@ -32,6 +32,40 @@ export function shouldSkipLine(lineIndex: number, codeBlockLines: Set<number>, f
   return codeBlockLines.has(lineIndex) || lineIndex < frontmatterEnd
 }
 
+// --- Compound identifier guard ---
+const COMPOUND_SEPARATOR = /[/\-_@]/
+
+/**
+ * Check if a regex match is inside a compound identifier like `@nuxtjs/seo`, `nuxt-seo`, `sitemap.xml`.
+ * Only triggers when the separator has a word char on the OTHER side (not at sentence boundaries).
+ * e.g. `Github.` at EOL won't trigger, but `sitemap.xml` will.
+ */
+export function isInsideCompoundIdentifier(line: string, matchStart: number, matchEnd: number): boolean {
+  const prevChar = matchStart > 0 ? line[matchStart - 1] : ''
+  const nextChar = matchEnd < line.length ? line[matchEnd] : ''
+  const prevPrev = matchStart > 1 ? line[matchStart - 2] : ''
+  const nextNext = matchEnd + 1 < line.length ? line[matchEnd + 1] : ''
+
+  // Inside quoted attribute value (e.g., lang="html", key="javascript")
+  if (prevChar === '"' || nextChar === '"')
+    return true
+  // Left side: separator before match with a word char before the separator
+  if (COMPOUND_SEPARATOR.test(prevChar) && /\w/.test(prevPrev))
+    return true
+  // Right side: separator after match with a word char after the separator
+  if (COMPOUND_SEPARATOR.test(nextChar) && /\w/.test(nextNext))
+    return true
+  // Dot: only compound if word char on the other side (sitemap.xml, not "Github.")
+  if (prevChar === '.' && /\w/.test(prevPrev))
+    return true
+  if (nextChar === '.' && /\w/.test(nextNext))
+    return true
+  // URL protocol (https://)
+  if (line.slice(matchEnd, matchEnd + 3) === '://')
+    return true
+  return false
+}
+
 // --- Inline scope tracking ---
 
 export type MarkdownScopeType = 'code' | 'link-text' | 'link-url'

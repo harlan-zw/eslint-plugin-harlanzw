@@ -1,6 +1,6 @@
 import type { DocumentNode } from '../types'
 import { AUTOLINK_DICTIONARY } from '../autolink-dictionary'
-import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Sort entries longest-first so multi-word entries match before single-word
 const SORTED_ENTRIES = Object.entries(AUTOLINK_DICTIONARY)
@@ -84,15 +84,8 @@ export default {
               if (isInScope(scopes, matchStart, matchEnd, ['link-text', 'link-url', 'code']))
                 continue
 
-              // Skip if part of a compound identifier (e.g., :github-repo-card, nuxt-seo)
-              const prevAutoChar = matchStart > 0 ? line[matchStart - 1] : ''
-              if (prevAutoChar === ':' || prevAutoChar === '-')
-                continue
-              const nextAutoChar = matchEnd < line.length ? line[matchEnd] : ''
-              if (nextAutoChar === '-')
-                continue
-              // Skip if followed by .ext (framework names like Vue.js, Node.js)
-              if (nextAutoChar === '.' && matchEnd + 1 < line.length && /[a-z]/i.test(line[matchEnd + 1]))
+              // Skip if part of a compound identifier (e.g., :github-repo-card, nuxt-seo, Vue.js)
+              if (isInsideCompoundIdentifier(line, matchStart, matchEnd))
                 continue
 
               // Skip if next word starts with a capital letter (compound name like "Nuxt SEO", "Tailwind CSS")

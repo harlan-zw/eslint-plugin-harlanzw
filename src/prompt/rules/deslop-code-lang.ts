@@ -1,5 +1,5 @@
 import type { DocumentNode } from '../types'
-import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 // Match inline code blocks ending with ) or > that don't already have {lang=...}
 // Word boundary before opening backtick ensures we're not inside another construct
@@ -34,10 +34,14 @@ export default {
 
           const line = lines[i]
           const lineNode = node.children[i]
+          const scopes = parseLineScopes(line)
           INLINE_CODE_RE.lastIndex = 0
 
           let match: RegExpExecArray | null
           while ((match = INLINE_CODE_RE.exec(line)) !== null) {
+            // Skip if inside a link URL or link text
+            if (isInScope(scopes, match.index, match.index + match[0].length, ['link-url', 'link-text']))
+              continue
             const code = match[1]
             const lastChar = code[code.length - 1]
             const lang = LANG_MAP[lastChar]
