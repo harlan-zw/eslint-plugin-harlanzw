@@ -40,7 +40,7 @@ export default {
           let match: RegExpExecArray | null
           while ((match = INLINE_CODE_RE.exec(line)) !== null) {
             // Skip if inside a link URL or link text
-            if (isInScope(scopes, match.index, match.index + match[0].length, ['link-url', 'link-text']))
+            if (isInScope(scopes, match.index, match.index + match[0].length, ['link-url']))
               continue
             const code = match[1]
             const lastChar = code[code.length - 1]

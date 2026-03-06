@@ -50,5 +50,10 @@ ruleTester.run('harlanzw/ai-deslop-code-lang', rule, {
       errors: [{ messageId: 'missingLang', data: { code: 'navigateTo()', lang: 'ts' } }],
       output: 'Call `navigateTo()`{lang="ts"} to redirect.',
     },
+    {
+      code: '[`useScriptGoogleAdsense()`](/scripts/google-adsense) composable.',
+      errors: [{ messageId: 'missingLang', data: { code: 'useScriptGoogleAdsense()', lang: 'ts' } }],
+      output: '[`useScriptGoogleAdsense()`{lang="ts"}](/scripts/google-adsense) composable.',
+    },
   ],
 })
