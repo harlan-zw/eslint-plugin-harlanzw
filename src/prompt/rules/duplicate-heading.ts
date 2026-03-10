@@ -1,6 +1,8 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /^(#{1,6}) (.+)$/
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -24,7 +26,7 @@ export default {
           if (shouldSkipLine(i, codeBlockLines, frontmatterEnd))
             continue
 
-          const match = lines[i].match(/^(#{1,6}) (.+)$/)
+          const match = lines[i].match(REGEX_1)
           if (!match)
             continue
 

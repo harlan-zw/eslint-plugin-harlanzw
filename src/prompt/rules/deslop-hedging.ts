@@ -2,9 +2,14 @@ import type { DocumentNode } from '../types'
 import { HEDGING_WORDS } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_4 = /[.*+?^${}()|[\]\\]/g
+const REGEX_3 = /(?:\bnot|n't|no longer|more than|rather than)\s+$/
+const REGEX_2 = /^[-*>\s#\d.]+$/
+const REGEX_1 = /\.\s+$/
+
 // Pre-compile regexes at module level
 const COMPILED = HEDGING_WORDS.map((word) => {
-  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = word.replace(REGEX_4, '\\$&')
   return { regex: new RegExp(`\\b${escaped}\\s+`, 'gi'), word }
 })
 
@@ -48,7 +53,7 @@ export default {
                 continue
 
               // "not just" / "isn't just" / "no longer just" / "more than just" / "rather than just" etc. — removing "just" reverses meaning
-              if (word === 'just' && /(?:\bnot|n't|no longer|more than|rather than)\s+$/.test(line.slice(Math.max(0, match.index - 20), match.index)))
+              if (word === 'just' && REGEX_3.test(line.slice(Math.max(0, match.index - 20), match.index)))
                 continue
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length
@@ -56,8 +61,8 @@ export default {
               // Check if the match is at a sentence boundary (start of line or after ". ")
               const textBefore = line.slice(0, match.index)
               const isAtSentenceStart = match.index === 0
-                || /^[-*>\s#\d.]+$/.test(textBefore)
-                || /\.\s+$/.test(textBefore)
+                || REGEX_2.test(textBefore)
+                || REGEX_1.test(textBefore)
 
               context.report({
                 loc: {

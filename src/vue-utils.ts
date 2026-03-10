@@ -1,6 +1,8 @@
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import { isAtTopLevel } from './ast-utils'
 
+const REGEX_1 = /^tryOn[A-Z]/
+
 export type VueTemplateListener = Record<string, (node: any) => void>
 
 export const VUE_REACTIVITY_APIS = new Set([
@@ -250,7 +252,7 @@ export function createReactivityChecker(vueImports: Set<string>, nonVueImports: 
   }
 
   function isReactiveLifecycleCall(node: TSESTree.CallExpression): boolean {
-    return node.callee.type === 'Identifier' && /^tryOn[A-Z]/.test(node.callee.name)
+    return node.callee.type === 'Identifier' && REGEX_1.test(node.callee.name)
   }
 
   function hasReactivityInExpression(expr: TSESTree.Expression | null): boolean {

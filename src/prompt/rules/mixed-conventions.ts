@@ -1,6 +1,9 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_2 = /<[a-z_]+>/i
+const REGEX_1 = /^#{1,6}\s+/
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -26,9 +29,9 @@ export default {
             continue
 
           const line = lines[i]
-          if (/<[a-z_]+>/i.test(line))
+          if (REGEX_2.test(line))
             hasXmlTags = true
-          if (/^#{1,6}\s+/.test(line))
+          if (REGEX_1.test(line))
             hasMarkdownHeaders = true
         }
 

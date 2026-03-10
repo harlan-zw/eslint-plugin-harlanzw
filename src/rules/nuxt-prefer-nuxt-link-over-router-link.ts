@@ -1,6 +1,9 @@
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
+const REGEX_2 = /router-link|RouterLink/gi
+const REGEX_1 = /router-link|RouterLink/gi
+
 export const RULE_NAME = 'nuxt-prefer-nuxt-link-over-router-link'
 export type MessageIds = 'preferNuxtLink'
 export type Options = []
@@ -41,14 +44,14 @@ export default createEslintRule<Options, MessageIds>({
                 // Fix opening tag
                 if (startTag) {
                   const openTagText = context.sourceCode.getText(startTag)
-                  const fixedOpenTag = openTagText.replace(/router-link|RouterLink/gi, 'NuxtLink')
+                  const fixedOpenTag = openTagText.replace(REGEX_2, 'NuxtLink')
                   fixes.push(fixer.replaceText(startTag, fixedOpenTag))
                 }
 
                 // Fix closing tag if it exists
                 if (endTag) {
                   const closeTagText = context.sourceCode.getText(endTag)
-                  const fixedCloseTag = closeTagText.replace(/router-link|RouterLink/gi, 'NuxtLink')
+                  const fixedCloseTag = closeTagText.replace(REGEX_1, 'NuxtLink')
                   fixes.push(fixer.replaceText(endTag, fixedCloseTag))
                 }
 

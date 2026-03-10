@@ -9,6 +9,8 @@ import {
 } from '../constants'
 import { parseFrontmatter } from '../utils'
 
+const REGEX_1 = /<|>/
+
 const allowedSet = new Set<string>(SKILL_ALLOWED_FIELDS)
 
 export default {
@@ -59,7 +61,7 @@ export default {
           }
 
           // Angle brackets forbidden in all frontmatter values (injection risk)
-          if (/<|>/.test(field.value)) {
+          if (REGEX_1.test(field.value)) {
             context.report({ node, loc: lineNode.position, messageId: 'frontmatterBrackets', data: { field: field.key } })
           }
 

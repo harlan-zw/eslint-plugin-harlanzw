@@ -2,6 +2,9 @@ import type { DocumentNode } from '../types'
 import { UNNECESSARY_ADVERBS } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_2 = /^[-*>\s#\d.]+$/
+const REGEX_1 = /\.\s+$/
+
 // Pre-compile regexes at module level
 const COMPILED = UNNECESSARY_ADVERBS.map((adverb) => {
   return { regex: new RegExp(`\\b${adverb}\\s+`, 'gi'), adverb }
@@ -47,8 +50,8 @@ export default {
               // Check if the match is at a sentence boundary (start of line or after ". ")
               const textBefore = line.slice(0, match.index)
               const isAtSentenceStart = match.index === 0
-                || /^[-*>\s#\d.]+$/.test(textBefore)
-                || /\.\s+$/.test(textBefore)
+                || REGEX_2.test(textBefore)
+                || REGEX_1.test(textBefore)
 
               context.report({
                 loc: {

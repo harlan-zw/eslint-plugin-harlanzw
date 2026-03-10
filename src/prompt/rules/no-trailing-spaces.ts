@@ -1,6 +1,8 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /(\s+)$/
+
 export default {
   meta: {
     type: 'layout' as const,
@@ -24,7 +26,7 @@ export default {
             continue
 
           const line = lines[i]
-          const match = line.match(/(\s+)$/)
+          const match = line.match(REGEX_1)
           if (match) {
             const trailingStart = line.length - match[1].length
             const lineNode = node.children[i]

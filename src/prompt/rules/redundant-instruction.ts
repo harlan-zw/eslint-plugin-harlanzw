@@ -1,6 +1,8 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /\s+/g
+
 const instructionRegex = /\b(?:must|should|always|never|avoid|do not|don't)\s+([^.!?\n]+)/gi
 
 export default {
@@ -30,7 +32,7 @@ export default {
           instructionRegex.lastIndex = 0
           let match: RegExpExecArray | null
           while ((match = instructionRegex.exec(lines[i])) !== null) {
-            const normalized = match[1].toLowerCase().trim().replace(/\s+/g, ' ')
+            const normalized = match[1].toLowerCase().trim().replace(REGEX_1, ' ')
             if (normalized.length > 10) {
               const existing = instructionPatterns.get(normalized) ?? []
               existing.push(i)

@@ -1,6 +1,8 @@
 import type { DocumentNode, LineNode, PromptNode } from './types'
 import { ConfigCommentParser, Directive, TextSourceCodeBase, VisitNodeStep } from '@eslint/plugin-kit'
 
+const REGEX_1 = /\r?\n/
+
 const configCommentStart = /<!--\s*eslint(?:-enable|-disable(?:(?:-next)?-line)?)?(?:\s|-->)/u
 const htmlCommentPattern = /<!--(.*?)-->/gsu
 const commentParser = new ConfigCommentParser()
@@ -146,7 +148,7 @@ export class PromptLanguage {
 
   parse(file: { body: string | Uint8Array }): { ok: true, ast: DocumentNode } {
     const text = file.body as string // fileType='text' guarantees string
-    const rawLines = text.split(/\r?\n/)
+    const rawLines = text.split(REGEX_1)
 
     let offset = 0
     const children: LineNode[] = rawLines.map((value: string, i: number) => {
@@ -170,7 +172,7 @@ export class PromptLanguage {
         start: { line: 1, column: 1, offset: 0 },
         end: {
           line: rawLines.length,
-          column: (rawLines[rawLines.length - 1]?.length ?? 0) + 1,
+          column: (rawLines.at(-1)?.length ?? 0) + 1,
           offset: text.length,
         },
       },

@@ -1,10 +1,12 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /\u2014/g
+
 // Find all em dash positions on a line (excluding scoped regions)
 function findEmDashes(line: string, scopes: ReturnType<typeof parseLineScopes>): number[] {
   const positions: number[] = []
-  const regex = /\u2014/g
+  const regex = REGEX_1
   let match: RegExpExecArray | null
   while ((match = regex.exec(line)) !== null) {
     if (!isInScope(scopes, match.index, match.index + 1, ['code', 'link-url']))
@@ -15,7 +17,7 @@ function findEmDashes(line: string, scopes: ReturnType<typeof parseLineScopes>):
 
 // Check if text before the em dash looks like a label/title:
 // **bold**, ### heading, or list item prefix (- **bold**)
-const LABEL_BEFORE = /(?:\*\*[^*]+\*\*|#{1,6}\s+\S.*?)\s*$/
+const LABEL_BEFORE = /(?:\*\*[^*]+\*\*|#{1,6}\s+\S(?:.*\S)?)\s*$/
 
 export default {
   meta: {

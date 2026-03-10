@@ -2,13 +2,15 @@ import type { DocumentNode } from '../types'
 import { CASING_DICTIONARY } from '../casing-dictionary'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /[.*+?^${}()|[\]\\]/g
+
 // Sort entries longest-first so multi-word entries match before single-word
 const SORTED_ENTRIES = Object.entries(CASING_DICTIONARY)
   .sort((a, b) => b[0].length - a[0].length)
 
 // Pre-compile regexes
 const COMPILED = SORTED_ENTRIES.map(([key, correct]) => {
-  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = key.replace(REGEX_1, '\\$&')
   return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), correct }
 })
 

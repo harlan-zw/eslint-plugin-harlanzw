@@ -3,6 +3,9 @@ import { getLinkUrl, linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, should
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
+const REGEX_2 = /[^\u0020-\u007F]/
+const REGEX_1 = /[^\u0020-\u007F]/
+
 export const RULE_NAME = 'link-ascii-only'
 export type MessageIds = 'nonAscii'
 export type Options = [LinkRuleOptions]
@@ -31,7 +34,7 @@ export default createEslintRule<Options, MessageIds>({
       if (shouldSkipLink(url, node, opts))
         return
 
-      if (/[^\u0020-\u007F]/.test(url)) {
+      if (REGEX_2.test(url)) {
         const sourceCode = context.sourceCode
         const attrText = sourceCode.getText(attrNode)
         context.report({
@@ -65,7 +68,7 @@ export default createEslintRule<Options, MessageIds>({
                 const url = attr.value.value
                 if (shouldSkipJsxLink(url, attrs, opts))
                   continue
-                if (/[^\u0020-\u007F]/.test(url)) {
+                if (REGEX_1.test(url)) {
                   context.report({
                     node,
                     messageId: 'nonAscii',

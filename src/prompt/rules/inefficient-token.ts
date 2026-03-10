@@ -2,6 +2,8 @@ import type { DocumentNode } from '../types'
 import { INEFFICIENT_PHRASES } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /[.*+?^${}()|[\]\\]/g
+
 const poorlyTokenized = [
   /[A-Z]{10,}/g,
   /\w{20,}/g,
@@ -10,7 +12,7 @@ const poorlyTokenized = [
 
 // Pre-compile verbose phrase regexes at module level
 const COMPILED_PHRASES = Object.entries(INEFFICIENT_PHRASES).map(([phrase, replacement]) => {
-  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = phrase.replace(REGEX_1, '\\$&')
   return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), replacement }
 })
 

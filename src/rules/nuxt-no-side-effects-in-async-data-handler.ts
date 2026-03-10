@@ -2,6 +2,8 @@ import type { TSESTree } from '@typescript-eslint/utils'
 import { findContainingStatement, getStatementIndentation } from '../ast-utils'
 import { createEslintRule } from '../utils'
 
+const REGEX_1 = /\n\s*\n\s*\n/g
+
 export const RULE_NAME = 'nuxt-no-side-effects-in-async-data-handler'
 export type MessageIds = 'noSideEffectsInAsyncDataHandler' | 'useCallOnceForSideEffects'
 export type Options = []
@@ -268,7 +270,7 @@ ${indent}})`
                 })
 
                 // Clean up extra whitespace and empty lines
-                cleanHandlerText = cleanHandlerText.replace(/\n\s*\n\s*\n/g, '\n\n').trim()
+                cleanHandlerText = cleanHandlerText.replace(REGEX_1, '\n\n').trim()
 
                 const newStatement = statementText.replace(handlerText, cleanHandlerText)
 

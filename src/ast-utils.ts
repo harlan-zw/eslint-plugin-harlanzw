@@ -1,5 +1,7 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 
+const REGEX_1 = /^(\s*)/
+
 export function isAwaited(node: TSESTree.CallExpression): boolean {
   return node.parent?.type === 'AwaitExpression'
 }
@@ -129,5 +131,5 @@ export function findContainingStatement(node: TSESTree.Node): TSESTree.Node {
  * Extracts the indentation (whitespace) at the beginning of a statement.
  */
 export function getStatementIndentation(statement: TSESTree.Node, sourceCode: any): string {
-  return sourceCode.text.slice(sourceCode.getIndexFromLoc(statement.loc.start)).match(/^(\s*)/)?.[1] || ''
+  return sourceCode.text.slice(sourceCode.getIndexFromLoc(statement.loc.start)).match(REGEX_1)?.[1] || ''
 }

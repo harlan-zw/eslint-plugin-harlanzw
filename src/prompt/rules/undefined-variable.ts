@@ -2,6 +2,8 @@ import type { DocumentNode } from '../types'
 import { COMMON_CONTEXT_VARIABLES } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /\{\{(\w+)\}\}/g
+
 const definitionPatterns = [
   /(\w+)\s*[:=]/g,
   /define\s+(\w+)/gi,
@@ -51,7 +53,7 @@ export default {
               definedVars.add(match[1].toLowerCase())
           }
 
-          const varRegex = /\{\{(\w+)\}\}/g
+          const varRegex = REGEX_1
           let match: RegExpExecArray | null
           while ((match = varRegex.exec(line)) !== null) {
             const varName = match[1]

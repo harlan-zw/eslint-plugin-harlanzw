@@ -1,6 +1,10 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_3 = /json|object|array|\{|\[/i
+const REGEX_2 = /output|respond|return/i
+const REGEX_1 = /format|structure|schema/i
+
 const examplePatterns = [
   /examples?:/i,
   /for example/i,
@@ -32,8 +36,8 @@ export default {
           .join('\n')
 
         const hasExamples = examplePatterns.some(p => p.test(filteredText))
-        const hasJsonOutput = /json|object|array|\{|\[/i.test(filteredText) && /output|respond|return/i.test(filteredText)
-        const hasFormatRequirement = /format|structure|schema/i.test(filteredText)
+        const hasJsonOutput = REGEX_3.test(filteredText) && REGEX_2.test(filteredText)
+        const hasFormatRequirement = REGEX_1.test(filteredText)
 
         if ((hasJsonOutput || hasFormatRequirement) && !hasExamples) {
           context.report({

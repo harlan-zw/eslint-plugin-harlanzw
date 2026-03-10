@@ -1,6 +1,9 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_2 = /input\s*:/gi
+const REGEX_1 = /output\s*:/gi
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -22,8 +25,8 @@ export default {
           .filter((_, i) => !shouldSkipLine(i, codeBlockLines, frontmatterEnd))
           .join('\n')
 
-        const inputExamples = (filteredText.match(/input\s*:/gi) ?? []).length
-        const outputExamples = (filteredText.match(/output\s*:/gi) ?? []).length
+        const inputExamples = (filteredText.match(REGEX_2) ?? []).length
+        const outputExamples = (filteredText.match(REGEX_1) ?? []).length
 
         if (inputExamples > 0 && outputExamples > 0 && inputExamples !== outputExamples) {
           context.report({

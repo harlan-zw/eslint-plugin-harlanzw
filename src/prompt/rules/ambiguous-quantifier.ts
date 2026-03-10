@@ -2,9 +2,11 @@ import type { DocumentNode } from '../types'
 import { AMBIGUOUS_QUANTIFIERS, QUANTIFIER_SUGGESTIONS } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /[.*+?^${}()|[\]\\]/g
+
 // Pre-compile regexes at module level
 const COMPILED = AMBIGUOUS_QUANTIFIERS.map((quantifier) => {
-  const escaped = quantifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = quantifier.replace(REGEX_1, '\\$&')
   return new RegExp(`\\b${escaped}\\b`, 'gi')
 })
 

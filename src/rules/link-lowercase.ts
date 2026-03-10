@@ -3,6 +3,11 @@ import { getLinkUrl, linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, should
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
+const REGEX_4 = /[A-Z]/
+const REGEX_3 = /%[0-9A-F]{2}/i
+const REGEX_2 = /[A-Z]/
+const REGEX_1 = /%[0-9A-F]{2}/i
+
 export const RULE_NAME = 'link-lowercase'
 export type MessageIds = 'uppercase'
 export type Options = [LinkRuleOptions]
@@ -32,8 +37,8 @@ export default createEslintRule<Options, MessageIds>({
         return
 
       // Check for uppercase characters, but ignore URL-encoded sequences (%XX)
-      const hasUppercase = /[A-Z]/.test(url)
-      const isUrlEncoded = /%[0-9A-F]{2}/i.test(url)
+      const hasUppercase = REGEX_4.test(url)
+      const isUrlEncoded = REGEX_3.test(url)
 
       if (hasUppercase && !isUrlEncoded) {
         const sourceCode = context.sourceCode
@@ -70,8 +75,8 @@ export default createEslintRule<Options, MessageIds>({
                 if (shouldSkipJsxLink(url, attrs, opts))
                   continue
 
-                const hasUppercase = /[A-Z]/.test(url)
-                const isUrlEncoded = /%[0-9A-F]{2}/i.test(url)
+                const hasUppercase = REGEX_2.test(url)
+                const isUrlEncoded = REGEX_1.test(url)
 
                 if (hasUppercase && !isUrlEncoded) {
                   context.report({

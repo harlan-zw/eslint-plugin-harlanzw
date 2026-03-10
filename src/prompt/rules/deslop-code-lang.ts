@@ -43,7 +43,7 @@ export default {
             if (isInScope(scopes, match.index, match.index + match[0].length, ['link-url']))
               continue
             const code = match[1]
-            const lastChar = code[code.length - 1]
+            const lastChar = code.at(-1)
             const lang = LANG_MAP[lastChar]
             if (!lang)
               continue

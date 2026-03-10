@@ -2,9 +2,13 @@ import type { DocumentNode } from '../types'
 import { FILLER_PHRASES } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_3 = /[.*+?^${}()|[\]\\]/g
+const REGEX_2 = /^[-*>\s#\d.]+$/
+const REGEX_1 = /\.\s+$/
+
 // Pre-compile regexes at module level
 const COMPILED = FILLER_PHRASES.map((phrase) => {
-  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = phrase.replace(REGEX_3, '\\$&')
   return { regex: new RegExp(`\\b${escaped}\\s*,?\\s*`, 'gi'), phrase }
 })
 
@@ -49,8 +53,8 @@ export default {
               // Check if the filler is at a sentence boundary
               const textBefore = line.slice(0, match.index)
               const isAtSentenceStart = match.index === 0
-                || /^[-*>\s#\d.]+$/.test(textBefore)
-                || /\.\s+$/.test(textBefore)
+                || REGEX_2.test(textBefore)
+                || REGEX_1.test(textBefore)
 
               context.report({
                 loc: {

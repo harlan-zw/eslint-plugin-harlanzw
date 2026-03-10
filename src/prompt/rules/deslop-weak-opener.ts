@@ -1,6 +1,8 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /^(?:[#>*+-]|\d+\.)\s+/
+
 // Weak expletive constructions at sentence start
 const WEAK_OPENERS = [
   'there is',
@@ -25,7 +27,7 @@ const WEAK_OPENERS = [
 ]
 
 // Sort longest-first
-const SORTED_OPENERS = [...WEAK_OPENERS].sort((a, b) => b.length - a.length)
+const SORTED_OPENERS = WEAK_OPENERS.toSorted((a, b) => b.length - a.length)
 
 export default {
   meta: {
@@ -51,7 +53,7 @@ export default {
           const line = lines[i]
           const scopes = parseLineScopes(line)
           // Strip leading markdown (list markers, heading markers)
-          const stripped = line.replace(/^(?:[#>*+-]|\d+\.)\s+/, '')
+          const stripped = line.replace(REGEX_1, '')
           const offset = line.length - stripped.length
 
           for (const opener of SORTED_OPENERS) {

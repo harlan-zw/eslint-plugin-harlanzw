@@ -2,9 +2,11 @@ import type { DocumentNode } from '../types'
 import { STRENGTH_PATTERNS, WEAK_TO_STRONG } from '../constants'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /[.*+?^${}()|[\]\\]/g
+
 // Pre-compile regexes at module level
 const COMPILED = STRENGTH_PATTERNS.weak.map((pattern) => {
-  const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = pattern.replace(REGEX_1, '\\$&')
   return new RegExp(`\\b${escaped}\\b`, 'gi')
 })
 

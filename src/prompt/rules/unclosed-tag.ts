@@ -1,6 +1,9 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_2 = /<([a-z_][\w-]*)>/gi
+const REGEX_1 = /<\/([a-z_][\w-]*)>/gi
+
 export default {
   meta: {
     type: 'problem' as const,
@@ -27,13 +30,13 @@ export default {
         const closeTags = new Map<string, number>()
 
         let match: RegExpExecArray | null
-        const xmlOpen = /<([a-z_][\w-]*)>/gi
+        const xmlOpen = REGEX_2
         while ((match = xmlOpen.exec(filteredText)) !== null) {
           const tag = match[1].toLowerCase()
           openTags.set(tag, (openTags.get(tag) ?? 0) + 1)
         }
 
-        const xmlClose = /<\/([a-z_][\w-]*)>/gi
+        const xmlClose = REGEX_1
         while ((match = xmlClose.exec(filteredText)) !== null) {
           const tag = match[1].toLowerCase()
           closeTags.set(tag, (closeTags.get(tag) ?? 0) + 1)
@@ -51,7 +54,7 @@ export default {
               data: { tag, openCount: String(count), closeCount: String(closeCount) },
               ...(missing > 0 && {
                 fix(fixer: any) {
-                  const closingTags = Array.from({ length: missing }, () => `</${tag}>`).join('\n')
+                  const closingTags = Array.from({ length: missing }).fill(`</${tag}>`).join('\n')
                   return fixer.insertTextAfterRange([docEnd, docEnd], `\n${closingTags}`)
                 },
               }),

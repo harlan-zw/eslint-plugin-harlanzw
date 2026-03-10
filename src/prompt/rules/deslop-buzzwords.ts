@@ -2,13 +2,17 @@ import type { DocumentNode } from '../types'
 import { BUZZWORD_PHRASES } from '../deslop-constants'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_3 = /[.*+?^${}()|[\]\\]/g
+const REGEX_2 = /^[-*>\s#\d.]+$/
+const REGEX_1 = /\.\s+$/
+
 // Sort phrases longest-first so longer matches take priority over shorter substrings
 const SORTED_PHRASES = Object.entries(BUZZWORD_PHRASES)
   .sort((a, b) => b[0].length - a[0].length)
 
 // Pre-compile regexes at module level
 const COMPILED = SORTED_PHRASES.map(([phrase, replacement]) => {
-  const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = phrase.replace(REGEX_3, '\\$&')
   return { regex: new RegExp(`\\b${escaped}\\b`, 'gi'), phrase, replacement }
 })
 
@@ -63,8 +67,8 @@ export default {
               // Check if the match is at a sentence boundary (start of line or after ". ")
               const textBefore = line.slice(0, matchStart)
               const isAtSentenceStart = matchStart === 0
-                || /^[-*>\s#\d.]+$/.test(textBefore)
-                || /\.\s+$/.test(textBefore)
+                || REGEX_2.test(textBefore)
+                || REGEX_1.test(textBefore)
 
               // Preserve original casing for the replacement
               const fixedReplacement = (isAtSentenceStart || (match[0][0] === match[0][0].toUpperCase())) && replacement

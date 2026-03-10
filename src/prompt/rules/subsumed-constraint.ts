@@ -1,6 +1,9 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_2 = /never\s+([^.!?\n]+)/i
+const REGEX_1 = /avoid\s+([^.!?\n]+)/i
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -26,11 +29,11 @@ export default {
           if (shouldSkipLine(i, codeBlockLines, frontmatterEnd))
             continue
 
-          const neverMatch = lines[i].match(/never\s+([^.!?\n]+)/i)
+          const neverMatch = lines[i].match(REGEX_2)
           if (neverMatch)
             neverPatterns.push({ text: neverMatch[1].toLowerCase(), line: i })
 
-          const avoidMatch = lines[i].match(/avoid\s+([^.!?\n]+)/i)
+          const avoidMatch = lines[i].match(REGEX_1)
           if (avoidMatch)
             avoidPatterns.push({ text: avoidMatch[1].toLowerCase(), line: i })
         }

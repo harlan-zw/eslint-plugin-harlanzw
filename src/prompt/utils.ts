@@ -1,3 +1,8 @@
+const REGEX_4 = /\w/
+const REGEX_3 = /\w/
+const REGEX_2 = /\w/
+const REGEX_1 = /\w/
+
 export function getCodeBlockLines(lines: string[]): Set<number> {
   const codeLines = new Set<number>()
   let inCodeBlock = false
@@ -50,15 +55,15 @@ export function isInsideCompoundIdentifier(line: string, matchStart: number, mat
   if (prevChar === '"' || nextChar === '"' || prevChar === '=' || nextChar === '=' || prevChar === '{' || nextChar === '}')
     return true
   // Left side: separator before match with a word char before the separator
-  if (COMPOUND_SEPARATOR.test(prevChar) && /\w/.test(prevPrev))
+  if (COMPOUND_SEPARATOR.test(prevChar) && REGEX_4.test(prevPrev))
     return true
   // Right side: separator after match with a word char after the separator
-  if (COMPOUND_SEPARATOR.test(nextChar) && /\w/.test(nextNext))
+  if (COMPOUND_SEPARATOR.test(nextChar) && REGEX_3.test(nextNext))
     return true
   // Dot: only compound if word char on the other side (sitemap.xml, not "Github.")
-  if (prevChar === '.' && /\w/.test(prevPrev))
+  if (prevChar === '.' && REGEX_2.test(prevPrev))
     return true
-  if (nextChar === '.' && /\w/.test(nextNext))
+  if (nextChar === '.' && REGEX_1.test(nextNext))
     return true
   // URL protocol (https://)
   if (line.slice(matchEnd, matchEnd + 3) === '://')

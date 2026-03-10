@@ -2,6 +2,8 @@ import type { TSESTree } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
 import { createReactivityChecker, isComposableName, trackNonVueImports, trackVueImports } from '../vue-utils'
 
+const REGEX_1 = /[/\\]composables[/\\]/
+
 export const RULE_NAME = 'vue-require-composable-prefix'
 export type MessageIds = 'requirePrefix'
 export type Options = []
@@ -25,7 +27,7 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   create: (context) => {
     const filename = context.filename || context.getFilename()
-    if (filename.endsWith('.vue') || (!/[/\\]composables[/\\]/.test(filename) && !filename.startsWith('composables/')))
+    if (filename.endsWith('.vue') || (!REGEX_1.test(filename) && !filename.startsWith('composables/')))
       return {}
 
     const vueImports = new Set<string>()

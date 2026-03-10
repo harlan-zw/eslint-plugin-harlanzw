@@ -1,6 +1,9 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_2 = /!(?!\[)/g
+const REGEX_1 = /\w/
+
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -29,13 +32,13 @@ export default {
 
           // Skip markdown image syntax ![alt](url)
           // Skip headings that are just markers
-          const regex = /!(?!\[)/g
+          const regex = REGEX_2
           let match: RegExpExecArray | null
           while ((match = regex.exec(line)) !== null) {
             if (isInScope(scopes, match.index, match.index + 1, ['code', 'link-url']))
               continue
             // Only replace ! that ends a sentence (preceded by a word char)
-            if (match.index === 0 || !/\w/.test(line[match.index - 1]))
+            if (match.index === 0 || !REGEX_1.test(line[match.index - 1]))
               continue
 
             const startOffset = lineNode.position.start.offset + match.index

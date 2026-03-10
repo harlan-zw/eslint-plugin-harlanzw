@@ -1,6 +1,8 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
+const REGEX_1 = /\{\{\s*\}\}/g
+
 export default {
   meta: {
     type: 'problem' as const,
@@ -24,7 +26,7 @@ export default {
             continue
 
           const line = lines[i]
-          const regex = /\{\{\s*\}\}/g
+          const regex = REGEX_1
           let match: RegExpExecArray | null
           while ((match = regex.exec(line)) !== null) {
             const lineNode = node.children[i]

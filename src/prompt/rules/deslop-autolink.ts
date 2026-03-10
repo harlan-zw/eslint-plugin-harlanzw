@@ -2,6 +2,10 @@ import type { DocumentNode } from '../types'
 import { AUTOLINK_DICTIONARY } from '../autolink-dictionary'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdentifier, parseLineScopes, shouldSkipLine } from '../utils'
 
+const REGEX_3 = /[.*+?^${}()|[\]\\]/g
+const REGEX_2 = /^:{1,2}\w/
+const REGEX_1 = /^\s+(\S)/
+
 // Sort entries longest-first so multi-word entries match before single-word
 const SORTED_ENTRIES = Object.entries(AUTOLINK_DICTIONARY)
   .sort((a, b) => b[0].length - a[0].length)
@@ -17,7 +21,7 @@ const DEDUPED_ENTRIES = SORTED_ENTRIES.filter(([name, url]) => {
 
 // Pre-compile regexes — require whitespace or start/end of line around matches (strict word boundary)
 const COMPILED = DEDUPED_ENTRIES.map(([name, url]) => {
-  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const escaped = name.replace(REGEX_3, '\\$&')
   return { name, url, regex: new RegExp(`(?<=\\s|^)${escaped}(?=\\s|$|[.,;:!?)])`, 'g') }
 })
 
@@ -64,7 +68,7 @@ export default {
           if (line.trimStart().startsWith('#'))
             continue
           // Skip MDC component lines — :ComponentName{...} or ::component-name
-          if (/^:{1,2}\w/.test(line.trimStart()))
+          if (REGEX_2.test(line.trimStart()))
             continue
 
           const lineNode = node.children[i]
@@ -90,7 +94,7 @@ export default {
 
               // Skip if next word starts with a capital letter (compound name like "Nuxt SEO", "Tailwind CSS")
               const afterMatch = line.slice(matchEnd)
-              const nextWordMatch = afterMatch.match(/^\s+(\S)/)
+              const nextWordMatch = afterMatch.match(REGEX_1)
               if (nextWordMatch && nextWordMatch[1] >= 'A' && nextWordMatch[1] <= 'Z')
                 continue
 

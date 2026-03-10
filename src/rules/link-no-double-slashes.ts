@@ -3,6 +3,10 @@ import { getLinkUrl, linkRuleDefaults, linkRuleSchema, shouldSkipJsxLink, should
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor, isVueParser } from '../vue-utils'
 
+const REGEX_3 = /\/+/g
+const REGEX_2 = /\/{2,}/
+const REGEX_1 = /\/{2,}/
+
 export const RULE_NAME = 'link-no-double-slashes'
 export type MessageIds = 'doubleSlashes'
 export type Options = [LinkRuleOptions]
@@ -27,7 +31,7 @@ function fixDoubleSlashesInUrl(url: string): string {
     path = path.slice(0, searchIndex)
   }
 
-  return `${path.replace(/\/+/g, '/')}${search}${hash}`
+  return `${path.replace(REGEX_3, '/')}${search}${hash}`
 }
 
 export default createEslintRule<Options, MessageIds>({
@@ -57,7 +61,7 @@ export default createEslintRule<Options, MessageIds>({
       if (shouldSkipLink(url, node, opts))
         return
 
-      if (/\/{2,}/.test(url)) {
+      if (REGEX_2.test(url)) {
         const sourceCode = context.sourceCode
         const attrText = sourceCode.getText(attrNode)
         context.report({
@@ -93,7 +97,7 @@ export default createEslintRule<Options, MessageIds>({
                   return
                 if (shouldSkipJsxLink(url, attrs, opts))
                   continue
-                if (/\/{2,}/.test(url)) {
+                if (REGEX_1.test(url)) {
                   context.report({
                     node,
                     messageId: 'doubleSlashes',
