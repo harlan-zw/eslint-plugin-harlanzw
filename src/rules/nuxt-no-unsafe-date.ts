@@ -36,6 +36,33 @@ function isNewDateCall(node: TSESTree.NewExpression): boolean {
   )
 }
 
+/**
+ * Check if `new Date()` is immediately chained with a stable method like `.getFullYear()`.
+ * These return the same value on server and client (unless at exact midnight on New Year's).
+ */
+const STABLE_DATE_METHODS = new Set([
+  'getFullYear',
+  'getUTCFullYear',
+  'getMonth',
+  'getUTCMonth',
+  'getDate',
+  'getUTCDate',
+  'getDay',
+  'getUTCDay',
+])
+
+function isChainedWithStableMethod(node: TSESTree.NewExpression): boolean {
+  const parent = node.parent as TSESTree.Node | undefined
+  if (parent?.type !== 'MemberExpression' || parent.object !== node)
+    return false
+  const prop = parent.property
+  if (prop.type !== 'Identifier' || !STABLE_DATE_METHODS.has(prop.name))
+    return false
+  // Ensure the member expression is actually called: new Date().getFullYear()
+  const grandparent = parent.parent as TSESTree.Node | undefined
+  return grandparent?.type === 'CallExpression' && grandparent.callee === parent
+}
+
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   meta: {
@@ -79,6 +106,9 @@ export default createEslintRule<Options, MessageIds>({
       if (!isNewDateCall(node))
         return
 
+      if (isChainedWithStableMethod(node))
+        return
+
       if (!executedDuringSetup(node))
         return
 
@@ -97,7 +127,7 @@ export default createEslintRule<Options, MessageIds>({
             context.report({ node, messageId: 'noDateCallTemplate' })
         },
         NewExpression(node: any) {
-          if (isNewDateCall(node))
+          if (isNewDateCall(node) && !isChainedWithStableMethod(node))
             context.report({ node, messageId: 'noNewDateTemplate' })
         },
       }, {

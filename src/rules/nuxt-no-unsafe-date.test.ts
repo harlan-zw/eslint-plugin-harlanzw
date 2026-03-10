@@ -100,6 +100,25 @@ runVue({
       `,
       filename: 'test.vue',
     },
+    // new Date().getFullYear() in template — safe (year is stable)
+    {
+      code: $`
+        <script setup>
+        </script>
+        <template><div>© {{ new Date().getFullYear() }}</div></template>
+      `,
+      filename: 'test.vue',
+    },
+    // new Date().getFullYear() in setup — safe
+    {
+      code: $`
+        <script setup>
+        const year = new Date().getFullYear()
+        </script>
+        <template><div>{{ year }}</div></template>
+      `,
+      filename: 'test.vue',
+    },
     // Inside watch callback — safe
     {
       code: $`
