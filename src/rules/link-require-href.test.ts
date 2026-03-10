@@ -22,6 +22,10 @@ run({
       code: '<a role="button">Button</a>',
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    {
+      code: '<a {...linkProps}>Link</a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
   ],
   invalid: [
     {
@@ -69,6 +73,22 @@ runVue({
       code: $`
         <template>
           <a role="button" @click="handle">Button</a>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    {
+      code: $`
+        <template>
+          <NuxtLink v-bind="linkProps">Link</NuxtLink>
+        </template>
+      `,
+      filename: 'test.vue',
+    },
+    {
+      code: $`
+        <template>
+          <a v-bind="attrs">Link</a>
         </template>
       `,
       filename: 'test.vue',

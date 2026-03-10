@@ -35,10 +35,10 @@ export default createEslintRule<Options, MessageIds>({
             if (attr.key?.name === 'href' || attr.key?.name === 'to') {
               return
             }
-            // Dynamic :href/:to (v-bind)
+            // Dynamic :href/:to (v-bind) or v-bind="obj" (object spread)
             if (attr.key?.type === 'VDirectiveKey'
               && attr.key?.name?.name === 'bind'
-              && (attr.key?.argument?.name === 'href' || attr.key?.argument?.name === 'to')) {
+              && (!attr.key?.argument || attr.key?.argument?.name === 'href' || attr.key?.argument?.name === 'to')) {
               return
             }
             // role="button"
@@ -63,6 +63,9 @@ export default createEslintRule<Options, MessageIds>({
         }
 
         for (const attr of node.openingElement.attributes || []) {
+          if (attr.type === 'JSXSpreadAttribute') {
+            return
+          }
           if (attr.type === 'JSXAttribute') {
             if (attr.name?.name === 'href' || attr.name?.name === 'to') {
               return
