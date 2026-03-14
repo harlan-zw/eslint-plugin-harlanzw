@@ -28,6 +28,12 @@ const REPLACEMENTS: Record<string, string> = {
   'border-[var(--ui-border-accented)]': 'border-accented',
   'border-[var(--ui-border-muted)]': 'border-muted',
   'border-[var(--ui-border-inverted)]': 'border-inverted',
+  // --ui-primary across all color utilities
+  ...Object.fromEntries(
+    ['text', 'bg', 'border', 'ring', 'outline', 'divide', 'accent', 'caret', 'fill', 'stroke', 'shadow', 'decoration'].map(
+      p => [`${p}-[var(--ui-primary)]`, `${p}-primary`],
+    ),
+  ),
 }
 
 /**
@@ -40,6 +46,9 @@ const OPACITY_SAFE = new Set([
   'bg-[var(--ui-bg-accented)]',
   'border-[var(--ui-border-accented)]',
   'border-[var(--ui-border-muted)]',
+  ...['text', 'bg', 'border', 'ring', 'outline', 'divide', 'accent', 'caret', 'fill', 'stroke', 'shadow', 'decoration'].map(
+    p => `${p}-[var(--ui-primary)]`,
+  ),
 ])
 
 function findVerboseClasses(value: string): { match: string, replacement: string, index: number }[] {

@@ -15,6 +15,9 @@ run({
     { code: `const cls = 'bg-[var(--ui-bg-elevated)]/5'` },
     { code: `const cls = 'bg-[var(--ui-bg-muted)]/50'` },
     { code: `const cls = 'bg-[var(--ui-bg-accented)]/50'` },
+    // Opacity modifier on primary — must keep var() form
+    { code: `const cls = 'bg-[var(--ui-primary)]/50'` },
+    { code: `const cls = 'text-[var(--ui-primary)]/80'` },
     // Cross-token usage (bg using border var) — not in our replacement map
     { code: `const cls = 'bg-[var(--ui-border)]'` },
     // Non-string code
@@ -62,6 +65,33 @@ run({
     {
       code: `const cls = 'border-[var(--ui-border-accented)]'`,
       output: `const cls = 'border-accented'`,
+      errors: [{ messageId: 'preferShorthand' }],
+    },
+    // --ui-primary across utilities
+    {
+      code: `const cls = 'text-[var(--ui-primary)]'`,
+      output: `const cls = 'text-primary'`,
+      errors: [{ messageId: 'preferShorthand' }],
+    },
+    {
+      code: `const cls = 'bg-[var(--ui-primary)]'`,
+      output: `const cls = 'bg-primary'`,
+      errors: [{ messageId: 'preferShorthand' }],
+    },
+    {
+      code: `const cls = 'border-[var(--ui-primary)]'`,
+      output: `const cls = 'border-primary'`,
+      errors: [{ messageId: 'preferShorthand' }],
+    },
+    {
+      code: `const cls = 'ring-[var(--ui-primary)]'`,
+      output: `const cls = 'ring-primary'`,
+      errors: [{ messageId: 'preferShorthand' }],
+    },
+    // primary with hover variant
+    {
+      code: `const cls = 'hover:text-[var(--ui-primary)]'`,
+      output: `const cls = 'hover:text-primary'`,
       errors: [{ messageId: 'preferShorthand' }],
     },
     // Multiple in one string — both fixed in single pass
@@ -117,6 +147,12 @@ runVue({
     {
       code: `<template><div :class="active ? 'bg-[var(--ui-bg-elevated)]' : 'text-dimmed'" /></template>`,
       output: `<template><div :class="active ? 'bg-elevated' : 'text-dimmed'" /></template>`,
+      errors: [{ messageId: 'preferShorthand' }],
+    },
+    // hover:text-primary shorthand in class
+    {
+      code: `<template><a class="text-sm hover:text-[var(--ui-primary)] flex items-center gap-1">link</a></template>`,
+      output: `<template><a class="text-sm hover:text-primary flex items-center gap-1">link</a></template>`,
       errors: [{ messageId: 'preferShorthand' }],
     },
     // Script string literal
