@@ -55,6 +55,7 @@ import nuxtNoSideEffectsInSetup from './rules/nuxt-no-side-effects-in-setup'
 import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
+import nuxtUiPreferShorthandCss from './rules/nuxt-ui-prefer-shorthand-css'
 import vueNoFauxComposables from './rules/vue-no-faux-composables'
 import vueNoNestedReactivity from './rules/vue-no-nested-reactivity'
 import vueNoPassingRefsAsProps from './rules/vue-no-passing-refs-as-props'
@@ -100,6 +101,7 @@ const plugin: ESLint.Plugin = {
     'nuxt-no-unsafe-date': nuxtNoUnsafeDate,
     'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
     'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
+    'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
     'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
     'prompt-duplicate-heading': promptDuplicateHeading,
     'prompt-empty-section': promptEmptySection,
@@ -275,6 +277,7 @@ plugin.configs!.nuxt = [
       'harlanzw/nuxt-no-unsafe-date': 'warn',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'warn',
       'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'warn',
+      'harlanzw/nuxt-ui-prefer-shorthand-css': 'warn',
     },
   },
 ]
