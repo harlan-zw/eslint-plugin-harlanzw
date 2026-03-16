@@ -61,6 +61,7 @@ import vueNoNestedReactivity from './rules/vue-no-nested-reactivity'
 import vueNoPassingRefsAsProps from './rules/vue-no-passing-refs-as-props'
 import vueNoReactiveDestructuring from './rules/vue-no-reactive-destructuring'
 import vueNoRefAccessInTemplates from './rules/vue-no-ref-access-in-templates'
+import vueNoResolveComponentInComposables from './rules/vue-no-resolve-component-in-composables'
 import vueNoTorefsOnProps from './rules/vue-no-torefs-on-props'
 import vueRequireComposablePrefix from './rules/vue-require-composable-prefix'
 
@@ -128,6 +129,7 @@ const plugin: ESLint.Plugin = {
     'vue-no-passing-refs-as-props': vueNoPassingRefsAsProps,
     'vue-no-reactive-destructuring': vueNoReactiveDestructuring,
     'vue-no-ref-access-in-templates': vueNoRefAccessInTemplates,
+    'vue-no-resolve-component-in-composables': vueNoResolveComponentInComposables,
     'vue-no-torefs-on-props': vueNoTorefsOnProps,
     'vue-require-composable-prefix': vueRequireComposablePrefix,
   },
@@ -295,6 +297,7 @@ plugin.configs!.vue = [
       'harlanzw/vue-no-passing-refs-as-props': 'error',
       'harlanzw/vue-no-reactive-destructuring': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'warn',
+      'harlanzw/vue-no-resolve-component-in-composables': 'error',
       'harlanzw/vue-no-torefs-on-props': 'warn',
       'harlanzw/vue-require-composable-prefix': 'warn',
     },

@@ -60,6 +60,7 @@ The rules are organized into the following categories:
 | [`vue-no-reactive-destructuring`](./src/rules/vue-no-reactive-destructuring.md) | avoid destructuring reactive objects |
 | [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) | don't use `.value` in Vue templates |
 | [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) | don't use `toRefs()` on the props object |
+| [`vue-no-resolve-component-in-composables`](./src/rules/vue-no-resolve-component-in-composables.ts) | disallow `resolveComponent()`/`resolveDirective()` outside top-level `<script setup>` |
 | [`vue-require-composable-prefix`](./src/rules/vue-require-composable-prefix.ts) | enforce `use*` prefix for functions using Vue reactivity |
 | **AI Deslop** | |
 | [`ai-deslop-adverbs`](./src/prompt/rules/deslop-adverbs.ts) | remove unnecessary adverbs that add no meaning (e.g. "significantly", "fundamentally") |
