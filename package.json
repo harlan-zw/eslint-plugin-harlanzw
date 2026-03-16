@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-harlanzw",
   "type": "module",
-  "version": "0.5.20",
+  "version": "0.5.21",
   "packageManager": "pnpm@10.32.1",
   "description": "Harlan's opinionated ESLint rules",
   "author": "Harlan Wilton <harlan@harlanzw.com>",
@@ -30,7 +30,7 @@
     "build": "unbuild",
     "dev": "unbuild --stub",
     "lint": "pnpm run dev && eslint . --fix",
-    "release": "pnpm build && bumpp",
+    "release": "pnpm build && bumpp --commit 'chore: release v%s' --tag 'v%s' --push --all",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
