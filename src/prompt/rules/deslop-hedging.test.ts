@@ -22,6 +22,10 @@ ruleTester.run('harlanzw/ai-deslop-hedging', rule, {
     'It\'s more than just a timestamp.',
     // "rather than just" — removing "just" changes meaning
     'Search engines now index entities rather than just keywords.',
+    // hedge + negation — removing hedge reverses meaning
+    'They almost never are.',
+    'There is almost nothing left.',
+    'It is practically never needed.',
   ],
   invalid: [
     {
@@ -65,6 +69,12 @@ ruleTester.run('harlanzw/ai-deslop-hedging', rule, {
       code: '- Just use the default config.',
       errors: [{ messageId: 'hedging' }],
       output: '- Use the default config.',
+    },
+    // Capital preservation after colon
+    {
+      code: '- **Ignoring intermittent 5xx errors**: Just because',
+      errors: [{ messageId: 'hedging' }],
+      output: '- **Ignoring intermittent 5xx errors**: Because',
     },
   ],
 })

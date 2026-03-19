@@ -40,6 +40,11 @@ export default {
             // Only replace ! that ends a sentence (preceded by a word char)
             if (match.index === 0 || !REGEX_1.test(line[match.index - 1]))
               continue
+            // Skip brand names like Yahoo! where ! follows a capitalized word
+            const beforeBang = line.slice(0, match.index)
+            const wordMatch = beforeBang.match(/(\w+)$/)
+            if (wordMatch && /^[A-Z]/.test(wordMatch[1]))
+              continue
 
             const startOffset = lineNode.position.start.offset + match.index
             const endOffset = startOffset + 1

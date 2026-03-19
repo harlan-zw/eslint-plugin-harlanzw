@@ -5,7 +5,8 @@ import { getCodeBlockLines, getFrontmatterEnd, isInScope, isInsideCompoundIdenti
 const REGEX_4 = /[.*+?^${}()|[\]\\]/g
 const REGEX_3 = /(?:\bnot|n't|no longer|more than|rather than)\s+$/
 const REGEX_2 = /^[-*>\s#\d.]+$/
-const REGEX_1 = /\.\s+$/
+const REGEX_1 = /[.:]\s+$/
+const NEGATION_AFTER = /^(?:never|no|nothing|none|nobody|nowhere)\b/
 
 // Pre-compile regexes at module level
 const COMPILED = HEDGING_WORDS.map((word) => {
@@ -54,6 +55,10 @@ export default {
 
               // "not just" / "isn't just" / "no longer just" / "more than just" / "rather than just" etc. — removing "just" reverses meaning
               if (word === 'just' && REGEX_3.test(line.slice(Math.max(0, match.index - 20), match.index)))
+                continue
+
+              // "almost never" / "quite nothing" etc. — removing hedge before negation reverses meaning
+              if (NEGATION_AFTER.test(line.slice(match.index + match[0].length)))
                 continue
               const startOffset = lineNode.position.start.offset + match.index
               const endOffset = startOffset + match[0].length

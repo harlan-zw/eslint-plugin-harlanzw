@@ -10,6 +10,8 @@ ruleTester.run('harlanzw/ai-deslop-no-exclamation', rule, {
     '![image](logo.png)',
     '```\nAlert! Something happened!\n```',
     '![image](logo.png) is valid markdown.',
+    'Check out Yahoo! for more info.',
+    'Welcome to Nuxt!',
   ],
   invalid: [
     {
@@ -21,11 +23,6 @@ ruleTester.run('harlanzw/ai-deslop-no-exclamation', rule, {
       code: 'Check out this feature! It works great!',
       errors: [{ messageId: 'exclamation' }, { messageId: 'exclamation' }],
       output: 'Check out this feature. It works great.',
-    },
-    {
-      code: 'Welcome to Nuxt!',
-      errors: [{ messageId: 'exclamation' }],
-      output: 'Welcome to Nuxt.',
     },
   ],
 })
