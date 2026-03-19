@@ -56,10 +56,12 @@ import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
 import nuxtUiPreferShorthandCss from './rules/nuxt-ui-prefer-shorthand-css'
+import vueNoAsyncLifecycleHook from './rules/vue-no-async-lifecycle-hook'
 import vueNoFauxComposables from './rules/vue-no-faux-composables'
 import vueNoNestedReactivity from './rules/vue-no-nested-reactivity'
 import vueNoPassingRefsAsProps from './rules/vue-no-passing-refs-as-props'
 import vueNoReactiveDestructuring from './rules/vue-no-reactive-destructuring'
+import vueNoReactivityAfterAwait from './rules/vue-no-reactivity-after-await'
 import vueNoRefAccessInTemplates from './rules/vue-no-ref-access-in-templates'
 import vueNoResolveComponentInComposables from './rules/vue-no-resolve-component-in-composables'
 import vueNoTorefsOnProps from './rules/vue-no-torefs-on-props'
@@ -124,10 +126,12 @@ const plugin: ESLint.Plugin = {
     'prompt-unresolved-reference': promptUnresolvedReference,
     'prompt-vague-term': promptVagueTerm,
     'prompt-weak-instruction': promptWeakInstruction,
+    'vue-no-async-lifecycle-hook': vueNoAsyncLifecycleHook,
     'vue-no-faux-composables': vueNoFauxComposables,
     'vue-no-nested-reactivity': vueNoNestedReactivity,
     'vue-no-passing-refs-as-props': vueNoPassingRefsAsProps,
     'vue-no-reactive-destructuring': vueNoReactiveDestructuring,
+    'vue-no-reactivity-after-await': vueNoReactivityAfterAwait,
     'vue-no-ref-access-in-templates': vueNoRefAccessInTemplates,
     'vue-no-resolve-component-in-composables': vueNoResolveComponentInComposables,
     'vue-no-torefs-on-props': vueNoTorefsOnProps,
@@ -292,10 +296,12 @@ plugin.configs!.vue = [
     ignores: CODE_IGNORES,
     plugins: { harlanzw: plugin },
     rules: {
+      'harlanzw/vue-no-async-lifecycle-hook': 'error',
       'harlanzw/vue-no-faux-composables': 'error',
       'harlanzw/vue-no-nested-reactivity': 'error',
       'harlanzw/vue-no-passing-refs-as-props': 'error',
       'harlanzw/vue-no-reactive-destructuring': 'error',
+      'harlanzw/vue-no-reactivity-after-await': 'error',
       'harlanzw/vue-no-ref-access-in-templates': 'warn',
       'harlanzw/vue-no-resolve-component-in-composables': 'error',
       'harlanzw/vue-no-torefs-on-props': 'warn',
