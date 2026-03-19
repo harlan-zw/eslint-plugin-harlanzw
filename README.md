@@ -69,6 +69,7 @@ The rules are organized into the following categories:
 | [`ai-deslop-autolink`](./src/prompt/rules/deslop-autolink.ts) | auto-link first mention of known tech terms to their canonical URLs |
 | [`ai-deslop-buzzwords`](./src/prompt/rules/deslop-buzzwords.ts) | replace AI-generated buzzword phrases with simpler alternatives (e.g. "leverage" → "use") |
 | [`ai-deslop-casing`](./src/prompt/rules/deslop-casing.ts) | enforce correct casing for tech terms, brands, and abbreviations (e.g. "github" → "GitHub") |
+| [`ai-deslop-false-dichotomy`](./src/prompt/rules/deslop-false-dichotomy.ts) | flag "it's not X, it's Y" contrast patterns common in AI writing |
 | [`ai-deslop-filler`](./src/prompt/rules/deslop-filler.ts) | remove AI-generated filler sentences and phrases (e.g. "it's worth noting that") |
 | [`ai-deslop-hedging`](./src/prompt/rules/deslop-hedging.ts) | remove hedging/qualifying words that weaken copy (e.g. "very", "really", "quite", "just") |
 | [`ai-deslop-no-exclamation`](./src/prompt/rules/deslop-no-exclamation.ts) | remove exclamation marks from content prose |
@@ -171,7 +172,7 @@ export default [
 
 ### AI Deslop Rules
 
-9 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
+10 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
 
 ```js
 // eslint.config.js
@@ -197,6 +198,7 @@ export default [
 | `ai-deslop-adverbs` | Strips unnecessary adverbs ("significantly", "fundamentally", "essentially") |
 | `ai-deslop-casing` | Fixes tech term casing using a 300+ term dictionary ("github" → "GitHub", "typescript" → "TypeScript") |
 | `ai-deslop-autolink` | Links first mention of tech terms to their canonical URLs ("Nuxt" → `[Nuxt](https://nuxt.com)`) |
+| `ai-deslop-false-dichotomy` | Flags "it's not X, it's Y" false contrast patterns |
 | `ai-deslop-hedging` | Strips hedging words that weaken copy ("very", "really", "quite", "just", "somewhat") |
 | `ai-deslop-no-exclamation` | Replaces exclamation marks with periods in content prose |
 | `ai-deslop-passive-voice` | Flags passive voice ("is generated", "was created") for active rewriting |

@@ -13,6 +13,7 @@ import aiDeslopAutolink from './prompt/rules/deslop-autolink'
 import aiDeslopBuzzwords from './prompt/rules/deslop-buzzwords'
 import aiDeslopCasing from './prompt/rules/deslop-casing'
 import aiDeslopCodeLang from './prompt/rules/deslop-code-lang'
+import aiDeslopFalseDichotomy from './prompt/rules/deslop-false-dichotomy'
 import aiDeslopFiller from './prompt/rules/deslop-filler'
 import aiDeslopHedging from './prompt/rules/deslop-hedging'
 import aiDeslopNoEmDash from './prompt/rules/deslop-no-em-dash'
@@ -82,6 +83,7 @@ const plugin: ESLint.Plugin = {
     'ai-deslop-buzzwords': aiDeslopBuzzwords,
     'ai-deslop-casing': aiDeslopCasing,
     'ai-deslop-code-lang': aiDeslopCodeLang,
+    'ai-deslop-false-dichotomy': aiDeslopFalseDichotomy,
     'ai-deslop-filler': aiDeslopFiller,
     'ai-deslop-hedging': aiDeslopHedging,
     'ai-deslop-no-em-dash': aiDeslopNoEmDash,
@@ -212,6 +214,7 @@ const CODE_IGNORES = ['.claude/**', '.cursor/**', '.github/copilot-instructions.
 const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-buzzwords': 'error',
   'harlanzw/ai-deslop-casing': 'error',
+  'harlanzw/ai-deslop-false-dichotomy': 'warn',
   'harlanzw/ai-deslop-filler': 'error',
   'harlanzw/ai-deslop-adverbs': 'error',
   'harlanzw/ai-deslop-hedging': 'warn',
