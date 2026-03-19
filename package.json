@@ -41,14 +41,14 @@
     "@eslint/plugin-kit": "^0.6.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^7.7.2",
+    "@antfu/eslint-config": "^7.7.3",
     "@antfu/ni": "^29.0.0",
     "@antfu/utils": "^9.3.0",
     "@types/eslint": "^9.6.1",
     "@types/node": "^25.5.0",
-    "@typescript-eslint/typescript-estree": "^8.57.0",
-    "@typescript-eslint/utils": "^8.57.0",
-    "bumpp": "^11.0.0",
+    "@typescript-eslint/typescript-estree": "^8.57.1",
+    "@typescript-eslint/utils": "^8.57.1",
+    "bumpp": "^11.0.1",
     "eslint": "^10.0.3",
     "eslint-vitest-rule-tester": "^3.1.0",
     "jsonc-eslint-parser": "^3.1.0",

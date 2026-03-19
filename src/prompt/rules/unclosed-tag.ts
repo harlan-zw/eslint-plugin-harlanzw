@@ -3,6 +3,7 @@ import { getCodeBlockLines, getFrontmatterEnd, shouldSkipLine } from '../utils'
 
 const REGEX_2 = /<([a-z_][\w-]*)>/gi
 const REGEX_1 = /<\/([a-z_][\w-]*)>/gi
+const REGEX_INLINE_CODE = /`[^`]+`/g
 
 export default {
   meta: {
@@ -24,7 +25,7 @@ export default {
 
         const filteredText = lines
           .filter((_, i) => !shouldSkipLine(i, codeBlockLines, frontmatterEnd))
-          .map(line => line.replace(/`[^`]+`/g, ''))
+          .map(line => line.replace(REGEX_INLINE_CODE, ''))
           .join('\n')
 
         const openTags = new Map<string, number>()
@@ -46,7 +47,6 @@ export default {
         for (const [tag, count] of openTags) {
           const closeCount = closeTags.get(tag) ?? 0
           if (count !== closeCount) {
-            const missing = count - closeCount
             context.report({
               node,
               messageId: 'unclosed',

@@ -3,6 +3,8 @@ import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shoul
 
 const REGEX_2 = /!(?!\[)/g
 const REGEX_1 = /\w/
+const REGEX_WORD_END = /(\w+)$/
+const REGEX_UPPER_START = /^[A-Z]/
 
 export default {
   meta: {
@@ -42,8 +44,8 @@ export default {
               continue
             // Skip brand names like Yahoo! where ! follows a capitalized word
             const beforeBang = line.slice(0, match.index)
-            const wordMatch = beforeBang.match(/(\w+)$/)
-            if (wordMatch && /^[A-Z]/.test(wordMatch[1]))
+            const wordMatch = beforeBang.match(REGEX_WORD_END)
+            if (wordMatch && REGEX_UPPER_START.test(wordMatch[1]))
               continue
 
             const startOffset = lineNode.position.start.offset + match.index

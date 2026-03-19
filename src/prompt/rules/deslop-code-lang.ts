@@ -44,6 +44,8 @@ export default {
               continue
             const code = match[1]
             const lastChar = code.at(-1)
+            if (!lastChar)
+              continue
             const lang = LANG_MAP[lastChar]
             if (!lang)
               continue
