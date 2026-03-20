@@ -63,6 +63,8 @@ The rules are organized into the following categories:
 | [`vue-no-reactivity-after-await`](./src/rules/vue-no-reactivity-after-await.md) | disallow subscription APIs (`watch`, `computed`, etc.) after `await` in async functions |
 | [`vue-no-async-lifecycle-hook`](./src/rules/vue-no-async-lifecycle-hook.md) | disallow async callbacks in Vue lifecycle hooks |
 | [`vue-no-resolve-component-in-composables`](./src/rules/vue-no-resolve-component-in-composables.ts) | disallow `resolveComponent()`/`resolveDirective()` outside top-level `<script setup>` |
+| [`vue-no-unresolvable-define-emits`](./src/rules/vue-no-unresolvable-define-emits.ts) | disallow unresolvable types in `defineEmits` type parameters |
+| [`vue-prefer-define-emits-object-syntax`](./src/rules/vue-prefer-define-emits-object-syntax.ts) | prefer Vue 3.3+ object syntax for `defineEmits` over call signatures |
 | [`vue-require-composable-prefix`](./src/rules/vue-require-composable-prefix.ts) | enforce `use*` prefix for functions using Vue reactivity |
 | **AI Deslop** | |
 | [`ai-deslop-adverbs`](./src/prompt/rules/deslop-adverbs.ts) | remove unnecessary adverbs that add no meaning (e.g. "significantly", "fundamentally") |

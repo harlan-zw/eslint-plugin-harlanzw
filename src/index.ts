@@ -68,6 +68,8 @@ import vueNoReactivityAfterAwait from './rules/vue-no-reactivity-after-await'
 import vueNoRefAccessInTemplates from './rules/vue-no-ref-access-in-templates'
 import vueNoResolveComponentInComposables from './rules/vue-no-resolve-component-in-composables'
 import vueNoTorefsOnProps from './rules/vue-no-torefs-on-props'
+import vueNoUnresolvableDefineEmits from './rules/vue-no-unresolvable-define-emits'
+import vuePreferDefineEmitsObjectSyntax from './rules/vue-prefer-define-emits-object-syntax'
 import vueRequireComposablePrefix from './rules/vue-require-composable-prefix'
 
 const plugin: ESLint.Plugin = {
@@ -141,6 +143,8 @@ const plugin: ESLint.Plugin = {
     'vue-no-ref-access-in-templates': vueNoRefAccessInTemplates,
     'vue-no-resolve-component-in-composables': vueNoResolveComponentInComposables,
     'vue-no-torefs-on-props': vueNoTorefsOnProps,
+    'vue-no-unresolvable-define-emits': vueNoUnresolvableDefineEmits,
+    'vue-prefer-define-emits-object-syntax': vuePreferDefineEmitsObjectSyntax,
     'vue-require-composable-prefix': vueRequireComposablePrefix,
   },
   configs: {} as Record<string, Linter.Config[]>,
@@ -314,6 +318,8 @@ plugin.configs!.vue = [
       'harlanzw/vue-no-ref-access-in-templates': 'warn',
       'harlanzw/vue-no-resolve-component-in-composables': 'error',
       'harlanzw/vue-no-torefs-on-props': 'warn',
+      'harlanzw/vue-no-unresolvable-define-emits': 'error',
+      'harlanzw/vue-prefer-define-emits-object-syntax': 'warn',
       'harlanzw/vue-require-composable-prefix': 'warn',
     },
   },
