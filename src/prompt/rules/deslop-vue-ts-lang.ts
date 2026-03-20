@@ -2,7 +2,7 @@ import type { DocumentNode } from '../types'
 import { getCodeBlockLines } from '../utils'
 
 // Match <script ...> that does NOT already have lang="ts" or lang='ts'
-const SCRIPT_TAG_RE = /^<script(\s[^>]*)?>$/
+const SCRIPT_TAG_RE = /^<script(?:\s[^>]*)?>$/
 const HAS_LANG_TS = /\blang=["']ts["']/
 
 export default {
