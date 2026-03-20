@@ -10,6 +10,7 @@ ruleTester.run('harlanzw/ai-deslop-false-dichotomy', rule, {
     'Check that it\'s working correctly.',
     '```\nIt\'s not a bug — it\'s a feature.\n```',
     'The value is not zero.',
+    '`google.maps.Marker` is not scheduled to be discontinued yet, but will only receive bug fixes for major regressions. At least 12 months notice will be given before support is discontinued.',
   ],
   invalid: [
     {

@@ -4,7 +4,7 @@ import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shoul
 // Matches: "it's not X — it's Y", "it's not X, it's Y", "it's not X; it's Y"
 // Case-insensitive, requires distinct words after each "it's not" and "it's"
 const APOSTROPHE = `(?:'|\u2019)`
-const PATTERN = new RegExp(`\\b(?:it${APOSTROPHE}s|it is|is|are)\\s+not\\b.+?\\b(?:it${APOSTROPHE}s|it is|is|are)\\b|\\bis\\s+no\\s+longer\\s+just\\s+about\\b.+?\\bit${APOSTROPHE}s\\s+about\\b`, 'i')
+const PATTERN = new RegExp(`\\b(?:it${APOSTROPHE}s|it is|is|are)\\s+not\\b.{1,80}?\\b(?:it${APOSTROPHE}s|it is|is|are)\\b|\\bis\\s+no\\s+longer\\s+just\\s+about\\b.{1,80}?\\bit${APOSTROPHE}s\\s+about\\b`, 'i')
 
 export default {
   meta: {
