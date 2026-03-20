@@ -28,5 +28,17 @@ ruleTester.run('harlanzw/ai-deslop-false-dichotomy', rule, {
       code: '- It\'s not complexity — it\'s power.',
       errors: [{ messageId: 'falseDichotomy' }],
     },
+    {
+      code: 'It\'s not just a compliance requirement; it is the primary metadata for **Visual Search**.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'As of 2025, adhering to these best practices is no longer just about passing a Lightouse audit - it\'s about survival in an AI-driven search landscape.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'Developers add `loading="lazy"` to all images as a "best practice." It\'s not. It\'s a targeted optimization for specific images.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
   ],
 })
