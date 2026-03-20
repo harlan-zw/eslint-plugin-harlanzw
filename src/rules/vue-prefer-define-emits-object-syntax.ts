@@ -10,6 +10,7 @@ export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   meta: {
     type: 'suggestion',
+    fixable: 'code',
     docs: {
       description: 'prefer Vue 3.3+ object syntax for defineEmits over call signature style',
     },
@@ -40,6 +41,44 @@ export default createEslintRule<Options, MessageIds>({
         context.report({
           node: typeParam,
           messageId: 'preferObjectSyntax',
+          fix(fixer) {
+            const sourceCode = context.sourceCode ?? context.getSourceCode()
+            const typeLiteral = typeParam as TSESTree.TSTypeLiteral
+            const entries: string[] = []
+
+            for (const member of typeLiteral.members) {
+              if (member.type === 'TSCallSignatureDeclaration') {
+                const params = member.params
+                if (params.length === 0)
+                  continue
+
+                const firstParam = params[0]
+                // Extract event name from first param's type annotation
+                const annotation = firstParam.typeAnnotation?.typeAnnotation
+                if (!annotation || annotation.type !== 'TSLiteralType' || annotation.literal.type !== 'Literal')
+                  return null // bail if we can't determine event name
+
+                const eventName = String(annotation.literal.value)
+                const payloadParams = params.slice(1)
+
+                if (payloadParams.length === 0) {
+                  entries.push(`${eventName}: []`)
+                }
+                else {
+                  const payloadParts = payloadParams.map(p => sourceCode.getText(p as any))
+                  entries.push(`${eventName}: [${payloadParts.join(', ')}]`)
+                }
+              }
+              else {
+                // Preserve non-call-signature members as-is
+                entries.push(sourceCode.getText(member as any))
+              }
+            }
+
+            const indent = '  '
+            const replacement = `{\n${entries.map(e => `${indent}${e}`).join('\n')}\n}`
+            return fixer.replaceText(typeParam as any, replacement)
+          },
         })
       }
     }

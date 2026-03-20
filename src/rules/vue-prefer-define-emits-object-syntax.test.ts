@@ -30,6 +30,11 @@ run({
           (event: 'click'): void
         }>()
       `,
+      output: $`
+        const emit = defineEmits<{
+          click: []
+        }>()
+      `,
       errors: [{ messageId: 'preferObjectSyntax' }],
     },
     // Multiple call signatures
@@ -40,6 +45,12 @@ run({
           (event: 'change', payload: string): void
         }>()
       `,
+      output: $`
+        const emit = defineEmits<{
+          click: []
+          change: [payload: string]
+        }>()
+      `,
       errors: [{ messageId: 'preferObjectSyntax' }],
     },
     // Mixed (call signature alongside property - still flags)
@@ -47,6 +58,12 @@ run({
       code: $`
         const emit = defineEmits<{
           (event: 'click'): void
+          change: [payload: string]
+        }>()
+      `,
+      output: $`
+        const emit = defineEmits<{
+          click: []
           change: [payload: string]
         }>()
       `,
@@ -79,6 +96,14 @@ runVue({
         const emit = defineEmits<{
           (event: 'click'): void
           (event: 'change', payload: string): void
+        }>()
+        </script>
+      `,
+      output: $`
+        <script setup lang="ts">
+        const emit = defineEmits<{
+          click: []
+          change: [payload: string]
         }>()
         </script>
       `,
