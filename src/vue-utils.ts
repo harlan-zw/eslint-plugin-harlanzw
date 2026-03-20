@@ -190,7 +190,7 @@ export function isReactivityCall(node: TSESTree.CallExpression, vueImports: Set<
   return false
 }
 
-const COMPOSABLE_RE = /^use[A-Z_]/
+const COMPOSABLE_RE = /^_?use[A-Z_]/
 
 export function isComposableCall(node: TSESTree.CallExpression): boolean {
   if (node.callee.type === 'Identifier') {
