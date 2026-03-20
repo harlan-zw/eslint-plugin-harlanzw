@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is `eslint-plugin-harlanzw` - Harlan's experimental ESLint rules for Vue projects, particularly focused on link hygiene, Nuxt best practices, and Vue reactivity patterns. The plugin provides 23 link/nuxt/vue rules, 10 AI deslop rules for cleaning AI-generated content, and 21 prompt linting rules.
+This is `eslint-plugin-harlanzw` - Harlan's experimental ESLint rules for Vue projects, particularly focused on link hygiene, Nuxt best practices, and Vue reactivity patterns. The plugin provides 23 link/nuxt/vue rules, 12 AI deslop rules for cleaning AI-generated content, and 21 prompt linting rules.
 
 ## Development Commands
 
@@ -97,6 +97,8 @@ Each rule follows a consistent pattern:
 - `ai-deslop-no-exclamation` - Remove exclamation marks from content prose
 - `ai-deslop-passive-voice` - Flag passive voice constructions ("is generated" → rewrite actively)
 - `ai-deslop-weak-opener` - Flag weak sentence openers ("There is", "It is possible to")
+- `ai-deslop-frontmatter-spacing` - Remove empty lines inside YAML frontmatter
+- `ai-deslop-vue-ts-lang` - Require `lang="ts"` on Vue `<script>` blocks in code examples
 
 **Shared configs:** `link`, `nuxt`, `vue`, `recommended` (all three), `content` (deslop), `prompt:recommended`, `prompt:strict`, `prompt:skill`
 

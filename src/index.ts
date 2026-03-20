@@ -15,10 +15,12 @@ import aiDeslopCasing from './prompt/rules/deslop-casing'
 import aiDeslopCodeLang from './prompt/rules/deslop-code-lang'
 import aiDeslopFalseDichotomy from './prompt/rules/deslop-false-dichotomy'
 import aiDeslopFiller from './prompt/rules/deslop-filler'
+import aiDeslopFrontmatterSpacing from './prompt/rules/deslop-frontmatter-spacing'
 import aiDeslopHedging from './prompt/rules/deslop-hedging'
 import aiDeslopNoEmDash from './prompt/rules/deslop-no-em-dash'
 import aiDeslopNoExclamation from './prompt/rules/deslop-no-exclamation'
 import aiDeslopPassiveVoice from './prompt/rules/deslop-passive-voice'
+import aiDeslopVueTsLang from './prompt/rules/deslop-vue-ts-lang'
 import aiDeslopWeakOpener from './prompt/rules/deslop-weak-opener'
 import promptDuplicateHeading from './prompt/rules/duplicate-heading'
 import promptEmptySection from './prompt/rules/empty-section'
@@ -85,10 +87,12 @@ const plugin: ESLint.Plugin = {
     'ai-deslop-code-lang': aiDeslopCodeLang,
     'ai-deslop-false-dichotomy': aiDeslopFalseDichotomy,
     'ai-deslop-filler': aiDeslopFiller,
+    'ai-deslop-frontmatter-spacing': aiDeslopFrontmatterSpacing,
     'ai-deslop-hedging': aiDeslopHedging,
     'ai-deslop-no-em-dash': aiDeslopNoEmDash,
     'ai-deslop-no-exclamation': aiDeslopNoExclamation,
     'ai-deslop-passive-voice': aiDeslopPassiveVoice,
+    'ai-deslop-vue-ts-lang': aiDeslopVueTsLang,
     'ai-deslop-weak-opener': aiDeslopWeakOpener,
     'link-ascii-only': linkAsciiOnly,
     'link-lowercase': linkLowercase,
@@ -224,6 +228,8 @@ const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-weak-opener': 'warn',
   'harlanzw/ai-deslop-autolink': 'warn',
   'harlanzw/ai-deslop-code-lang': 'warn',
+  'harlanzw/ai-deslop-frontmatter-spacing': 'error',
+  'harlanzw/ai-deslop-vue-ts-lang': 'error',
 }
 
 plugin.configs!.content = [

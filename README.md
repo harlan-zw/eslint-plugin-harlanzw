@@ -75,6 +75,8 @@ The rules are organized into the following categories:
 | [`ai-deslop-no-exclamation`](./src/prompt/rules/deslop-no-exclamation.ts) | remove exclamation marks from content prose |
 | [`ai-deslop-passive-voice`](./src/prompt/rules/deslop-passive-voice.ts) | flag passive voice constructions (e.g. "is generated" → rewrite in active voice) |
 | [`ai-deslop-weak-opener`](./src/prompt/rules/deslop-weak-opener.ts) | flag weak sentence openers like "There is" and "It is possible to" |
+| [`ai-deslop-frontmatter-spacing`](./src/prompt/rules/deslop-frontmatter-spacing.ts) | remove empty lines inside YAML frontmatter |
+| [`ai-deslop-vue-ts-lang`](./src/prompt/rules/deslop-vue-ts-lang.ts) | require `lang="ts"` on Vue `<script>` blocks in code examples |
 <!-- rules:end -->
 
 The plugin also includes 21 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
@@ -172,7 +174,7 @@ export default [
 
 ### AI Deslop Rules
 
-10 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
+12 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
 
 ```js
 // eslint.config.js
@@ -203,6 +205,8 @@ export default [
 | `ai-deslop-no-exclamation` | Replaces exclamation marks with periods in content prose |
 | `ai-deslop-passive-voice` | Flags passive voice ("is generated", "was created") for active rewriting |
 | `ai-deslop-weak-opener` | Flags weak expletive openers ("There is", "It is possible to") |
+| `ai-deslop-frontmatter-spacing` | Removes empty lines inside YAML frontmatter blocks |
+| `ai-deslop-vue-ts-lang` | Adds `lang="ts"` to Vue `<script>` blocks in code examples |
 
 ### Prompt Rules
 
