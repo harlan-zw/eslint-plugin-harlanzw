@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.15.2",
-    "eslint": "^10.0.3",
+    "eslint": "^10.1.0",
     "eslint-plugin-harlanzw": "latest",
     "typescript": "^5.9.3"
   }
