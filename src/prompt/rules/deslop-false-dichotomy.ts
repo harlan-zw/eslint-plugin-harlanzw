@@ -1,10 +1,12 @@
 import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
-// Matches: "it's not X — it's Y", "it's not X, it's Y", "it's not X; it's Y"
-// Case-insensitive, requires distinct words after each "it's not" and "it's"
+// Matches: "it's not X — it's Y", "they're not X; they're Y", etc.
+// Case-insensitive, requires distinct words after each contrast
 const APOSTROPHE = `(?:'|\u2019)`
-const PATTERN = new RegExp(`\\b(?:it${APOSTROPHE}s|it is|is|are)\\s+not\\b.{1,80}?\\b(?:it${APOSTROPHE}s|it is|is|are)\\b|\\bis\\s+no\\s+longer\\s+just\\s+about\\b.{1,80}?\\bit${APOSTROPHE}s\\s+about\\b`, 'i')
+const SUBJECT_NOT = `(?:it${APOSTROPHE}s|it is|they${APOSTROPHE}re|they are|this is|that is|is|are)`
+const SUBJECT_IS = `(?:it${APOSTROPHE}s|it is|they${APOSTROPHE}re|they are|this is|that is|is|are)`
+const PATTERN = new RegExp(`\\b${SUBJECT_NOT}\\s+not\\b.{1,80}?\\b${SUBJECT_IS}\\b|\\bis\\s+no\\s+longer\\s+just\\s+about\\b.{1,80}?\\bit${APOSTROPHE}s\\s+about\\b`, 'i')
 
 export default {
   meta: {

@@ -41,5 +41,13 @@ ruleTester.run('harlanzw/ai-deslop-false-dichotomy', rule, {
       code: 'Developers add `loading="lazy"` to all images as a "best practice." It\'s not. It\'s a targeted optimization for specific images.',
       errors: [{ messageId: 'falseDichotomy' }],
     },
+    {
+      code: 'They\'re not a hierarchy; they\'re independent axes combined into a single score.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'This is not a limitation; this is a feature.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
   ],
 })
