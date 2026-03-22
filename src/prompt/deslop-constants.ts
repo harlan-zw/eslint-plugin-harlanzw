@@ -268,3 +268,4 @@ export const HEDGING_WORDS: string[] = [
 ]
 
 export const CONTENT_FILES = ['**/content/**/*.md', '**/docs/**/*.md', '**/README.md']
+export const NUXT_CONTENT_FILES = ['**/content/**/*.md', '**/docs/**/*.md']

@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 import process from 'node:process'
 import { version } from '../package.json'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
-import { CONTENT_FILES } from './prompt/deslop-constants'
+import { CONTENT_FILES, NUXT_CONTENT_FILES } from './prompt/deslop-constants'
 import { PromptLanguage } from './prompt/language'
 import promptAmbiguousQuantifier from './prompt/rules/ambiguous-quantifier'
 import aiDeslopAdverbs from './prompt/rules/deslop-adverbs'
@@ -233,8 +233,12 @@ const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-passive-voice': 'warn',
   'harlanzw/ai-deslop-weak-opener': 'warn',
   'harlanzw/ai-deslop-autolink': 'warn',
-  'harlanzw/ai-deslop-code-lang': 'warn',
   'harlanzw/ai-deslop-frontmatter-spacing': 'error',
+}
+
+// Rules that use Nuxt Content syntax ({lang="..."}, vue script tags in code blocks)
+const nuxtContentDeslopRules: Record<string, Linter.RuleSeverity> = {
+  'harlanzw/ai-deslop-code-lang': 'warn',
   'harlanzw/ai-deslop-vue-ts-lang': 'error',
 }
 
@@ -246,6 +250,14 @@ plugin.configs!.content = [
     language: 'harlanzw/prompt',
     plugins: { harlanzw: plugin },
     rules: deslopRules,
+  },
+  {
+    name: 'harlanzw/content/nuxt-content',
+    files: NUXT_CONTENT_FILES,
+    ignores: CODE_IGNORES,
+    language: 'harlanzw/prompt',
+    plugins: { harlanzw: plugin },
+    rules: nuxtContentDeslopRules,
   },
 ]
 
