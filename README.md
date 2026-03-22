@@ -79,6 +79,8 @@ The rules are organized into the following categories:
 | [`ai-deslop-weak-opener`](./src/prompt/rules/deslop-weak-opener.ts) | flag weak sentence openers like "There is" and "It is possible to" |
 | [`ai-deslop-frontmatter-spacing`](./src/prompt/rules/deslop-frontmatter-spacing.ts) | remove empty lines inside YAML frontmatter |
 | [`ai-deslop-vue-ts-lang`](./src/prompt/rules/deslop-vue-ts-lang.ts) | require `lang="ts"` on Vue `<script>` blocks in code examples |
+| **pnpm** | |
+| [`pnpm-require-trust-policy`](./src/prompt/rules/pnpm-require-trust-policy.ts) | require `trustPolicyIgnoreAfter: 262800` in `pnpm-workspace.yaml` |
 <!-- rules:end -->
 
 The plugin also includes 21 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
@@ -225,6 +227,30 @@ export default [
   // ...plugin.configs['prompt:skill'],
 ]
 ```
+
+### pnpm Rules
+
+Enforces required fields in `pnpm-workspace.yaml`. Auto-enabled when the file exists.
+
+```js
+export default harlanzw({
+  pnpm: true,
+})
+```
+
+Or use the raw config:
+
+```js
+import { plugin } from 'eslint-plugin-harlanzw'
+
+export default [
+  ...plugin.configs.pnpm,
+]
+```
+
+| Rule | What it does |
+| --- | --- |
+| `pnpm-require-trust-policy` | Ensures `trustPolicyIgnoreAfter: 262800` is present in `pnpm-workspace.yaml` (auto-fixable) |
 
 ## Sponsors
 

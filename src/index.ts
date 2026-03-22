@@ -32,6 +32,7 @@ import promptLargePrompt from './prompt/rules/large-prompt'
 import promptMissingExamples from './prompt/rules/missing-examples'
 import promptMixedConventions from './prompt/rules/mixed-conventions'
 import promptNoTrailingSpaces from './prompt/rules/no-trailing-spaces'
+import pnpmRequireTrustPolicy from './prompt/rules/pnpm-require-trust-policy'
 import promptRedundantInstruction from './prompt/rules/redundant-instruction'
 import promptSkillFrontmatterRequired from './prompt/rules/skill-frontmatter-required'
 import promptSkillFrontmatterSchema from './prompt/rules/skill-frontmatter-schema'
@@ -113,6 +114,7 @@ const plugin: ESLint.Plugin = {
     'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
     'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
     'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
+    'pnpm-require-trust-policy': pnpmRequireTrustPolicy,
     'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
     'prompt-duplicate-heading': promptDuplicateHeading,
     'prompt-empty-section': promptEmptySection,
@@ -325,6 +327,19 @@ plugin.configs!.vue = [
   },
 ]
 
+// pnpm config
+plugin.configs!.pnpm = [
+  {
+    name: 'harlanzw/pnpm',
+    files: ['pnpm-workspace.yaml'],
+    language: 'harlanzw/prompt',
+    plugins: { harlanzw: plugin },
+    rules: {
+      'harlanzw/pnpm-require-trust-policy': 'error',
+    },
+  },
+]
+
 // Recommended config (all link + nuxt + vue rules)
 plugin.configs!.recommended = [
   ...plugin.configs!.link,
@@ -339,6 +354,7 @@ export interface HarlanzwOptions {
   vue?: boolean
   prompt?: boolean | 'recommended' | 'strict' | 'skill'
   content?: boolean
+  pnpm?: boolean
 }
 
 const PROMPT_MARKERS = [
@@ -428,12 +444,17 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     configs.push(...plugin.configs!.content as Linter.Config[])
   }
 
+  const enablePnpm = options.pnpm ?? detected.pnpm
+  if (enablePnpm) {
+    configs.push(...plugin.configs!.pnpm as Linter.Config[])
+  }
+
   configs.push(...extraConfigs)
 
   return configs
 }
 
-function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, content: boolean } {
+function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, content: boolean, pnpm: boolean } {
   const cwd = process.cwd()
   const nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
   let vue = nuxt
@@ -447,7 +468,8 @@ function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, cont
   }
   const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))
   const content = existsSync(resolve(cwd, 'content')) || existsSync(resolve(cwd, 'docs'))
-  return { nuxt, vue, prompt, content }
+  const pnpm = existsSync(resolve(cwd, 'pnpm-workspace.yaml'))
+  return { nuxt, vue, prompt, content, pnpm }
 }
 
 // Attach plugin to factory and export both

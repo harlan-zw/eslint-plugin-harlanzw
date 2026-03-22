@@ -38,6 +38,7 @@ pnpm release
 - Test files are located alongside rule files with `.test.ts` suffix
 - Common test utilities are in `src/rules/_test.ts`
 - Each rule should have comprehensive test cases covering valid/invalid scenarios
+- Every new rule **must** have a `.test.ts` file and an entry in the rules table in `README.md`
 
 ## Project Architecture
 
