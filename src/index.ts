@@ -332,7 +332,6 @@ plugin.configs!.pnpm = [
   {
     name: 'harlanzw/pnpm',
     files: ['pnpm-workspace.yaml'],
-    language: 'harlanzw/prompt',
     plugins: { harlanzw: plugin },
     rules: {
       'harlanzw/pnpm-require-trust-policy': 'error',

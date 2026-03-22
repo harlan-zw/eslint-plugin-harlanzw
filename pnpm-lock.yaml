@@ -69,6 +69,9 @@ importers:
       vue:
         specifier: ^3.5.30
         version: 3.5.30(typescript@5.9.3)
+      yaml-eslint-parser:
+        specifier: ^2.0.0
+        version: 2.0.0
 
   playground:
     dependencies:

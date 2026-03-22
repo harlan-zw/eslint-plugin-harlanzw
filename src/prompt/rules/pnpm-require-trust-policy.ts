@@ -1,5 +1,3 @@
-import type { DocumentNode } from '../types'
-
 const EXPECTED_KEY = 'trustPolicyIgnoreAfter'
 const EXPECTED_VALUE = 262800
 const EXPECTED_LINE = `${EXPECTED_KEY}: ${EXPECTED_VALUE}`
@@ -17,55 +15,43 @@ export default {
   },
   create(context: any) {
     return {
-      document(node: DocumentNode) {
-        const sourceCode = context.sourceCode
-        const lines: string[] = sourceCode.lines
+      // YAMLDocument from yaml-eslint-parser
+      YAMLDocument(node: any) {
+        const mapping = node.content
+        if (!mapping || mapping.type !== 'YAMLMapping')
+          return
 
-        // Find existing trustPolicyIgnoreAfter line
-        const existingIdx = lines.findIndex((l: string) =>
-          l.trim().startsWith(`${EXPECTED_KEY}:`),
+        const pair = mapping.pairs.find((p: any) =>
+          p.key?.type === 'YAMLScalar' && p.key.value === EXPECTED_KEY,
         )
 
-        if (existingIdx !== -1) {
-          // Key exists, check value
-          const match = lines[existingIdx].match(/trustPolicyIgnoreAfter:\s*(.+)/)
-          const val = match?.[1]?.trim()
-          if (val === String(EXPECTED_VALUE))
+        if (pair) {
+          const val = pair.value?.type === 'YAMLScalar' ? pair.value.value : undefined
+          if (val === EXPECTED_VALUE)
             return
 
-          // Wrong value, fix it
-          const lineNode = node.children[existingIdx]
           context.report({
-            loc: {
-              start: { line: existingIdx + 1, column: 1 },
-              end: { line: existingIdx + 1, column: lines[existingIdx].length + 1 },
-            },
+            node: pair,
             messageId: 'wrongValue',
             fix(fixer: any) {
-              return fixer.replaceTextRange(
-                [lineNode.position.start.offset, lineNode.position.end.offset],
-                EXPECTED_LINE,
-              )
+              return fixer.replaceText(pair, EXPECTED_LINE)
             },
           })
           return
         }
 
-        // Key is missing, add it at the end
-        const lastLine = node.children.at(-1)
-        const insertOffset = lastLine.position.end.offset
-        const needsNewline = lines.at(-1).trim() !== ''
+        // Key missing, append at end of mapping
+        const sourceCode = context.sourceCode
+        const text = sourceCode.getText()
+        const endsWithNewline = text.endsWith('\n')
 
         context.report({
-          loc: {
-            start: { line: 1, column: 1 },
-            end: { line: 1, column: 1 },
-          },
+          node: mapping,
           messageId: 'missing',
           fix(fixer: any) {
-            return fixer.insertTextAfterRange(
-              [insertOffset, insertOffset],
-              `${needsNewline ? '\n' : ''}${EXPECTED_LINE}\n`,
+            return fixer.insertTextAfter(
+              mapping,
+              `${endsWithNewline ? '' : '\n'}${EXPECTED_LINE}\n`,
             )
           },
         })

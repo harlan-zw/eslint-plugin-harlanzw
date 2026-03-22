@@ -58,7 +58,8 @@
     "unbuild": "^3.6.1",
     "vite": "^8.0.1",
     "vitest": "^4.1.0",
-    "vue": "^3.5.30"
+    "vue": "^3.5.30",
+    "yaml-eslint-parser": "^2.0.0"
   },
   "resolutions": {
     "eslint-plugin-harlanzw": "workspace:*"
