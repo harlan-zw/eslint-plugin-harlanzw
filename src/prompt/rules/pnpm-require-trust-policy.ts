@@ -40,7 +40,7 @@ export default {
           return
         }
 
-        // Key missing, append at end of mapping
+        // Key missing, append at end of file
         const sourceCode = context.sourceCode
         const text = sourceCode.getText()
         const endsWithNewline = text.endsWith('\n')
@@ -49,9 +49,10 @@ export default {
           node: mapping,
           messageId: 'missing',
           fix(fixer: any) {
-            return fixer.insertTextAfter(
-              mapping,
-              `${endsWithNewline ? '' : '\n'}${EXPECTED_LINE}\n`,
+            const insertPos = text.length
+            return fixer.insertTextAfterRange(
+              [insertPos, insertPos],
+              `${endsWithNewline ? '' : '\n'}\n${EXPECTED_LINE}\n`,
             )
           },
         })

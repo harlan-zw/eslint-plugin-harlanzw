@@ -18,7 +18,17 @@ ruleTester.run('harlanzw/pnpm-require-trust-policy', rule, {
     {
       code: 'packages:\n  - packages/*',
       errors: [{ messageId: 'missing' }],
-      output: 'packages:\n  - packages/*\ntrustPolicyIgnoreAfter: 262800\n',
+      output: 'packages:\n  - packages/*\n\ntrustPolicyIgnoreAfter: 262800\n',
+    },
+    {
+      code: 'packages:\n  - packages/*\n',
+      errors: [{ messageId: 'missing' }],
+      output: 'packages:\n  - packages/*\n\ntrustPolicyIgnoreAfter: 262800\n',
+    },
+    {
+      code: 'onlyBuiltDependencies:\n  - esbuild\n  - sharp\n',
+      errors: [{ messageId: 'missing' }],
+      output: 'onlyBuiltDependencies:\n  - esbuild\n  - sharp\n\ntrustPolicyIgnoreAfter: 262800\n',
     },
     {
       code: 'packages:\n  - packages/*\ntrustPolicyIgnoreAfter: 100',
