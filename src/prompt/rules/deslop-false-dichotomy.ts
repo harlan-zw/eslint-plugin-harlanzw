@@ -4,9 +4,11 @@ import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shoul
 // Matches: "it's not X — it's Y", "they're not X; they're Y", etc.
 // Case-insensitive, requires distinct words after each contrast
 const APOSTROPHE = `(?:'|\u2019)`
-const SUBJECT_NOT = `(?:it${APOSTROPHE}s|it is|they${APOSTROPHE}re|they are|this is|that is|is|are)`
-const SUBJECT_IS = `(?:it${APOSTROPHE}s|it is|they${APOSTROPHE}re|they are|this is|that is|is|are)`
-const PATTERN = new RegExp(`\\b${SUBJECT_NOT}\\s+not\\b.{1,80}?\\b${SUBJECT_IS}\\b|\\bis\\s+no\\s+longer\\s+just\\s+about\\b.{1,80}?\\bit${APOSTROPHE}s\\s+about\\b`, 'i')
+const SUBJECT_NOT = `(?:it${APOSTROPHE}s|it is|they${APOSTROPHE}re|they are|we${APOSTROPHE}re|we are|you${APOSTROPHE}re|you are|this is|that is|is|are)`
+const SUBJECT_IS = `(?:it${APOSTROPHE}s|it is|they${APOSTROPHE}re|they are|we${APOSTROPHE}re|we are|you${APOSTROPHE}re|you are|this is|that is|is|are)`
+const CONTRACTION_NOT = `(?:isn${APOSTROPHE}t|aren${APOSTROPHE}t|wasn${APOSTROPHE}t|weren${APOSTROPHE}t)`
+const NO_LONGER = `(?:is|it${APOSTROPHE}s|was)`
+const PATTERN = new RegExp(`\\b${SUBJECT_NOT}\\s+not\\b.{1,80}?\\b${SUBJECT_IS}\\b|\\b${CONTRACTION_NOT}\\s+(?:just\\s+)?about\\b.{1,80}?\\b(?:it${APOSTROPHE}s|is)\\s+about\\b|\\b${NO_LONGER}\\s+no\\s+longer\\b.{1,60}?\\b(?:it${APOSTROPHE}s|is)\\b`, 'i')
 
 export default {
   meta: {

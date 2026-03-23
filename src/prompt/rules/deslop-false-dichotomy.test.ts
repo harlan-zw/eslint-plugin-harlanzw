@@ -49,5 +49,53 @@ ruleTester.run('harlanzw/ai-deslop-false-dichotomy', rule, {
       code: 'This is not a limitation; this is a feature.',
       errors: [{ messageId: 'falseDichotomy' }],
     },
+    // we're/we are subjects
+    {
+      code: 'We\'re not building a framework; we\'re building a compiler.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'We are not replacing the old system, we are reimagining it.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    // you're/you are subjects
+    {
+      code: 'You\'re not writing CSS — you\'re writing utility classes.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'You are not debugging code; you are debugging assumptions.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    // contraction_not: isn't/aren't/wasn't/weren't ... about ... it's/is about
+    {
+      code: 'Performance isn\'t just about speed, it\'s about perceived responsiveness.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'These metrics aren\'t about vanity, it\'s about real user impact.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'The migration wasn\'t about modernization; it\'s about compliance.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'Accessibility isn\'t about checking boxes, is about inclusive design.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    // no longer pattern: is/it's/was no longer ... it's/is
+    {
+      code: 'SEO is no longer about keywords; it\'s about intent.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'It\'s no longer enough to just ship fast, it\'s about shipping right.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
+    {
+      code: 'The API was no longer stable, it\'s now deprecated.',
+      errors: [{ messageId: 'falseDichotomy' }],
+    },
   ],
 })
