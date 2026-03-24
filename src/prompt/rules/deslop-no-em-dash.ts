@@ -1,4 +1,3 @@
-import type { DocumentNode } from '../types'
 import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shouldSkipLine } from '../utils'
 
 const REGEX_1 = /\u2014/g
@@ -15,10 +14,6 @@ function findEmDashes(line: string, scopes: ReturnType<typeof parseLineScopes>):
   return positions
 }
 
-// Check if text before the em dash looks like a label/title:
-// **bold**, ### heading, or list item prefix (- **bold**)
-const LABEL_BEFORE = /(?:\*\*[^*]+\*\*|#{1,6}\s+\S(?:.*\S)?)\s*$/
-
 export default {
   meta: {
     type: 'suggestion' as const,
@@ -30,7 +25,7 @@ export default {
   },
   create(context: any) {
     return {
-      document(node: DocumentNode) {
+      document() {
         const sourceCode = context.sourceCode
         const lines: string[] = sourceCode.lines
         const codeBlockLines = getCodeBlockLines(lines)
