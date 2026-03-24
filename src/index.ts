@@ -51,6 +51,7 @@ import linkNoWhitespace from './rules/link-no-whitespace'
 import linkRequireDescriptiveText from './rules/link-require-descriptive-text'
 import linkRequireHref from './rules/link-require-href'
 import linkTrailingSlash from './rules/link-trailing-slash'
+import noSilentCatch from './rules/no-silent-catch'
 import nuxtAwaitNavigateTo from './rules/nuxt-await-navigate-to'
 import nuxtNoRandom from './rules/nuxt-no-random'
 import nuxtNoRedundantImportMeta from './rules/nuxt-no-redundant-import-meta'
@@ -105,6 +106,7 @@ const plugin: ESLint.Plugin = {
     'link-require-descriptive-text': linkRequireDescriptiveText,
     'link-require-href': linkRequireHref,
     'link-trailing-slash': linkTrailingSlash,
+    'no-silent-catch': noSilentCatch,
     'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
     'nuxt-no-random': nuxtNoRandom,
     'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,

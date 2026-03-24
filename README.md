@@ -66,6 +66,8 @@ The rules are organized into the following categories:
 | [`vue-no-unresolvable-define-emits`](./src/rules/vue-no-unresolvable-define-emits.ts) | disallow unresolvable types in `defineEmits` type parameters |
 | [`vue-prefer-define-emits-object-syntax`](./src/rules/vue-prefer-define-emits-object-syntax.ts) | prefer Vue 3.3+ object syntax for `defineEmits` over call signatures |
 | [`vue-require-composable-prefix`](./src/rules/vue-require-composable-prefix.ts) | enforce `use*` prefix for functions using Vue reactivity |
+| **General** | |
+| [`no-silent-catch`](./src/rules/no-silent-catch.ts) | disallow silently swallowing errors in `.catch()` or `try/catch` |
 | **AI Deslop** | |
 | [`ai-deslop-adverbs`](./src/prompt/rules/deslop-adverbs.ts) | remove unnecessary adverbs that add no meaning (e.g. "significantly", "fundamentally") |
 | [`ai-deslop-autolink`](./src/prompt/rules/deslop-autolink.ts) | auto-link first mention of known tech terms to their canonical URLs |
