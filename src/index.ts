@@ -30,7 +30,6 @@ import promptInefficientToken from './prompt/rules/inefficient-token'
 import promptInstructionDilution from './prompt/rules/instruction-dilution'
 import promptLargePrompt from './prompt/rules/large-prompt'
 import promptMissingExamples from './prompt/rules/missing-examples'
-import promptMixedConventions from './prompt/rules/mixed-conventions'
 import promptNoTrailingSpaces from './prompt/rules/no-trailing-spaces'
 import pnpmRequireTrustPolicy from './prompt/rules/pnpm-require-trust-policy'
 import promptRedundantInstruction from './prompt/rules/redundant-instruction'
@@ -126,7 +125,6 @@ const plugin: ESLint.Plugin = {
     'prompt-instruction-dilution': promptInstructionDilution,
     'prompt-large-prompt': promptLargePrompt,
     'prompt-missing-examples': promptMissingExamples,
-    'prompt-mixed-conventions': promptMixedConventions,
     'prompt-no-trailing-spaces': promptNoTrailingSpaces,
     'prompt-redundant-instruction': promptRedundantInstruction,
     'prompt-skill-frontmatter-required': promptSkillFrontmatterRequired,
@@ -161,7 +159,6 @@ const promptRecommendedRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/prompt-ambiguous-quantifier': 'warn',
   'harlanzw/prompt-vague-term': 'warn',
   'harlanzw/prompt-unresolved-reference': 'warn',
-  'harlanzw/prompt-mixed-conventions': 'warn',
   'harlanzw/prompt-unclosed-code-fence': 'error',
   'harlanzw/prompt-unclosed-tag': 'error',
   'harlanzw/prompt-duplicate-heading': 'warn',
