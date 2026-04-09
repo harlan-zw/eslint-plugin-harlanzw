@@ -12,74 +12,62 @@ ruleTester.run('harlanzw/ai-deslop-no-em-dash', rule, {
     'Visit [link](https://example.com/path—thing) for details.',
   ],
   invalid: [
-    // === Single em dash: replace with " - " ===
+    // === Single em dash ===
     {
       code: 'This is great — really great.',
       errors: [{ messageId: 'emDash' }],
-      output: 'This is great - really great.',
     },
     {
       code: 'First—second',
       errors: [{ messageId: 'emDash' }],
-      output: 'First - second',
     },
     {
       code: 'One— two',
       errors: [{ messageId: 'emDash' }],
-      output: 'One - two',
     },
     {
       code: 'One —two',
       errors: [{ messageId: 'emDash' }],
-      output: 'One - two',
     },
 
-    // === Paired em dashes (parenthetical): replace with commas ===
+    // === Paired em dashes (parenthetical) ===
     {
       code: 'TypeScript — a typed language — is great.',
-      errors: [{ messageId: 'emDashParen' }, { messageId: 'emDashParen' }],
-      output: 'TypeScript, a typed language, is great.',
+      errors: [{ messageId: 'emDash' }, { messageId: 'emDash' }],
     },
     {
       code: 'The tool—built in Rust—is fast.',
-      errors: [{ messageId: 'emDashParen' }, { messageId: 'emDashParen' }],
-      output: 'The tool, built in Rust, is fast.',
+      errors: [{ messageId: 'emDash' }, { messageId: 'emDash' }],
     },
     {
       code: 'Nuxt — the Vue framework — ships SSR by default.',
-      errors: [{ messageId: 'emDashParen' }, { messageId: 'emDashParen' }],
-      output: 'Nuxt, the Vue framework, ships SSR by default.',
+      errors: [{ messageId: 'emDash' }, { messageId: 'emDash' }],
     },
 
-    // === Label/title pattern: replace with colon ===
+    // === Label/title pattern ===
     {
       code: '**Performance** — how to make it fast.',
-      errors: [{ messageId: 'emDashColon' }],
-      output: '**Performance**: how to make it fast.',
+      errors: [{ messageId: 'emDash' }],
     },
     {
       code: '- **SSR** — server-side rendering for Nuxt apps.',
-      errors: [{ messageId: 'emDashColon' }],
-      output: '- **SSR**: server-side rendering for Nuxt apps.',
+      errors: [{ messageId: 'emDash' }],
     },
     {
       code: '**Build tools**—bundlers and transpilers.',
-      errors: [{ messageId: 'emDashColon' }],
-      output: '**Build tools**: bundlers and transpilers.',
+      errors: [{ messageId: 'emDash' }],
     },
 
-    // === Three or more em dashes: not a pair, use dashes ===
+    // === Three or more em dashes ===
     {
       code: 'A — B — C — D',
       errors: [{ messageId: 'emDash' }, { messageId: 'emDash' }, { messageId: 'emDash' }],
-      output: 'A - B - C - D',
     },
 
-    // === Edge: bold text with paired em dashes is parenthetical, not label ===
+    // === Edge: bold text with paired em dashes ===
     {
       code: 'The **framework** — built by Evan — is popular.',
-      errors: [{ messageId: 'emDashParen' }, { messageId: 'emDashParen' }],
-      output: 'The **framework**, built by Evan, is popular.',
+      errors: [{ messageId: 'emDash' }, { messageId: 'emDash' }],
     },
   ],
 })
