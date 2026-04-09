@@ -336,6 +336,20 @@ plugin.configs!.vue = [
       'harlanzw/vue-require-composable-prefix': 'warn',
     },
   },
+  {
+    // SFCs with two <script> blocks (one for exported types, one for setup)
+    // confuse `import/first`: it concatenates the blocks and reports the
+    // setup-block imports as "below the body of the module" because the
+    // first block has exports. Autofix then corrupts the file by hoisting
+    // imports above the exports. Disable on .vue files where the rule has
+    // no useful signal anyway.
+    name: 'harlanzw/vue/import-first-off',
+    files: ['**/*.vue'],
+    ignores: CODE_IGNORES,
+    rules: {
+      'import/first': 'off',
+    },
+  },
 ]
 
 // pnpm config
