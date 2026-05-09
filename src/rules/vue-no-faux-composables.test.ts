@@ -358,6 +358,23 @@ run({
         }, _options)
       }
     `,
+    // Composable using inject (Vue dependency injection)
+    $`
+      import { inject } from 'vue'
+
+      function useProSession() {
+        const injected = inject('pro-session', null)
+        return injected
+      }
+    `,
+    // Composable using provide
+    $`
+      import { provide } from 'vue'
+
+      function useProvideSession(session) {
+        provide('pro-session', session)
+      }
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

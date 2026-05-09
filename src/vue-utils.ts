@@ -36,6 +36,10 @@ export const VUE_REACTIVITY_APIS = new Set([
   'effectScope',
   'getCurrentScope',
   'onScopeDispose',
+  // Dependency injection (composition-context only)
+  'provide',
+  'inject',
+  'hasInjectionContext',
 ])
 
 // VueUse reactive APIs that don't follow the use* pattern
