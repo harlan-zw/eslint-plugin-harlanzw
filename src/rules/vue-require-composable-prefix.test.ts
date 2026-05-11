@@ -106,6 +106,16 @@ run({
       `,
       filename,
     },
+    // Nuxt app context access is not reactive by itself
+    {
+      code: $`
+        function showErrorToast() {
+          const { $toast } = useNuxtApp()
+          $toast.error('Something went wrong')
+        }
+      `,
+      filename,
+    },
   ],
   invalid: [
     // Function declaration calling ref

@@ -195,10 +195,13 @@ export function isReactivityCall(node: TSESTree.CallExpression, vueImports: Set<
 }
 
 const COMPOSABLE_RE = /^_?use[A-Z_]/
+const NON_REACTIVE_COMPOSABLE_CALLS = new Set([
+  'useNuxtApp',
+])
 
 export function isComposableCall(node: TSESTree.CallExpression): boolean {
   if (node.callee.type === 'Identifier') {
-    return COMPOSABLE_RE.test(node.callee.name)
+    return COMPOSABLE_RE.test(node.callee.name) && !NON_REACTIVE_COMPOSABLE_CALLS.has(node.callee.name)
   }
   return false
 }
