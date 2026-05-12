@@ -30,8 +30,6 @@ function hasUnresolvableType(node: TSESTree.TypeNode): boolean {
         return node.typeArguments.params.some(t => hasUnresolvableType(t))
       }
       return false
-    case 'TSParenthesizedType':
-      return hasUnresolvableType(node.typeAnnotation)
     default:
       return false
   }

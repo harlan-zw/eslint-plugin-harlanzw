@@ -310,6 +310,7 @@ plugin.configs!.nuxt = [
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'warn',
       'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'warn',
       'harlanzw/nuxt-ui-prefer-shorthand-css': 'warn',
+      'harlanzw/no-silent-catch': 'error',
     },
   },
 ]
@@ -334,6 +335,7 @@ plugin.configs!.vue = [
       'harlanzw/vue-no-unresolvable-define-emits': 'error',
       'harlanzw/vue-prefer-define-emits-object-syntax': 'warn',
       'harlanzw/vue-require-composable-prefix': 'warn',
+      'harlanzw/no-silent-catch': 'error',
     },
   },
   {

@@ -52,7 +52,7 @@ export default createEslintRule<Options, MessageIds>({
                 if (params.length === 0)
                   continue
 
-                const firstParam = params[0]
+                const firstParam = params[0] as any
                 // Extract event name from first param's type annotation
                 const annotation = firstParam.typeAnnotation?.typeAnnotation
                 if (!annotation || annotation.type !== 'TSLiteralType' || annotation.literal.type !== 'Literal')
