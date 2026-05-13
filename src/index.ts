@@ -60,6 +60,7 @@ import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
 import nuxtUiPreferShorthandCss from './rules/nuxt-ui-prefer-shorthand-css'
+import preferNodeStyleText from './rules/prefer-node-style-text'
 import vueNoAsyncLifecycleHook from './rules/vue-no-async-lifecycle-hook'
 import vueNoFauxComposables from './rules/vue-no-faux-composables'
 import vueNoNestedReactivity from './rules/vue-no-nested-reactivity'
@@ -116,6 +117,7 @@ const plugin: ESLint.Plugin = {
     'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
     'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
     'pnpm-require-trust-policy': pnpmRequireTrustPolicy,
+    'prefer-node-style-text': preferNodeStyleText,
     'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
     'prompt-duplicate-heading': promptDuplicateHeading,
     'prompt-empty-section': promptEmptySection,
