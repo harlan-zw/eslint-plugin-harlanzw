@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-harlanzw",
   "type": "module",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "packageManager": "pnpm@11.1.1",
   "description": "Harlan's opinionated ESLint rules",
   "author": "Harlan Wilton <harlan@harlanzw.com>",
