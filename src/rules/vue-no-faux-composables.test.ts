@@ -391,6 +391,14 @@ run({
         provide('pro-session', session)
       }
     `,
+    // Composable using lifecycle hooks
+    $`
+      function useToolTracking() {
+        onMounted(() => {
+          trackView()
+        })
+      }
+    `,
   ],
   invalid: [
     // Function declaration without reactivity

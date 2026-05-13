@@ -40,6 +40,19 @@ export const VUE_REACTIVITY_APIS = new Set([
   'provide',
   'inject',
   'hasInjectionContext',
+  // Lifecycle hooks (composition-context only)
+  'onBeforeMount',
+  'onMounted',
+  'onBeforeUpdate',
+  'onUpdated',
+  'onBeforeUnmount',
+  'onUnmounted',
+  'onActivated',
+  'onDeactivated',
+  'onErrorCaptured',
+  'onRenderTracked',
+  'onRenderTriggered',
+  'onServerPrefetch',
 ])
 
 // VueUse reactive APIs that don't follow the use* pattern
