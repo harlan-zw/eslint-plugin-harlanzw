@@ -6,6 +6,8 @@ export const RULE_NAME = 'vue-no-faux-composables'
 export type MessageIds = 'mustUseReactivity'
 export type Options = []
 
+const SERVER_RE = /(?:^|[/\\])server[/\\]/
+
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   meta: {
@@ -21,14 +23,16 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   create: (context) => {
     const filename = context.filename || context.getFilename()
-    if (filename.endsWith('.vue'))
+    if (filename.endsWith('.vue') || SERVER_RE.test(filename))
       return {}
 
     const vueImports = new Set<string>()
     const nonVueImports = new Set<string>()
     const composableFunctions = new Map<string, TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression>()
 
-    const { hasReactivityInStatement, hasReactivityInExpression } = createReactivityChecker(vueImports, nonVueImports)
+    const { hasReactivityInStatement, hasReactivityInExpression } = createReactivityChecker(vueImports, nonVueImports, {
+      countNuxtAppAsComposable: true,
+    })
 
     function checkFunctionForReactivity(functionNode: TSESTree.FunctionDeclaration | TSESTree.FunctionExpression | TSESTree.ArrowFunctionExpression, functionName: string): void {
       if (!functionNode.body)

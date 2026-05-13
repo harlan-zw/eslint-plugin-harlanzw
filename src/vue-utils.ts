@@ -199,9 +199,14 @@ const NON_REACTIVE_COMPOSABLE_CALLS = new Set([
   'useNuxtApp',
 ])
 
-export function isComposableCall(node: TSESTree.CallExpression): boolean {
+interface ReactivityCheckerOptions {
+  countNuxtAppAsComposable?: boolean
+}
+
+export function isComposableCall(node: TSESTree.CallExpression, options: ReactivityCheckerOptions = {}): boolean {
   if (node.callee.type === 'Identifier') {
-    return COMPOSABLE_RE.test(node.callee.name) && !NON_REACTIVE_COMPOSABLE_CALLS.has(node.callee.name)
+    return COMPOSABLE_RE.test(node.callee.name)
+      && (options.countNuxtAppAsComposable || !NON_REACTIVE_COMPOSABLE_CALLS.has(node.callee.name))
   }
   return false
 }
@@ -249,7 +254,7 @@ export function trackNonVueImports(node: TSESTree.ImportDeclaration, nonVueImpor
   }
 }
 
-export function createReactivityChecker(vueImports: Set<string>, nonVueImports: Set<string>) {
+export function createReactivityChecker(vueImports: Set<string>, nonVueImports: Set<string>, options: ReactivityCheckerOptions = {}) {
   function isAutoImportedReactivityCall(node: TSESTree.CallExpression): boolean {
     if (node.callee.type === 'Identifier') {
       const name = node.callee.name
@@ -268,7 +273,7 @@ export function createReactivityChecker(vueImports: Set<string>, nonVueImports: 
 
     switch (expr.type) {
       case 'CallExpression':
-        if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr) || isReactiveLifecycleCall(expr))
+        if (isReactivityCall(expr, vueImports) || isAutoImportedReactivityCall(expr) || isComposableCall(expr, options) || isReactiveLifecycleCall(expr))
           return true
         return expr.arguments.some(arg => hasReactivityInArg(arg))
       case 'NewExpression':

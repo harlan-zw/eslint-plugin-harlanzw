@@ -76,10 +76,12 @@ The rules are organized into the following categories:
 | [`ai-deslop-false-dichotomy`](./src/prompt/rules/deslop-false-dichotomy.ts) | flag "it's not X, it's Y" contrast patterns common in AI writing |
 | [`ai-deslop-filler`](./src/prompt/rules/deslop-filler.ts) | remove AI-generated filler sentences and phrases (e.g. "it's worth noting that") |
 | [`ai-deslop-hedging`](./src/prompt/rules/deslop-hedging.ts) | remove hedging/qualifying words that weaken copy (e.g. "very", "really", "quite", "just") |
+| [`ai-deslop-no-em-dash`](./src/prompt/rules/deslop-no-em-dash.ts) | replace em dashes in content prose |
 | [`ai-deslop-no-exclamation`](./src/prompt/rules/deslop-no-exclamation.ts) | remove exclamation marks from content prose |
 | [`ai-deslop-passive-voice`](./src/prompt/rules/deslop-passive-voice.ts) | flag passive voice constructions (e.g. "is generated" → rewrite in active voice) |
 | [`ai-deslop-weak-opener`](./src/prompt/rules/deslop-weak-opener.ts) | flag weak sentence openers like "There is" and "It is possible to" |
 | [`ai-deslop-frontmatter-spacing`](./src/prompt/rules/deslop-frontmatter-spacing.ts) | remove empty lines inside YAML frontmatter |
+| [`ai-deslop-code-lang`](./src/prompt/rules/deslop-code-lang.ts) | require language hints on fenced code examples |
 | [`ai-deslop-vue-ts-lang`](./src/prompt/rules/deslop-vue-ts-lang.ts) | require `lang="ts"` on Vue `<script>` blocks in code examples |
 | **pnpm** | |
 | [`pnpm-require-trust-policy`](./src/prompt/rules/pnpm-require-trust-policy.ts) | require `trustPolicyIgnoreAfter: 262800` in `pnpm-workspace.yaml` |
@@ -180,7 +182,7 @@ export default [
 
 ### AI Deslop Rules
 
-12 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
+14 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
 
 ```js
 // eslint.config.js
@@ -208,10 +210,12 @@ export default [
 | `ai-deslop-autolink` | Links first mention of tech terms to their canonical URLs ("Nuxt" → `[Nuxt](https://nuxt.com)`) |
 | `ai-deslop-false-dichotomy` | Flags "it's not X, it's Y" false contrast patterns |
 | `ai-deslop-hedging` | Strips hedging words that weaken copy ("very", "really", "quite", "just", "somewhat") |
+| `ai-deslop-no-em-dash` | Replaces em dashes in content prose |
 | `ai-deslop-no-exclamation` | Replaces exclamation marks with periods in content prose |
 | `ai-deslop-passive-voice` | Flags passive voice ("is generated", "was created") for active rewriting |
 | `ai-deslop-weak-opener` | Flags weak expletive openers ("There is", "It is possible to") |
 | `ai-deslop-frontmatter-spacing` | Removes empty lines inside YAML frontmatter blocks |
+| `ai-deslop-code-lang` | Adds language hints to fenced code blocks |
 | `ai-deslop-vue-ts-lang` | Adds `lang="ts"` to Vue `<script>` blocks in code examples |
 
 ### Prompt Rules

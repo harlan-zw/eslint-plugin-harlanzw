@@ -106,6 +106,30 @@ run({
       `,
       filename,
     },
+    // provide/inject helpers are conventional names for typed DI wrappers.
+    {
+      code: $`
+        import { provide } from 'vue'
+
+        function provideSiteCompetitorsView(view) {
+          provide(SITE_COMPETITORS_VIEW, view)
+        }
+      `,
+      filename,
+    },
+    {
+      code: $`
+        import { inject } from 'vue'
+
+        function injectDashboardOverview() {
+          const overview = inject(DASHBOARD_OVERVIEW_KEY)
+          if (!overview)
+            throw new Error('Dashboard overview not provided.')
+          return overview
+        }
+      `,
+      filename,
+    },
     // Nuxt app context access is not reactive by itself
     {
       code: $`

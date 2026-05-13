@@ -10,6 +10,8 @@ export type Options = []
 
 const DEFINE_RE = /^define[A-Z]/
 const CREATE_RE = /^create[A-Z]/
+const PROVIDE_RE = /^provide[A-Z]/
+const INJECT_RE = /^inject[A-Z]/
 
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
@@ -40,7 +42,7 @@ export default createEslintRule<Options, MessageIds>({
     const { hasReactivityInStatement, hasReactivityInExpression } = createReactivityChecker(vueImports, nonVueImports)
 
     function isExcludedName(name: string): boolean {
-      return DEFINE_RE.test(name) || CREATE_RE.test(name) || name === 'setup'
+      return DEFINE_RE.test(name) || CREATE_RE.test(name) || PROVIDE_RE.test(name) || INJECT_RE.test(name) || name === 'setup'
     }
 
     function checkFunctionForReactivity(

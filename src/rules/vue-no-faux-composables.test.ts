@@ -248,6 +248,22 @@ run({
         return useRuntimeConfig().public['nuxt-scripts']
       }
     `,
+    // Nuxt app context wrappers are valid composables even without Vue refs.
+    $`
+      export function useProSiteChrome(featureId) {
+        const nuxtApp = useNuxtApp()
+        return nuxtApp._proShellChrome?.[featureId]
+      }
+    `,
+    // Server utilities often use Nuxt-style use* names without Vue reactivity.
+    {
+      filename: 'server/utils/auth/hooks.ts',
+      code: $`
+        export function useAuthHooks() {
+          return getOrCreate()
+        }
+      `,
+    },
     // Composable with reactivity inside new Promise callback
     $`
       function useElementVisibility(element) {
