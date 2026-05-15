@@ -57,6 +57,7 @@ import nuxtNoRedundantImportMeta from './rules/nuxt-no-redundant-import-meta'
 import nuxtNoSideEffectsInAsyncDataHandler from './rules/nuxt-no-side-effects-in-async-data-handler'
 import nuxtNoSideEffectsInSetup from './rules/nuxt-no-side-effects-in-setup'
 import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
+import nuxtPreferLayerAlias from './rules/nuxt-prefer-layer-alias'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
 import nuxtUiPreferShorthandCss from './rules/nuxt-ui-prefer-shorthand-css'
@@ -113,6 +114,7 @@ const plugin: ESLint.Plugin = {
     'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
     'nuxt-no-side-effects-in-setup': nuxtNoSideEffectsInSetup,
     'nuxt-no-unsafe-date': nuxtNoUnsafeDate,
+    'nuxt-prefer-layer-alias': nuxtPreferLayerAlias,
     'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
     'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
     'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
@@ -309,6 +311,7 @@ plugin.configs!.nuxt = [
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
       'harlanzw/nuxt-no-unsafe-date': 'warn',
+      'harlanzw/nuxt-prefer-layer-alias': 'warn',
       'harlanzw/nuxt-prefer-navigate-to-over-router-push-replace': 'warn',
       'harlanzw/nuxt-prefer-nuxt-link-over-router-link': 'warn',
       'harlanzw/nuxt-ui-prefer-shorthand-css': 'warn',

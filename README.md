@@ -50,6 +50,7 @@ The rules are organized into the following categories:
 | [`nuxt-no-redundant-import-meta`](./src/rules/nuxt-no-redundant-import-meta.md) | disallow redundant `import.meta.server` or `import.meta.client` checks in scoped components |
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
 | [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
+| [`nuxt-prefer-layer-alias`](./src/rules/nuxt-prefer-layer-alias.ts) | prefer `#layers/<name>` alias over `~~/layers/<name>` paths |
 | [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) | prefer `navigateTo()` over `router.push()` or `router.replace()` |
 | [`nuxt-prefer-nuxt-link-over-router-link`](./src/rules/nuxt-prefer-nuxt-link-over-router-link.md) | prefer `NuxtLink` over `RouterLink` |
 | [`nuxt-ui-prefer-shorthand-css`](./src/rules/nuxt-ui-prefer-shorthand-css.ts) | prefer Nuxt UI shorthand CSS classes over verbose `var()` syntax |
