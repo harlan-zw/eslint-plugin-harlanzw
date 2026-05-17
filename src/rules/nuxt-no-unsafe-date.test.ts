@@ -54,6 +54,26 @@ runVue({
       `,
       filename: 'test.vue',
     },
+    // useState factory — value is serialized to payload and reused on client
+    {
+      code: $`
+        <script setup>
+        const renderNow = useState('render:now', () => Number(new Date()))
+        </script>
+        <template><div>{{ renderNow }}</div></template>
+      `,
+      filename: 'test.vue',
+    },
+    // useAsyncData handler — runs on server, serialized via payload
+    {
+      code: $`
+        <script setup>
+        const { data } = await useAsyncData('now', () => Promise.resolve(Date.now()))
+        </script>
+        <template><div>{{ data }}</div></template>
+      `,
+      filename: 'test.vue',
+    },
     // Ternary client guard — safe
     {
       code: $`

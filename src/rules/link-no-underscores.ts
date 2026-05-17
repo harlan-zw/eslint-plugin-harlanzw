@@ -31,10 +31,13 @@ export default createEslintRule<Options, MessageIds>({
       if (shouldSkipLink(url, node, opts))
         return
 
-      if (url.includes('_')) {
+      const queryIndex = url.search(/[?#]/)
+      const pathPart = queryIndex === -1 ? url : url.slice(0, queryIndex)
+      const rest = queryIndex === -1 ? '' : url.slice(queryIndex)
+      if (pathPart.includes('_')) {
         const sourceCode = context.sourceCode
         const attrText = sourceCode.getText(attrNode)
-        const fixedUrl = url.replaceAll('_', '-')
+        const fixedUrl = pathPart.replaceAll('_', '-') + rest
         context.report({
           node,
           messageId: 'underscores',
@@ -66,8 +69,11 @@ export default createEslintRule<Options, MessageIds>({
                 const url = attr.value.value
                 if (shouldSkipJsxLink(url, attrs, opts))
                   continue
-                if (url.includes('_')) {
-                  const fixedUrl = url.replaceAll('_', '-')
+                const queryIndex = url.search(/[?#]/)
+                const pathPart = queryIndex === -1 ? url : url.slice(0, queryIndex)
+                const rest = queryIndex === -1 ? '' : url.slice(queryIndex)
+                if (pathPart.includes('_')) {
+                  const fixedUrl = pathPart.replaceAll('_', '-') + rest
                   context.report({
                     node,
                     messageId: 'underscores',

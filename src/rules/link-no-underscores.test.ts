@@ -18,8 +18,22 @@ run({
       code: '<a href="https://example.com/some_path">External</a>',
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    {
+      code: '<a href="/login?return_to=/onboarding">Login</a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    {
+      code: '<a href="/page#some_anchor">Anchor</a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
   ],
   invalid: [
+    {
+      code: '<a href="/about_us?return_to=/x_y">About</a>',
+      output: '<a href="/about-us?return_to=/x_y">About</a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      errors: [{ messageId: 'underscores' }],
+    },
     {
       code: '<a href="/about_us">About</a>',
       output: '<a href="/about-us">About</a>',

@@ -31,6 +31,19 @@ const SERVER_HANDLER_FUNCTIONS = new Set([
 ])
 
 /**
+ * Nuxt data composables whose factory/handler runs on the server and is serialized
+ * into the payload for hydration. The client reuses the serialized value rather than
+ * re-running the callback, so non-deterministic APIs (Date, Math.random) inside are safe.
+ */
+const PAYLOAD_HYDRATED_FUNCTIONS = new Set([
+  'useState',
+  'useAsyncData',
+  'useLazyAsyncData',
+  'useFetch',
+  'useLazyFetch',
+])
+
+/**
  * Check if a function node is a "named" function — one that's declared or assigned to a variable.
  * Named functions (event handlers, utility functions) are just defined during setup, not executed.
  * Inline callbacks (e.g. `.sort(() => ...)`) are anonymous and execute synchronously during setup.
@@ -103,6 +116,9 @@ export function executedDuringSetup(node: TSESTree.Node): boolean {
           return false
 
         if (SERVER_HANDLER_FUNCTIONS.has(calleeName))
+          return false
+
+        if (PAYLOAD_HYDRATED_FUNCTIONS.has(calleeName))
           return false
 
         // For watch(), only the callback (2nd+ arg) is deferred; the getter (1st arg) executes during setup
