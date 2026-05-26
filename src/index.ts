@@ -490,13 +490,14 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
 
 function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, content: boolean, pnpm: boolean } {
   const cwd = process.cwd()
-  const nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
+  let nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
   let vue = nuxt
-  if (!vue) {
+  if (!vue || !nuxt) {
     try {
       const pkg = JSON.parse(readFileSync(resolve(cwd, 'package.json'), 'utf-8'))
       const deps = { ...pkg.dependencies, ...pkg.devDependencies }
-      vue = !!(deps.vue || deps.nuxt)
+      nuxt = nuxt || !!deps.nuxt
+      vue = vue || !!(deps.vue || deps.nuxt)
     }
     catch {}
   }
