@@ -48,6 +48,7 @@ The rules are organized into the following categories:
 | **Nuxt** | |
 | [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) | enforce awaiting `navigateTo()` calls |
 | [`nuxt-no-redundant-import-meta`](./src/rules/nuxt-no-redundant-import-meta.md) | disallow redundant `import.meta.server` or `import.meta.client` checks in scoped components |
+| [`nuxt-no-self-layer-alias`](./src/rules/nuxt-no-self-layer-alias.ts) | disallow `#layers/<name>` alias when importing from the same layer; prefer a relative path |
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
 | [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
 | [`nuxt-prefer-layer-alias`](./src/rules/nuxt-prefer-layer-alias.ts) | prefer `#layers/<name>` alias over `~~/layers/<name>` paths |

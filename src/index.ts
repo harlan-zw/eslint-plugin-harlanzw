@@ -54,6 +54,7 @@ import noSilentCatch from './rules/no-silent-catch'
 import nuxtAwaitNavigateTo from './rules/nuxt-await-navigate-to'
 import nuxtNoRandom from './rules/nuxt-no-random'
 import nuxtNoRedundantImportMeta from './rules/nuxt-no-redundant-import-meta'
+import nuxtNoSelfLayerAlias from './rules/nuxt-no-self-layer-alias'
 import nuxtNoSideEffectsInAsyncDataHandler from './rules/nuxt-no-side-effects-in-async-data-handler'
 import nuxtNoSideEffectsInSetup from './rules/nuxt-no-side-effects-in-setup'
 import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
@@ -111,6 +112,7 @@ const plugin: ESLint.Plugin = {
     'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
     'nuxt-no-random': nuxtNoRandom,
     'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
+    'nuxt-no-self-layer-alias': nuxtNoSelfLayerAlias,
     'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
     'nuxt-no-side-effects-in-setup': nuxtNoSideEffectsInSetup,
     'nuxt-no-unsafe-date': nuxtNoUnsafeDate,
@@ -308,6 +310,7 @@ plugin.configs!.nuxt = [
       'harlanzw/nuxt-await-navigate-to': 'error',
       'harlanzw/nuxt-no-random': 'error',
       'harlanzw/nuxt-no-redundant-import-meta': 'error',
+      'harlanzw/nuxt-no-self-layer-alias': 'warn',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
       'harlanzw/nuxt-no-side-effects-in-setup': 'error',
       'harlanzw/nuxt-no-unsafe-date': 'warn',
