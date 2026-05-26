@@ -50,18 +50,18 @@ const SIDE_EFFECT_PATTERNS = new Set([
  * Methods that are only side effects when called on specific receivers.
  * Avoids false positives like String.replace(), Array.push(), etc.
  */
-const RECEIVER_SCOPED_METHODS: Record<string, Set<string>> = {
+const RECEIVER_SCOPED_METHODS = new Map<string, Set<string>>([
   // Navigation — only on router instances
-  push: new Set(['router', '$router']),
-  replace: new Set(['router', '$router']),
-  go: new Set(['router', '$router']),
-  back: new Set(['router', '$router']),
-  forward: new Set(['router', '$router']),
+  ['push', new Set(['router', '$router'])],
+  ['replace', new Set(['router', '$router'])],
+  ['go', new Set(['router', '$router'])],
+  ['back', new Set(['router', '$router'])],
+  ['forward', new Set(['router', '$router'])],
   // Analytics — only on analytics/tracking objects
-  track: new Set(['analytics', 'mixpanel', 'segment']),
-  identify: new Set(['analytics', 'mixpanel', 'segment']),
-  page: new Set(['analytics', 'mixpanel', 'segment']),
-}
+  ['track', new Set(['analytics', 'mixpanel', 'segment'])],
+  ['identify', new Set(['analytics', 'mixpanel', 'segment'])],
+  ['page', new Set(['analytics', 'mixpanel', 'segment'])],
+])
 
 /**
  * Receiver objects that are always side-effecting (any method call on them)
@@ -102,7 +102,7 @@ function isSideEffectInHandler(node: TSESTree.Node): boolean {
         return true
 
       // Receiver-scoped methods (e.g., router.push but NOT array.push)
-      const allowedReceivers = RECEIVER_SCOPED_METHODS[method]
+      const allowedReceivers = RECEIVER_SCOPED_METHODS.get(method)
       if (allowedReceivers && node.callee.object.type === 'Identifier' && allowedReceivers.has(node.callee.object.name))
         return true
 
