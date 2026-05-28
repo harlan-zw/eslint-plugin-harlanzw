@@ -14,6 +14,7 @@ import aiDeslopBuzzwords from './prompt/rules/deslop-buzzwords'
 import aiDeslopCasing from './prompt/rules/deslop-casing'
 import aiDeslopCodeLang from './prompt/rules/deslop-code-lang'
 import aiDeslopFalseDichotomy from './prompt/rules/deslop-false-dichotomy'
+import aiDeslopFalseSincerity from './prompt/rules/deslop-false-sincerity'
 import aiDeslopFiller from './prompt/rules/deslop-filler'
 import aiDeslopFrontmatterSpacing from './prompt/rules/deslop-frontmatter-spacing'
 import aiDeslopHedging from './prompt/rules/deslop-hedging'
@@ -92,6 +93,7 @@ const plugin: ESLint.Plugin = {
     'ai-deslop-casing': aiDeslopCasing,
     'ai-deslop-code-lang': aiDeslopCodeLang,
     'ai-deslop-false-dichotomy': aiDeslopFalseDichotomy,
+    'ai-deslop-false-sincerity': aiDeslopFalseSincerity,
     'ai-deslop-filler': aiDeslopFiller,
     'ai-deslop-frontmatter-spacing': aiDeslopFrontmatterSpacing,
     'ai-deslop-hedging': aiDeslopHedging,
@@ -230,6 +232,7 @@ const deslopRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/ai-deslop-buzzwords': 'error',
   'harlanzw/ai-deslop-casing': 'error',
   'harlanzw/ai-deslop-false-dichotomy': 'warn',
+  'harlanzw/ai-deslop-false-sincerity': 'error',
   'harlanzw/ai-deslop-filler': 'error',
   'harlanzw/ai-deslop-adverbs': 'error',
   'harlanzw/ai-deslop-hedging': 'warn',

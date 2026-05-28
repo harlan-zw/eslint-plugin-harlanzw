@@ -6,7 +6,7 @@
   "description": "Harlan's opinionated ESLint rules",
   "author": "Harlan Wilton <harlan@harlanzw.com>",
   "license": "MIT",
-  "funding": "https://github.com/sponsors/harlan-zw",
+  "funding": "https://github.comcla/sponsors/harlan-zw",
   "homepage": "https://github.com/harlan-zw/eslint-plugin-harlanzw#readme",
   "repository": {
     "type": "git",

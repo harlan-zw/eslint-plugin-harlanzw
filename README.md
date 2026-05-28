@@ -76,6 +76,7 @@ The rules are organized into the following categories:
 | [`ai-deslop-buzzwords`](./src/prompt/rules/deslop-buzzwords.ts) | replace AI-generated buzzword phrases with simpler alternatives (e.g. "leverage" → "use") |
 | [`ai-deslop-casing`](./src/prompt/rules/deslop-casing.ts) | enforce correct casing for tech terms, brands, and abbreviations (e.g. "github" → "GitHub") |
 | [`ai-deslop-false-dichotomy`](./src/prompt/rules/deslop-false-dichotomy.ts) | flag "it's not X, it's Y" contrast patterns common in AI writing |
+| [`ai-deslop-false-sincerity`](./src/prompt/rules/deslop-false-sincerity.ts) | remove false-sincerity openers that pad sentences ("honestly", "frankly", "in all honesty") |
 | [`ai-deslop-filler`](./src/prompt/rules/deslop-filler.ts) | remove AI-generated filler sentences and phrases (e.g. "it's worth noting that") |
 | [`ai-deslop-hedging`](./src/prompt/rules/deslop-hedging.ts) | remove hedging/qualifying words that weaken copy (e.g. "very", "really", "quite", "just") |
 | [`ai-deslop-no-em-dash`](./src/prompt/rules/deslop-no-em-dash.ts) | replace em dashes in content prose |
@@ -211,6 +212,7 @@ export default [
 | `ai-deslop-casing` | Fixes tech term casing using a 300+ term dictionary ("github" → "GitHub", "typescript" → "TypeScript") |
 | `ai-deslop-autolink` | Links first mention of tech terms to their canonical URLs ("Nuxt" → `[Nuxt](https://nuxt.com)`) |
 | `ai-deslop-false-dichotomy` | Flags "it's not X, it's Y" false contrast patterns |
+| `ai-deslop-false-sincerity` | Strips false-sincerity openers ("honestly", "frankly", "in all honesty", "let's be real") |
 | `ai-deslop-hedging` | Strips hedging words that weaken copy ("very", "really", "quite", "just", "somewhat") |
 | `ai-deslop-no-em-dash` | Replaces em dashes in content prose |
 | `ai-deslop-no-exclamation` | Replaces exclamation marks with periods in content prose |

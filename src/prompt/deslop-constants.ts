@@ -216,6 +216,19 @@ export const FILLER_PHRASES: string[] = [
   'to sum up',
 ]
 
+// False-sincerity openers — signal nothing, pad the sentence. State the point.
+export const FALSE_SINCERITY_OPENERS: string[] = [
+  'honestly',
+  'frankly',
+  'in all honesty',
+  'in all fairness',
+  'to be frank',
+  'let\'s be real',
+  'if i\'m honest',
+  'if i\'m being honest',
+  'if we\'re being honest',
+]
+
 // Unnecessary adverbs that add no meaning
 export const UNNECESSARY_ADVERBS: string[] = [
   'fundamentally',
