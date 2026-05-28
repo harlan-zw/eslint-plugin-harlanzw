@@ -1,4 +1,4 @@
-import { dirname, posix, relative, sep } from 'node:path'
+import { dirname, posix, sep } from 'node:path'
 import { createEslintRule } from '../utils'
 
 export const RULE_NAME = 'nuxt-no-self-layer-alias'
