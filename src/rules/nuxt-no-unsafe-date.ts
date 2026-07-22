@@ -41,13 +41,9 @@ function isNewDateCall(node: TSESTree.NewExpression): boolean {
  * These return the same value on server and client (unless at exact midnight on New Year's).
  */
 const STABLE_DATE_METHODS = new Set([
-  'getFullYear',
   'getUTCFullYear',
-  'getMonth',
   'getUTCMonth',
-  'getDate',
   'getUTCDate',
-  'getDay',
   'getUTCDay',
 ])
 

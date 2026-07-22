@@ -14,10 +14,11 @@ export default {
   meta: {
     type: 'suggestion' as const,
     docs: { description: 'Disallow weak instruction language that models may interpret inconsistently' },
-    fixable: 'code' as const,
+    hasSuggestions: true as const,
     schema: [],
     messages: {
       weak: 'Weak instruction: "{{found}}". Use "{{suggestion}}" for more consistent behavior.',
+      strengthen: 'Replace with "{{suggestion}}"',
     },
   },
   create(context: any) {
@@ -50,9 +51,15 @@ export default {
                 },
                 messageId: 'weak',
                 data: { found: match[0], suggestion },
-                fix(fixer: any) {
-                  return fixer.replaceTextRange([startOffset, endOffset], suggestion)
-                },
+                // suggestion, not autofix: "might" -> "Will" flips possibility
+                // into obligation, which --fix must never do silently
+                suggest: [{
+                  messageId: 'strengthen',
+                  data: { suggestion },
+                  fix(fixer: any) {
+                    return fixer.replaceTextRange([startOffset, endOffset], suggestion)
+                  },
+                }],
               })
             }
           }

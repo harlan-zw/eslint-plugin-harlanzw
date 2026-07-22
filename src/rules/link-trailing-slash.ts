@@ -7,8 +7,32 @@ export const RULE_NAME = 'link-trailing-slash'
 export type MessageIds = 'addTrailingSlash' | 'removeTrailingSlash'
 export type Options = [LinkRuleOptions & { requireTrailingSlash?: boolean }]
 
+function splitUrl(url: string): { path: string, suffix: string } {
+  const queryIndex = url.indexOf('?')
+  const hashIndex = url.indexOf('#')
+  const suffixIndex = queryIndex === -1
+    ? hashIndex
+    : hashIndex === -1
+      ? queryIndex
+      : Math.min(queryIndex, hashIndex)
+
+  return suffixIndex === -1
+    ? { path: url, suffix: '' }
+    : { path: url.slice(0, suffixIndex), suffix: url.slice(suffixIndex) }
+}
+
 function shouldSkipUrl(url: string): boolean {
-  return url.startsWith('#') || url.includes(':') || url === '/' || url === ''
+  const { path } = splitUrl(url)
+  return url.startsWith('#') || url.includes(':') || path === '/' || path === ''
+}
+
+function fixTrailingSlash(url: string, requireTrailingSlash: boolean): string {
+  const { path, suffix } = splitUrl(url)
+  if (requireTrailingSlash && !path.endsWith('/'))
+    return `${path}/${suffix}`
+  if (!requireTrailingSlash && path.endsWith('/'))
+    return `${path.slice(0, -1)}${suffix}`
+  return url
 }
 
 export default createEslintRule<Options, MessageIds>({
@@ -56,27 +80,30 @@ export default createEslintRule<Options, MessageIds>({
       if (shouldSkipLink(url, node, opts))
         return
 
-      const hasTrailingSlash = url.endsWith('/')
+      const fixedUrl = fixTrailingSlash(url, requireTrailingSlash)
+      if (fixedUrl === url)
+        return
+
       const sourceCode = context.sourceCode
       const attrText = sourceCode.getText(attrNode)
 
-      if (requireTrailingSlash && !hasTrailingSlash) {
+      if (requireTrailingSlash) {
         context.report({
           node,
           messageId: 'addTrailingSlash',
           data: { url },
           fix(fixer) {
-            return fixer.replaceText(attrNode, attrText.replace(url, `${url}/`))
+            return fixer.replaceText(attrNode, attrText.replace(url, fixedUrl))
           },
         })
       }
-      else if (!requireTrailingSlash && hasTrailingSlash) {
+      else {
         context.report({
           node,
           messageId: 'removeTrailingSlash',
           data: { url },
           fix(fixer) {
-            return fixer.replaceText(attrNode, attrText.replace(url, url.slice(0, -1)))
+            return fixer.replaceText(attrNode, attrText.replace(url, fixedUrl))
           },
         })
       }
@@ -104,24 +131,27 @@ export default createEslintRule<Options, MessageIds>({
                   continue
                 if (shouldSkipJsxLink(url, attrs, opts))
                   continue
-                const hasTrailingSlash = url.endsWith('/')
-                if (requireTrailingSlash && !hasTrailingSlash) {
+                const fixedUrl = fixTrailingSlash(url, requireTrailingSlash)
+                if (fixedUrl === url)
+                  continue
+
+                if (requireTrailingSlash) {
                   context.report({
                     node,
                     messageId: 'addTrailingSlash',
                     data: { url },
                     fix(fixer) {
-                      return fixer.replaceText(attr.value, `"${url}/"`)
+                      return fixer.replaceText(attr.value, `"${fixedUrl}"`)
                     },
                   })
                 }
-                else if (!requireTrailingSlash && hasTrailingSlash) {
+                else {
                   context.report({
                     node,
                     messageId: 'removeTrailingSlash',
                     data: { url },
                     fix(fixer) {
-                      return fixer.replaceText(attr.value, `"${url.slice(0, -1)}"`)
+                      return fixer.replaceText(attr.value, `"${fixedUrl}"`)
                     },
                   })
                 }

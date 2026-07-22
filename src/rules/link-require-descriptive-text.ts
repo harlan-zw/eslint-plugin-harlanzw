@@ -129,11 +129,15 @@ export default createEslintRule<Options, MessageIds>({
           if (url && shouldSkipJsxLink(url, attrs, opts))
             return
 
-          const textContent = (node.children || [])
-            .filter((child: any) => child.type === 'JSXText')
-            .map((child: any) => child.value)
-            .join('')
-            .trim()
+          const children = node.children || []
+          const hasDynamicContent = children.some((child: any) => child.type !== 'JSXText')
+          const textContent = hasDynamicContent
+            ? '[dynamic]'
+            : children
+                .filter((child: any) => child.type === 'JSXText')
+                .map((child: any) => child.value)
+                .join('')
+                .trim()
 
           let title: string | null = null
           let ariaLabel: string | null = null
@@ -141,8 +145,12 @@ export default createEslintRule<Options, MessageIds>({
             if (attr.type === 'JSXAttribute') {
               if (attr.name?.name === 'title' && attr.value?.type === 'Literal')
                 title = attr.value.value
+              else if (attr.name?.name === 'title' && attr.value?.type === 'JSXExpressionContainer')
+                title = '[dynamic]'
               if (attr.name?.name === 'aria-label' && attr.value?.type === 'Literal')
                 ariaLabel = attr.value.value
+              else if (attr.name?.name === 'aria-label' && attr.value?.type === 'JSXExpressionContainer')
+                ariaLabel = '[dynamic]'
             }
           }
 

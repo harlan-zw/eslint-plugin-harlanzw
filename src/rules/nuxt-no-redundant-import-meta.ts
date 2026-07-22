@@ -1,4 +1,3 @@
-import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 import { createEslintRule } from '../utils'
 
 export const RULE_NAME = 'nuxt-no-redundant-import-meta'
@@ -35,12 +34,12 @@ export default createEslintRule<Options, MessageIds>({
       MemberExpression(node) {
         // Check for import.meta.server or import.meta.client
         if (
-          node.object.type === AST_NODE_TYPES.MetaProperty
-          && node.object.meta.type === AST_NODE_TYPES.Identifier
+          node.object.type === 'MetaProperty'
+          && node.object.meta.type === 'Identifier'
           && node.object.meta.name === 'import'
-          && node.object.property.type === AST_NODE_TYPES.Identifier
+          && node.object.property.type === 'Identifier'
           && node.object.property.name === 'meta'
-          && node.property.type === AST_NODE_TYPES.Identifier
+          && node.property.type === 'Identifier'
           && (node.property.name === 'server' || node.property.name === 'client')
         ) {
           const accessType = node.property.name

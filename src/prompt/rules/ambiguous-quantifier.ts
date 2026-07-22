@@ -14,10 +14,11 @@ export default {
   meta: {
     type: 'suggestion' as const,
     docs: { description: 'Disallow ambiguous quantifiers that models interpret inconsistently' },
-    fixable: 'code' as const,
+    hasSuggestions: true as const,
     schema: [],
     messages: {
       ambiguous: 'Ambiguous quantifier: "{{found}}". Consider specifying "{{suggestion}}".',
+      specify: 'Replace with "{{suggestion}}"',
     },
   },
   create(context: any) {
@@ -50,9 +51,15 @@ export default {
                 },
                 messageId: 'ambiguous',
                 data: { found: match[0], suggestion },
-                fix(fixer: any) {
-                  return fixer.replaceTextRange([startOffset, endOffset], suggestion)
-                },
+                // suggestion, not autofix: the replacement guesses the author's
+                // intended count, so --fix must never apply it silently
+                suggest: [{
+                  messageId: 'specify',
+                  data: { suggestion },
+                  fix(fixer: any) {
+                    return fixer.replaceTextRange([startOffset, endOffset], suggestion)
+                  },
+                }],
               })
             }
           }

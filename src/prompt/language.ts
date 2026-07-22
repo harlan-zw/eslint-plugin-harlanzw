@@ -161,7 +161,9 @@ export class PromptLanguage {
           end: { line: i + 1, column: value.length + 1, offset: lineStart + value.length },
         },
       }
-      offset += value.length + 1 // +1 for newline
+      offset += value.length
+      if (i < rawLines.length - 1)
+        offset += text.startsWith('\r\n', offset) ? 2 : 1
       return node
     })
 

@@ -12,13 +12,19 @@ ruleTester.run('harlanzw/prompt-ambiguous-quantifier', rule, {
   invalid: [
     {
       code: 'Return a few items.',
-      errors: [{ messageId: 'ambiguous', data: { found: 'a few', suggestion: '2-3' } }],
-      output: 'Return 2-3 items.',
+      errors: [{
+        messageId: 'ambiguous',
+        data: { found: 'a few', suggestion: '2-3' },
+        suggestions: [{ messageId: 'specify', data: { suggestion: '2-3' }, output: 'Return 2-3 items.' }],
+      }],
     },
     {
       code: 'Include several tests.',
-      errors: [{ messageId: 'ambiguous', data: { found: 'several', suggestion: '5-7' } }],
-      output: 'Include 5-7 tests.',
+      errors: [{
+        messageId: 'ambiguous',
+        data: { found: 'several', suggestion: '5-7' },
+        suggestions: [{ messageId: 'specify', data: { suggestion: '5-7' }, output: 'Include 5-7 tests.' }],
+      }],
     },
   ],
 })

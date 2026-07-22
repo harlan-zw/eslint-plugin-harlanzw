@@ -5,16 +5,41 @@ const REGEX_1 = /\w/
 
 export function getCodeBlockLines(lines: string[]): Set<number> {
   const codeLines = new Set<number>()
-  let inCodeBlock = false
+  let openFence: { marker: '`' | '~', length: number } | undefined
 
   for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trimStart()
-    if (trimmed.startsWith('```')) {
-      codeLines.add(i)
-      inCodeBlock = !inCodeBlock
+    const line = lines[i]
+    let markerIndex = 0
+    while (markerIndex < line.length && line[markerIndex] === ' ')
+      markerIndex++
+
+    const marker = line[markerIndex]
+    const fenceMarker = marker === '`' || marker === '~' ? marker : undefined
+    let markerEnd = markerIndex
+    if (markerIndex <= 3 && fenceMarker) {
+      while (line[markerEnd] === marker)
+        markerEnd++
     }
-    else if (inCodeBlock) {
+
+    const fenceLength = markerEnd - markerIndex
+    const suffix = line.slice(markerEnd)
+    const isFence = fenceLength >= 3
+      && (marker === '~' || !suffix.includes('`'))
+
+    if (!openFence && isFence && fenceMarker) {
       codeLines.add(i)
+      openFence = { marker: fenceMarker, length: fenceLength }
+    }
+    else if (openFence) {
+      codeLines.add(i)
+      if (
+        isFence
+        && marker === openFence.marker
+        && fenceLength >= openFence.length
+        && suffix.trim() === ''
+      ) {
+        openFence = undefined
+      }
     }
   }
 

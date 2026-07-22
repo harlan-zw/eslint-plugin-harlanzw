@@ -58,6 +58,14 @@ run({
       output: '<RouterLink to="/contact-page">Link</RouterLink>',
       errors: [{ messageId: 'uppercase' }],
     },
+    {
+      code: '<a href="/Docs/%2F">Link</a>',
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+      output: '<a href="/docs/%2f">Link</a>',
+      errors: [{ messageId: 'uppercase' }],
+    },
   ],
 })
 

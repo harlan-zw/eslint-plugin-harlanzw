@@ -171,15 +171,21 @@ function isClientGuardTest(test: TSESTree.Expression): boolean {
     return true
   }
 
-  // typeof window !== 'undefined'
+  // typeof window !== 'undefined' or 'undefined' !== typeof window
   if (
     test.type === 'BinaryExpression'
-    && test.left.type === 'UnaryExpression'
-    && test.left.operator === 'typeof'
-    && test.left.argument.type === 'Identifier'
-    && test.left.argument.name === 'window'
+    && (test.operator === '!==' || test.operator === '!=')
   ) {
-    return true
+    const isTypeofWindow = (node: TSESTree.Node): boolean =>
+      node.type === 'UnaryExpression'
+      && node.operator === 'typeof'
+      && node.argument.type === 'Identifier'
+      && node.argument.name === 'window'
+    const isUndefined = (node: TSESTree.Node): boolean =>
+      node.type === 'Literal' && node.value === 'undefined'
+
+    return (isTypeofWindow(test.left) && isUndefined(test.right))
+      || (isUndefined(test.left) && isTypeofWindow(test.right))
   }
 
   return false

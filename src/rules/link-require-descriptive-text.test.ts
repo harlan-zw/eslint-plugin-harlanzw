@@ -14,6 +14,18 @@ run({
       code: '<a href="/contact" aria-label="Contact support">Icon</a>',
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    {
+      code: '<a href="/account">{accountLabel}</a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    {
+      code: '<a href="/account"><AccountLabel /></a>',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    {
+      code: '<a href="/account" aria-label={accountLabel} />',
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
   ],
   invalid: [
     {

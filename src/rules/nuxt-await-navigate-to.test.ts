@@ -50,6 +50,10 @@ run({
         return navigateTo('/handler')
       }
     `,
+    // Implicit arrow return also propagates the navigation promise
+    $`
+      const handler = () => navigateTo('/handler')
+    `,
     // Other function calls (not navigateTo)
     $`
       function useOther() {

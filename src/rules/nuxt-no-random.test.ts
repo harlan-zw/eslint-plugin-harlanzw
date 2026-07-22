@@ -252,5 +252,18 @@ runVue({
       filename: 'test.vue',
       errors: [{ messageId: 'noMathRandom' }],
     },
+    // A server-only typeof guard must not be mistaken for a client guard
+    {
+      code: $`
+        <script setup>
+        if (typeof window === 'undefined') {
+          const x = Math.random()
+        }
+        </script>
+        <template><div /></template>
+      `,
+      filename: 'test.vue',
+      errors: [{ messageId: 'noMathRandom' }],
+    },
   ],
 })

@@ -36,6 +36,12 @@ run({
         // expected: file may not exist
       }
     `,
+    // .catch with a comment explaining why swallowing is safe
+    $`
+      promise.catch(() => {
+        // expected: optional request may fail
+      })
+    `,
     // Regular .catch on non-promise (just the word catch as method)
     $`
       obj.catch(data => processData(data))
@@ -93,6 +99,22 @@ run({
     {
       code: $`
         promise.catch(() => void 0)
+      `,
+      errors: [{ messageId: 'noSilentCatch' }],
+    },
+    // .catch(() => null)
+    {
+      code: $`
+        promise.catch(() => null)
+      `,
+      errors: [{ messageId: 'noSilentCatch' }],
+    },
+    // .catch(() => { return undefined })
+    {
+      code: $`
+        promise.catch(() => {
+          return undefined
+        })
       `,
       errors: [{ messageId: 'noSilentCatch' }],
     },

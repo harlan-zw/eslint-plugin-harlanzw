@@ -5,26 +5,41 @@ export const RULE_NAME = 'no-silent-catch'
 export type MessageIds = 'noSilentCatch' | 'noSilentTryCatch'
 export type Options = []
 
-function isEmptyOrVoid(node: TSESTree.CallExpressionArgument): boolean {
+interface SourceCodeWithComments {
+  getCommentsInside: (node: TSESTree.Node) => TSESTree.Comment[]
+}
+
+function isNoopValue(node: TSESTree.Expression | null): boolean {
+  return node === null
+    || (node.type === 'Identifier' && node.name === 'undefined')
+    || (node.type === 'UnaryExpression' && node.operator === 'void')
+    || (node.type === 'Literal' && node.value === null)
+}
+
+function isSilentBlock(node: TSESTree.BlockStatement, sourceCode: SourceCodeWithComments): boolean {
+  if (sourceCode.getCommentsInside(node).length > 0)
+    return false
+  if (node.body.length === 0)
+    return true
+  return node.body.length === 1
+    && node.body[0].type === 'ReturnStatement'
+    && isNoopValue(node.body[0].argument)
+}
+
+function isSilentHandler(node: TSESTree.CallExpressionArgument, sourceCode: SourceCodeWithComments): boolean {
   // () => {}
   if (node.type === 'ArrowFunctionExpression') {
-    if (node.body.type === 'BlockStatement' && node.body.body.length === 0)
-      return true
-    // () => undefined, () => void 0
-    if (node.body.type === 'Identifier' && node.body.name === 'undefined')
-      return true
-    if (node.body.type === 'UnaryExpression' && node.body.operator === 'void')
-      return true
-    return false
+    return node.body.type === 'BlockStatement'
+      ? isSilentBlock(node.body, sourceCode)
+      : isNoopValue(node.body)
   }
   // function() {} or function(_e) {}
-  if (node.type === 'FunctionExpression') {
-    return node.body.body.length === 0
-  }
+  if (node.type === 'FunctionExpression')
+    return isSilentBlock(node.body, sourceCode)
   return false
 }
 
-function hasOnlyComments(node: TSESTree.BlockStatement, sourceCode: { getCommentsInside: (node: TSESTree.Node) => TSESTree.Comment[] }): boolean {
+function hasOnlyComments(node: TSESTree.BlockStatement, sourceCode: SourceCodeWithComments): boolean {
   return node.body.length === 0 && sourceCode.getCommentsInside(node).length > 0
 }
 
@@ -59,7 +74,7 @@ export default createEslintRule<Options, MessageIds>({
         if (!handler)
           return
 
-        if (isEmptyOrVoid(handler)) {
+        if (isSilentHandler(handler, sourceCode as SourceCodeWithComments)) {
           context.report({ node, messageId: 'noSilentCatch' })
         }
       },

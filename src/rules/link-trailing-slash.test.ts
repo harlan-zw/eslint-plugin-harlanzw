@@ -59,6 +59,13 @@ run({
       parserOptions: { ecmaFeatures: { jsx: true } },
       errors: [{ messageId: 'addTrailingSlash' }],
     },
+    {
+      code: '<a href="/about?ref=nav#team">About</a>',
+      output: '<a href="/about/?ref=nav#team">About</a>',
+      options: [{ requireTrailingSlash: true }],
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      errors: [{ messageId: 'addTrailingSlash' }],
+    },
   ],
 })
 
@@ -110,6 +117,20 @@ runVue({
       output: $`
         <template>
           <NuxtLink to="/contact">Contact</NuxtLink>
+        </template>
+      `,
+      filename: 'test.vue',
+      errors: [{ messageId: 'removeTrailingSlash' }],
+    },
+    {
+      code: $`
+        <template>
+          <a href="/about/?ref=nav#team">About</a>
+        </template>
+      `,
+      output: $`
+        <template>
+          <a href="/about?ref=nav#team">About</a>
         </template>
       `,
       filename: 'test.vue',

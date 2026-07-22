@@ -7,7 +7,6 @@ export default defineBuildConfig({
   declaration: 'node16',
   clean: true,
   externals: [
-    '@typescript-eslint/utils',
     '@eslint/plugin-kit',
   ],
   rollup: {

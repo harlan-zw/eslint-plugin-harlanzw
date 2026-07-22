@@ -120,20 +120,20 @@ runVue({
       `,
       filename: 'test.vue',
     },
-    // new Date().getFullYear() in template — safe (year is stable)
+    // UTC date methods do not vary with the browser timezone
     {
       code: $`
         <script setup>
         </script>
-        <template><div>© {{ new Date().getFullYear() }}</div></template>
+        <template><div>© {{ new Date().getUTCFullYear() }}</div></template>
       `,
       filename: 'test.vue',
     },
-    // new Date().getFullYear() in setup — safe
+    // UTC date methods are also safe in setup
     {
       code: $`
         <script setup>
-        const year = new Date().getFullYear()
+        const year = new Date().getUTCFullYear()
         </script>
         <template><div>{{ year }}</div></template>
       `,
@@ -173,6 +173,17 @@ runVue({
         const now = new Date()
         </script>
         <template><div>{{ now }}</div></template>
+      `,
+      filename: 'test.vue',
+      errors: [{ messageId: 'noNewDate' }],
+    },
+    // Local date methods vary with the server and browser timezones
+    {
+      code: $`
+        <script setup>
+        const day = new Date().getDate()
+        </script>
+        <template><div>{{ day }}</div></template>
       `,
       filename: 'test.vue',
       errors: [{ messageId: 'noNewDate' }],
@@ -218,6 +229,19 @@ runVue({
       `,
       filename: 'test.vue',
       errors: [{ messageId: 'noNewDateTemplate' }],
+    },
+    // A server-only typeof guard must not be mistaken for a client guard
+    {
+      code: $`
+        <script setup>
+        if (typeof window === 'undefined') {
+          const ts = Date.now()
+        }
+        </script>
+        <template><div /></template>
+      `,
+      filename: 'test.vue',
+      errors: [{ messageId: 'noDateNow' }],
     },
   ],
 })

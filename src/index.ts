@@ -77,6 +77,83 @@ import vueNoUnresolvableDefineEmits from './rules/vue-no-unresolvable-define-emi
 import vuePreferDefineEmitsObjectSyntax from './rules/vue-prefer-define-emits-object-syntax'
 import vueRequireComposablePrefix from './rules/vue-require-composable-prefix'
 
+function defineRules<const TName extends string>(definitions: Record<TName, unknown>): Record<TName, unknown> {
+  return definitions
+}
+
+// @keep-sorted
+const rules = defineRules({
+  'ai-deslop-adverbs': aiDeslopAdverbs,
+  'ai-deslop-autolink': aiDeslopAutolink,
+  'ai-deslop-buzzwords': aiDeslopBuzzwords,
+  'ai-deslop-casing': aiDeslopCasing,
+  'ai-deslop-code-lang': aiDeslopCodeLang,
+  'ai-deslop-false-dichotomy': aiDeslopFalseDichotomy,
+  'ai-deslop-false-sincerity': aiDeslopFalseSincerity,
+  'ai-deslop-filler': aiDeslopFiller,
+  'ai-deslop-frontmatter-spacing': aiDeslopFrontmatterSpacing,
+  'ai-deslop-hedging': aiDeslopHedging,
+  'ai-deslop-no-em-dash': aiDeslopNoEmDash,
+  'ai-deslop-no-exclamation': aiDeslopNoExclamation,
+  'ai-deslop-passive-voice': aiDeslopPassiveVoice,
+  'ai-deslop-vue-ts-lang': aiDeslopVueTsLang,
+  'ai-deslop-weak-opener': aiDeslopWeakOpener,
+  'link-ascii-only': linkAsciiOnly,
+  'link-lowercase': linkLowercase,
+  'link-no-double-slashes': linkNoDoubleSlashes,
+  'link-no-underscores': linkNoUnderscores,
+  'link-no-whitespace': linkNoWhitespace,
+  'link-require-descriptive-text': linkRequireDescriptiveText,
+  'link-require-href': linkRequireHref,
+  'link-trailing-slash': linkTrailingSlash,
+  'no-silent-catch': noSilentCatch,
+  'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
+  'nuxt-no-random': nuxtNoRandom,
+  'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
+  'nuxt-no-self-layer-alias': nuxtNoSelfLayerAlias,
+  'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
+  'nuxt-no-side-effects-in-setup': nuxtNoSideEffectsInSetup,
+  'nuxt-no-unsafe-date': nuxtNoUnsafeDate,
+  'nuxt-prefer-layer-alias': nuxtPreferLayerAlias,
+  'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
+  'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
+  'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
+  'pnpm-require-trust-policy': pnpmRequireTrustPolicy,
+  'prefer-node-style-text': preferNodeStyleText,
+  'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
+  'prompt-duplicate-heading': promptDuplicateHeading,
+  'prompt-empty-section': promptEmptySection,
+  'prompt-empty-variable': promptEmptyVariable,
+  'prompt-example-mismatch': promptExampleMismatch,
+  'prompt-inefficient-token': promptInefficientToken,
+  'prompt-instruction-dilution': promptInstructionDilution,
+  'prompt-large-prompt': promptLargePrompt,
+  'prompt-missing-examples': promptMissingExamples,
+  'prompt-no-trailing-spaces': promptNoTrailingSpaces,
+  'prompt-redundant-instruction': promptRedundantInstruction,
+  'prompt-skill-frontmatter-required': promptSkillFrontmatterRequired,
+  'prompt-skill-frontmatter-schema': promptSkillFrontmatterSchema,
+  'prompt-subsumed-constraint': promptSubsumedConstraint,
+  'prompt-unclosed-code-fence': promptUnclosedCodeFence,
+  'prompt-unclosed-tag': promptUnclosedTag,
+  'prompt-undefined-variable': promptUndefinedVariable,
+  'prompt-unresolved-reference': promptUnresolvedReference,
+  'prompt-vague-term': promptVagueTerm,
+  'prompt-weak-instruction': promptWeakInstruction,
+  'vue-no-async-lifecycle-hook': vueNoAsyncLifecycleHook,
+  'vue-no-faux-composables': vueNoFauxComposables,
+  'vue-no-nested-reactivity': vueNoNestedReactivity,
+  'vue-no-passing-refs-as-props': vueNoPassingRefsAsProps,
+  'vue-no-reactive-destructuring': vueNoReactiveDestructuring,
+  'vue-no-reactivity-after-await': vueNoReactivityAfterAwait,
+  'vue-no-ref-access-in-templates': vueNoRefAccessInTemplates,
+  'vue-no-resolve-component-in-composables': vueNoResolveComponentInComposables,
+  'vue-no-torefs-on-props': vueNoTorefsOnProps,
+  'vue-no-unresolvable-define-emits': vueNoUnresolvableDefineEmits,
+  'vue-prefer-define-emits-object-syntax': vuePreferDefineEmitsObjectSyntax,
+  'vue-require-composable-prefix': vueRequireComposablePrefix,
+})
+
 const plugin: ESLint.Plugin = {
   meta: {
     name: 'harlanzw',
@@ -85,78 +162,7 @@ const plugin: ESLint.Plugin = {
   languages: {
     prompt: new PromptLanguage() as any,
   },
-  // @keep-sorted
-  rules: {
-    'ai-deslop-adverbs': aiDeslopAdverbs,
-    'ai-deslop-autolink': aiDeslopAutolink,
-    'ai-deslop-buzzwords': aiDeslopBuzzwords,
-    'ai-deslop-casing': aiDeslopCasing,
-    'ai-deslop-code-lang': aiDeslopCodeLang,
-    'ai-deslop-false-dichotomy': aiDeslopFalseDichotomy,
-    'ai-deslop-false-sincerity': aiDeslopFalseSincerity,
-    'ai-deslop-filler': aiDeslopFiller,
-    'ai-deslop-frontmatter-spacing': aiDeslopFrontmatterSpacing,
-    'ai-deslop-hedging': aiDeslopHedging,
-    'ai-deslop-no-em-dash': aiDeslopNoEmDash,
-    'ai-deslop-no-exclamation': aiDeslopNoExclamation,
-    'ai-deslop-passive-voice': aiDeslopPassiveVoice,
-    'ai-deslop-vue-ts-lang': aiDeslopVueTsLang,
-    'ai-deslop-weak-opener': aiDeslopWeakOpener,
-    'link-ascii-only': linkAsciiOnly,
-    'link-lowercase': linkLowercase,
-    'link-no-double-slashes': linkNoDoubleSlashes,
-    'link-no-underscores': linkNoUnderscores,
-    'link-no-whitespace': linkNoWhitespace,
-    'link-require-descriptive-text': linkRequireDescriptiveText,
-    'link-require-href': linkRequireHref,
-    'link-trailing-slash': linkTrailingSlash,
-    'no-silent-catch': noSilentCatch,
-    'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
-    'nuxt-no-random': nuxtNoRandom,
-    'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
-    'nuxt-no-self-layer-alias': nuxtNoSelfLayerAlias,
-    'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
-    'nuxt-no-side-effects-in-setup': nuxtNoSideEffectsInSetup,
-    'nuxt-no-unsafe-date': nuxtNoUnsafeDate,
-    'nuxt-prefer-layer-alias': nuxtPreferLayerAlias,
-    'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
-    'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
-    'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
-    'pnpm-require-trust-policy': pnpmRequireTrustPolicy,
-    'prefer-node-style-text': preferNodeStyleText,
-    'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
-    'prompt-duplicate-heading': promptDuplicateHeading,
-    'prompt-empty-section': promptEmptySection,
-    'prompt-empty-variable': promptEmptyVariable,
-    'prompt-example-mismatch': promptExampleMismatch,
-    'prompt-inefficient-token': promptInefficientToken,
-    'prompt-instruction-dilution': promptInstructionDilution,
-    'prompt-large-prompt': promptLargePrompt,
-    'prompt-missing-examples': promptMissingExamples,
-    'prompt-no-trailing-spaces': promptNoTrailingSpaces,
-    'prompt-redundant-instruction': promptRedundantInstruction,
-    'prompt-skill-frontmatter-required': promptSkillFrontmatterRequired,
-    'prompt-skill-frontmatter-schema': promptSkillFrontmatterSchema,
-    'prompt-subsumed-constraint': promptSubsumedConstraint,
-    'prompt-unclosed-code-fence': promptUnclosedCodeFence,
-    'prompt-unclosed-tag': promptUnclosedTag,
-    'prompt-undefined-variable': promptUndefinedVariable,
-    'prompt-unresolved-reference': promptUnresolvedReference,
-    'prompt-vague-term': promptVagueTerm,
-    'prompt-weak-instruction': promptWeakInstruction,
-    'vue-no-async-lifecycle-hook': vueNoAsyncLifecycleHook,
-    'vue-no-faux-composables': vueNoFauxComposables,
-    'vue-no-nested-reactivity': vueNoNestedReactivity,
-    'vue-no-passing-refs-as-props': vueNoPassingRefsAsProps,
-    'vue-no-reactive-destructuring': vueNoReactiveDestructuring,
-    'vue-no-reactivity-after-await': vueNoReactivityAfterAwait,
-    'vue-no-ref-access-in-templates': vueNoRefAccessInTemplates,
-    'vue-no-resolve-component-in-composables': vueNoResolveComponentInComposables,
-    'vue-no-torefs-on-props': vueNoTorefsOnProps,
-    'vue-no-unresolvable-define-emits': vueNoUnresolvableDefineEmits,
-    'vue-prefer-define-emits-object-syntax': vuePreferDefineEmitsObjectSyntax,
-    'vue-require-composable-prefix': vueRequireComposablePrefix,
-  },
+  rules: rules as ESLint.Plugin['rules'],
   configs: {} as Record<string, Linter.Config[]>,
 }
 
@@ -302,7 +308,17 @@ plugin.configs!.link = [
 ]
 
 // Nuxt config
-const NUXT_VUE_FILES = ['**/*.vue', '**/*.ts', '**/*.jsx', '**/*.tsx']
+const NUXT_VUE_FILES = [
+  '**/*.vue',
+  '**/*.js',
+  '**/*.jsx',
+  '**/*.mjs',
+  '**/*.cjs',
+  '**/*.ts',
+  '**/*.tsx',
+  '**/*.mts',
+  '**/*.cts',
+]
 plugin.configs!.nuxt = [
   {
     name: 'harlanzw/nuxt',
@@ -496,13 +512,13 @@ function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, cont
   let nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
   let vue = nuxt
   if (!vue || !nuxt) {
-    try {
-      const pkg = JSON.parse(readFileSync(resolve(cwd, 'package.json'), 'utf-8'))
+    const packagePath = resolve(cwd, 'package.json')
+    if (existsSync(packagePath)) {
+      const pkg = JSON.parse(readFileSync(packagePath, 'utf-8'))
       const deps = { ...pkg.dependencies, ...pkg.devDependencies }
       nuxt = nuxt || !!deps.nuxt
       vue = vue || !!(deps.vue || deps.nuxt)
     }
-    catch {}
   }
   const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))
   const content = existsSync(resolve(cwd, 'content')) || existsSync(resolve(cwd, 'docs'))
@@ -510,17 +526,25 @@ function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, cont
   return { nuxt, vue, prompt, content, pnpm }
 }
 
-// Attach plugin to factory and export both
-harlanzw.plugin = plugin
-harlanzw.detectFramework = detectFramework
+interface HarlanzwFactory {
+  (options?: HarlanzwOptions, ...extraConfigs: Linter.Config[]): Linter.Config[]
+  detectFramework: typeof detectFramework
+  plugin: ESLint.Plugin
+}
 
-export { plugin }
-export default harlanzw
+const harlanzwWithPlugin: HarlanzwFactory = Object.assign(harlanzw, { plugin, detectFramework })
 
-type RuleDefinitions = typeof plugin['rules']
+export { harlanzwWithPlugin as harlanzw, plugin }
+export default harlanzwWithPlugin
+
+type RuleDefinitions = typeof rules
 
 export type RuleOptions = {
-  [K in keyof RuleDefinitions]: RuleDefinitions[K] extends { defaultOptions: infer D } ? D : []
+  [K in keyof RuleDefinitions]: K extends 'link-trailing-slash'
+    ? [LinkRuleOptions & { requireTrailingSlash?: boolean }]
+    : K extends typeof LINK_RULES_WITH_OPTIONS[number]
+      ? [LinkRuleOptions]
+      : []
 }
 
 export type Rules = {

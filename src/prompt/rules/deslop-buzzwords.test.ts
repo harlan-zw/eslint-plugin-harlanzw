@@ -8,6 +8,8 @@ ruleTester.run('harlanzw/ai-deslop-buzzwords', rule, {
     'We use modern tools to build software.',
     'This is a strong framework.',
     '```\nLeverage the power of AI.\n```',
+    '~~~ts\nWe leverage modern tools.\n~~~',
+    '````md\n```\nWe leverage modern tools.\n```\n````',
     'Explore the codebase.',
   ],
   invalid: [

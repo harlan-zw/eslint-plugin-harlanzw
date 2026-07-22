@@ -13,23 +13,35 @@ ruleTester.run('harlanzw/prompt-weak-instruction', rule, {
   invalid: [
     {
       code: 'Try to use TypeScript.',
-      errors: [{ messageId: 'weak', data: { found: 'Try to', suggestion: 'Always' } }],
-      output: 'Always use TypeScript.',
+      errors: [{
+        messageId: 'weak',
+        data: { found: 'Try to', suggestion: 'Always' },
+        suggestions: [{ messageId: 'strengthen', data: { suggestion: 'Always' }, output: 'Always use TypeScript.' }],
+      }],
     },
     {
       code: 'You could use classes.',
-      errors: [{ messageId: 'weak', data: { found: 'could', suggestion: 'Must' } }],
-      output: 'You Must use classes.',
+      errors: [{
+        messageId: 'weak',
+        data: { found: 'could', suggestion: 'Must' },
+        suggestions: [{ messageId: 'strengthen', data: { suggestion: 'Must' }, output: 'You Must use classes.' }],
+      }],
     },
     {
       code: 'Consider using functional style.',
-      errors: [{ messageId: 'weak', data: { found: 'Consider', suggestion: 'Must' } }],
-      output: 'Must using functional style.',
+      errors: [{
+        messageId: 'weak',
+        data: { found: 'Consider', suggestion: 'Must' },
+        suggestions: [{ messageId: 'strengthen', data: { suggestion: 'Must' }, output: 'Must using functional style.' }],
+      }],
     },
     {
       code: 'If possible, add tests.',
-      errors: [{ messageId: 'weak', data: { found: 'If possible', suggestion: 'Must' } }],
-      output: 'Must, add tests.',
+      errors: [{
+        messageId: 'weak',
+        data: { found: 'If possible', suggestion: 'Must' },
+        suggestions: [{ messageId: 'strengthen', data: { suggestion: 'Must' }, output: 'Must, add tests.' }],
+      }],
     },
   ],
 })

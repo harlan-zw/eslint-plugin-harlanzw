@@ -12,10 +12,12 @@ export function isReturned(node: TSESTree.CallExpression): boolean {
     if (parent.type === 'ReturnStatement') {
       return true
     }
+    if (parent.type === 'ArrowFunctionExpression') {
+      return parent.body.type !== 'BlockStatement'
+    }
     // Stop searching if we hit a function boundary
     if (parent.type === 'FunctionDeclaration'
-      || parent.type === 'FunctionExpression'
-      || parent.type === 'ArrowFunctionExpression') {
+      || parent.type === 'FunctionExpression') {
       break
     }
     parent = parent.parent

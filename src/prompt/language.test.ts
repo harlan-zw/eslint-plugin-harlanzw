@@ -25,6 +25,15 @@ describe('promptLanguage', () => {
     expect(line2.position.end).toEqual({ line: 2, column: 4, offset: 7 })
   })
 
+  it('sets correct offsets for CRLF line endings', () => {
+    const result = lang.parse({ body: 'abc\r\ndef' })
+    const [line1, line2] = result.ast.children
+
+    expect(line1.position.end.offset).toBe(3)
+    expect(line2.position.start.offset).toBe(5)
+    expect(line2.position.end.offset).toBe(8)
+  })
+
   it('creates source code', () => {
     const text = 'hello\nworld'
     const parseResult = lang.parse({ body: text })
