@@ -28,10 +28,10 @@ Try the rules in action with a Nuxt ESLint interactive playground:
 
 The rules are organized into the following categories:
 
-- **Link Rules** - Ensure link URLs are clean, accessible, and SEO-friendly
-- **Nuxt Rules** - Best practices for Nuxt applications
-- **Vue Rules** - Vue composition API and reactivity best practices
-- **AI Deslop Rules** - Clean AI-generated slop from content markdown
+- **Link Rules**: Ensure link URLs are clean, accessible, and SEO-friendly
+- **Nuxt Rules**: Best practices for Nuxt applications
+- **Vue Rules**: Vue composition API and reactivity best practices
+- **AI Deslop Rules**: Clean AI-generated slop from content markdown
 
 <!-- rules:start -->
 | Rule | Description |
@@ -44,13 +44,15 @@ The rules are organized into the following categories:
 | [`link-no-whitespace`](./src/rules/link-no-whitespace.md) | ensure link URLs do not contain whitespace characters |
 | [`link-require-descriptive-text`](./src/rules/link-require-descriptive-text.ts) | require descriptive link text |
 | [`link-require-href`](./src/rules/link-require-href.ts) | require `href`/`to` attribute on link elements |
-| [`link-trailing-slash`](./src/rules/link-trailing-slash.ts) | enforce trailing slash consistency on link URLs |
+| [`link-trailing-slash`](./src/rules/link-trailing-slash.md) | enforce trailing slash consistency on URL paths |
 | **Nuxt** | |
 | [`nuxt-await-navigate-to`](./src/rules/nuxt-await-navigate-to.md) | enforce awaiting `navigateTo()` calls |
+| [`nuxt-no-random`](./src/rules/nuxt-no-random.md) | disallow random values during SSR rendering |
 | [`nuxt-no-redundant-import-meta`](./src/rules/nuxt-no-redundant-import-meta.md) | disallow redundant `import.meta.server` or `import.meta.client` checks in scoped components |
 | [`nuxt-no-self-layer-alias`](./src/rules/nuxt-no-self-layer-alias.ts) | disallow `#layers/<name>` alias when importing from the same layer; prefer a relative path |
 | [`nuxt-no-side-effects-in-async-data-handler`](./src/rules/nuxt-no-side-effects-in-async-data-handler.md) | disallow side effects in async data handlers |
 | [`nuxt-no-side-effects-in-setup`](./src/rules/nuxt-no-side-effects-in-setup.md) | disallow side effects in setup functions |
+| [`nuxt-no-unsafe-date`](./src/rules/nuxt-no-unsafe-date.md) | disallow unstable current dates during SSR rendering |
 | [`nuxt-prefer-layer-alias`](./src/rules/nuxt-prefer-layer-alias.ts) | prefer `#layers/<name>` alias over `~~/layers/<name>` paths |
 | [`nuxt-prefer-navigate-to-over-router-push-replace`](./src/rules/nuxt-prefer-navigate-to-over-router-push-replace.md) | prefer `navigateTo()` over `router.push()` or `router.replace()` |
 | [`nuxt-prefer-nuxt-link-over-router-link`](./src/rules/nuxt-prefer-nuxt-link-over-router-link.md) | prefer `NuxtLink` over `RouterLink` |
@@ -58,7 +60,7 @@ The rules are organized into the following categories:
 | **Vue** | |
 | [`vue-no-faux-composables`](./src/rules/vue-no-faux-composables.md) | stop fake composables that don't use Vue reactivity |
 | [`vue-no-nested-reactivity`](./src/rules/vue-no-nested-reactivity.md) | don't mix `ref()` and `reactive()` together |
-| [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) | don't pass refs as props - unwrap them first |
+| [`vue-no-passing-refs-as-props`](./src/rules/vue-no-passing-refs-as-props.md) | don't pass refs as props; unwrap them first |
 | [`vue-no-reactive-destructuring`](./src/rules/vue-no-reactive-destructuring.md) | avoid destructuring reactive objects |
 | [`vue-no-ref-access-in-templates`](./src/rules/vue-no-ref-access-in-templates.md) | don't use `.value` in Vue templates |
 | [`vue-no-torefs-on-props`](./src/rules/vue-no-torefs-on-props.md) | don't use `toRefs()` on the props object |
@@ -69,7 +71,8 @@ The rules are organized into the following categories:
 | [`vue-prefer-define-emits-object-syntax`](./src/rules/vue-prefer-define-emits-object-syntax.ts) | prefer Vue 3.3+ object syntax for `defineEmits` over call signatures |
 | [`vue-require-composable-prefix`](./src/rules/vue-require-composable-prefix.ts) | enforce `use*` prefix for functions using Vue reactivity |
 | **General** | |
-| [`no-silent-catch`](./src/rules/no-silent-catch.ts) | disallow silently swallowing errors in `.catch()` or `try/catch` |
+| [`no-silent-catch`](./src/rules/no-silent-catch.md) | disallow silently swallowing errors in `.catch()` or `try/catch` |
+| [`prefer-node-style-text`](./src/rules/prefer-node-style-text.ts) | prefer Node.js `styleText()` over raw ANSI escape codes |
 | **AI Deslop** | |
 | [`ai-deslop-adverbs`](./src/prompt/rules/deslop-adverbs.ts) | remove unnecessary adverbs that add no meaning (e.g. "significantly", "fundamentally") |
 | [`ai-deslop-autolink`](./src/prompt/rules/deslop-autolink.ts) | auto-link first mention of known tech terms to their canonical URLs |
@@ -90,7 +93,7 @@ The rules are organized into the following categories:
 | [`pnpm-require-trust-policy`](./src/prompt/rules/pnpm-require-trust-policy.ts) | require `trustPolicyIgnoreAfter: 262800` in `pnpm-workspace.yaml` |
 <!-- rules:end -->
 
-The plugin also includes 21 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
+The plugin also includes 20 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
 
 ## Installation
 
@@ -104,7 +107,7 @@ pnpm add -D eslint-plugin-harlanzw
 
 ```js
 // eslint.config.js
-import harlanzw from 'eslint-plugin-harlanzw'
+import { harlanzw } from 'eslint-plugin-harlanzw'
 
 export default harlanzw({
   link: true,
@@ -112,6 +115,8 @@ export default harlanzw({
   vue: true,
 })
 ```
+
+The Nuxt and Vue presets cover `.vue`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.mts`, and `.cts` files.
 
 ### Link Options
 
@@ -148,7 +153,7 @@ export default harlanzw(
 
 ```js
 import antfu from '@antfu/eslint-config'
-import harlanzw from 'eslint-plugin-harlanzw'
+import { harlanzw } from 'eslint-plugin-harlanzw'
 
 export default antfu(
   { vue: true },
@@ -159,7 +164,7 @@ export default antfu(
 ### With Nuxt ESLint
 
 ```ts
-import harlanzw from 'eslint-plugin-harlanzw'
+import { harlanzw } from 'eslint-plugin-harlanzw'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
@@ -167,16 +172,31 @@ export default withNuxt(
 )
 ```
 
-### Plugin Access
+### Public API
 
-For custom configs or if you need the raw ESLint plugin object:
+The factory exposes the raw plugin and framework detection. The package also exports typed rule maps for custom configs.
+
+```ts
+import type { RuleOptions, Rules } from 'eslint-plugin-harlanzw'
+import { harlanzw, plugin } from 'eslint-plugin-harlanzw'
+
+const detected = harlanzw.detectFramework()
+const rawPlugin = harlanzw.plugin
+const linkOptions: RuleOptions['link-lowercase'] = [{ ignoreExternal: true }]
+const linkRule: Rules['link-lowercase'] = ['warn', ...linkOptions]
+
+export default [
+  ...plugin.configs.recommended,
+  { rules: { 'harlanzw/link-lowercase': linkRule } },
+]
+```
+
+You can also select individual presets:
 
 ```js
 import { plugin } from 'eslint-plugin-harlanzw'
 
 export default [
-  ...plugin.configs.recommended, // link + nuxt + vue
-  // or pick:
   ...plugin.configs.link,
   ...plugin.configs.nuxt,
   ...plugin.configs.vue,
@@ -185,7 +205,7 @@ export default [
 
 ### AI Deslop Rules
 
-14 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable.
+15 rules for cleaning AI-generated slop from your content markdown files (`content/**/*.md`). Most rules are auto-fixable. Prose checks skip fenced code blocks opened with backticks or tildes, including fences longer than three characters.
 
 ```js
 // eslint.config.js
@@ -224,7 +244,7 @@ export default [
 
 ### Prompt Rules
 
-21 rules for linting `.prompt.md` and `.skill.md` files using a custom prompt language:
+20 rules for linting `.prompt.md` and `.skill.md` files using a custom prompt language:
 
 ```js
 import { plugin } from 'eslint-plugin-harlanzw'

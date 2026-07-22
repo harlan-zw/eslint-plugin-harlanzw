@@ -444,7 +444,7 @@ function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boo
  *
  * @example
  * ```ts
- * import harlanzw from 'eslint-plugin-harlanzw'
+ * import { harlanzw } from 'eslint-plugin-harlanzw'
  *
  * export default harlanzw({
  *   link: { ignoreExternal: true },
