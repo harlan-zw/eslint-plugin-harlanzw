@@ -18,18 +18,36 @@ export interface BaseOptions {
    * Paths to ignore on top of the shared ignore set.
    */
   ignores?: string[]
+  /**
+   * What to do with `CLAUDE.md`, `AGENTS.md`, and the agent tool directories.
+   *
+   * `ignore` keeps them out of the lint run entirely, which is what most repos
+   * did by hand. `lint` leaves them for the prompt configs to pick up.
+   *
+   * A global `ignores` block beats any `files`-scoped config, so ignoring these
+   * here would silently stop the prompt rules from ever seeing them.
+   * {@link harlanzw} passes `lint` whenever its prompt config is enabled.
+   *
+   * @default 'ignore'
+   */
+  agentFiles?: 'ignore' | 'lint'
 }
 
-/** Ignored everywhere. Agent files are linted by the prompt configs instead. */
+// Globs are recursive: monorepo packages carry their own playground, fixtures,
+// and agent files, and a root-anchored glob misses every nested copy.
+const AGENT_IGNORES = [
+  '**/CLAUDE.md',
+  '**/AGENTS.md',
+  '**/.claude/**',
+  '**/.cursor/**',
+]
+
+/** Ignored everywhere, whatever the agent file handling is. */
 const BASE_IGNORES = [
-  'CLAUDE.md',
-  'AGENTS.md',
-  '.claude/**',
-  '.cursor/**',
-  '.data/**',
+  '**/.data/**',
   '**/test/fixtures/**',
   '**/fixtures/**',
-  'playground/**',
+  '**/playground/**',
   '**/worker-configuration.d.ts',
 ]
 
@@ -51,7 +69,7 @@ const EXAMPLE_MANIFESTS = ['examples/**/package.json']
  * Spread these after the preset whose rules they turn off.
  */
 export function base(options: BaseOptions = {}): Linter.Config[] {
-  const { type = 'lib', ignores = [] } = options
+  const { type = 'lib', ignores = [], agentFiles = 'ignore' } = options
 
   const rules: Linter.RulesRecord = {
     'no-use-before-define': 'off',
@@ -66,7 +84,11 @@ export function base(options: BaseOptions = {}): Linter.Config[] {
   return [
     {
       name: 'harlanzw/base/ignores',
-      ignores: [...BASE_IGNORES, ...ignores],
+      ignores: [
+        ...BASE_IGNORES,
+        ...(agentFiles === 'ignore' ? AGENT_IGNORES : []),
+        ...ignores,
+      ],
     },
     {
       name: 'harlanzw/base/rules',
