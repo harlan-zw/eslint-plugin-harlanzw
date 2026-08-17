@@ -13,6 +13,7 @@ const hasDocs = [
   'link-require-href',
   'link-trailing-slash',
   'nuxt-no-random',
+  'nuxt-no-redundant-component-imports',
   'nuxt-no-redundant-import-meta',
   'nuxt-no-side-effects-in-setup',
   'nuxt-no-unsafe-date',

@@ -54,6 +54,7 @@ import linkTrailingSlash from './rules/link-trailing-slash'
 import noSilentCatch from './rules/no-silent-catch'
 import nuxtAwaitNavigateTo from './rules/nuxt-await-navigate-to'
 import nuxtNoRandom from './rules/nuxt-no-random'
+import nuxtNoRedundantComponentImports from './rules/nuxt-no-redundant-component-imports'
 import nuxtNoRedundantImportMeta from './rules/nuxt-no-redundant-import-meta'
 import nuxtNoSelfLayerAlias from './rules/nuxt-no-self-layer-alias'
 import nuxtNoSideEffectsInAsyncDataHandler from './rules/nuxt-no-side-effects-in-async-data-handler'
@@ -109,6 +110,7 @@ const rules = defineRules({
   'no-silent-catch': noSilentCatch,
   'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
   'nuxt-no-random': nuxtNoRandom,
+  'nuxt-no-redundant-component-imports': nuxtNoRedundantComponentImports,
   'nuxt-no-redundant-import-meta': nuxtNoRedundantImportMeta,
   'nuxt-no-self-layer-alias': nuxtNoSelfLayerAlias,
   'nuxt-no-side-effects-in-async-data-handler': nuxtNoSideEffectsInAsyncDataHandler,
@@ -328,6 +330,7 @@ plugin.configs!.nuxt = [
     rules: {
       'harlanzw/nuxt-await-navigate-to': 'error',
       'harlanzw/nuxt-no-random': 'error',
+      'harlanzw/nuxt-no-redundant-component-imports': 'warn',
       'harlanzw/nuxt-no-redundant-import-meta': 'error',
       'harlanzw/nuxt-no-self-layer-alias': 'warn',
       'harlanzw/nuxt-no-side-effects-in-async-data-handler': 'error',
