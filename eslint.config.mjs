@@ -1,4 +1,7 @@
 import antfu from '@antfu/eslint-config'
+// Dogfood the shared base from this package (requires `pnpm dev` for the stub build).
+// eslint-disable-next-line antfu/no-import-dist
+import { base } from './dist/index.mjs'
 
 export default antfu(
   {
@@ -9,34 +12,12 @@ export default antfu(
       },
     },
   },
-  {
-    ignores: ['playground/**', 'src/rules/*.md', 'CLAUDE.md'],
-  },
-  // Markdown code blocks in rule docs contain multi-root Vue/JSX examples
-  {
-    files: ['src/rules/*.md/**'],
-    rules: {
-      'no-tabs': 'off',
-      'style/no-tabs': 'off',
-    },
-  },
-  {
-    files: ['fixtures/**/*.ts'],
-    rules: {
-      'no-unused-vars': 'off',
-      'unused-imports/no-unused-vars': 'off',
-      'ts/explicit-function-return-type': 'off',
-    },
-  },
+  // Rule docs contain multi-root Vue/JSX examples that antfu's markdown pass cannot parse.
+  ...base({ ignores: ['src/rules/*.md'] }),
   {
     files: ['src/prompt/**/*.ts'],
     rules: {
       'no-cond-assign': 'off',
-    },
-  },
-  {
-    rules: {
-      'ts/explicit-function-return-type': 'off',
     },
   },
 )
