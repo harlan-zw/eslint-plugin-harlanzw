@@ -73,6 +73,7 @@ The rules are organized into the following categories:
 | **General** | |
 | [`no-silent-catch`](./src/rules/no-silent-catch.md) | disallow silently swallowing errors in `.catch()` or `try/catch` |
 | [`prefer-node-style-text`](./src/rules/prefer-node-style-text.ts) | prefer Node.js `styleText()` over raw ANSI escape codes |
+| [`prefer-satisfies`](./src/rules/prefer-satisfies.md) | prefer `satisfies` over a widening type annotation on object literals |
 | **AI Deslop** | |
 | [`ai-deslop-adverbs`](./src/prompt/rules/deslop-adverbs.ts) | remove unnecessary adverbs that add no meaning (e.g. "significantly", "fundamentally") |
 | [`ai-deslop-autolink`](./src/prompt/rules/deslop-autolink.ts) | auto-link first mention of known tech terms to their canonical URLs |

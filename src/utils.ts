@@ -18,6 +18,7 @@ const hasDocs = [
   'nuxt-no-unsafe-date',
   'nuxt-prefer-navigate-to-over-router-push-replace',
   'nuxt-prefer-nuxt-link-over-router-link',
+  'prefer-satisfies',
   'use-composables-must-use-reactivity',
   'vue-no-async-lifecycle-hook',
   'vue-no-nested-reactivity',
