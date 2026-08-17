@@ -135,6 +135,48 @@ export default harlanzw({
 })
 ```
 
+### Shared Base
+
+`base` carries the override blocks that were copy-pasted into every repo: the shared ignore set, node globals, and relaxations for test files, markdown code fences, and example manifests. It is opt in.
+
+```js
+import antfu from '@antfu/eslint-config'
+import { harlanzw } from 'eslint-plugin-harlanzw'
+
+export default antfu(
+  { type: 'lib' },
+  ...harlanzw({
+    base: true, // or { type: 'app', ignores: ['docs/**'] }
+    nuxt: true,
+    vue: true,
+  }),
+)
+```
+
+`type` defaults to `'lib'`, which also turns off `ts/explicit-function-return-type`. `ignores` appends to the shared set.
+
+Every rule in these blocks is set to `off`, and flat config ignores an `off` entry for a rule whose plugin is absent. So the blocks are safe with any preset, and need no dependency on `@antfu/eslint-config`.
+
+Spread them without the rule presets when you only want the shared overrides:
+
+```js
+import { base } from 'eslint-plugin-harlanzw'
+
+export default antfu({ type: 'lib' }, ...base())
+```
+
+The base blocks come first in the returned array, so put `harlanzw()` after the preset whose rules it relaxes.
+
+Contents:
+
+| Block | Applies to | Turns off |
+| --- | --- | --- |
+| `harlanzw/base/ignores` | global | `CLAUDE.md`, `AGENTS.md`, `.claude`, `.cursor`, `.data`, fixtures, `playground`, `worker-configuration.d.ts` |
+| `harlanzw/base/rules` | all files | `no-use-before-define`, `node/prefer-global/process`, `node/prefer-global/buffer` (+ `ts/explicit-function-return-type` for libs) |
+| `harlanzw/base/tests` | test files | `no-console`, `ts/no-unsafe-function-type`, `antfu/no-top-level-await`, `e18e/prefer-static-regex` |
+| `harlanzw/base/markdown` | `**/*.md/**` | `no-console`, tabs, `style/max-statements-per-line`, `e18e/prefer-static-regex`, unused imports |
+| `harlanzw/base/examples` | `examples/**/package.json` | pnpm catalog rules |
+
 ### Extra Configs
 
 Pass additional flat configs as extra arguments:

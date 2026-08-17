@@ -1,9 +1,11 @@
 import type { ESLint, Linter } from 'eslint'
+import type { BaseOptions } from './base'
 import type { LinkRuleOptions } from './link-utils'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { version } from '../package.json'
+import { base } from './base'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
 import { CONTENT_FILES, NUXT_CONTENT_FILES } from './prompt/deslop-constants'
 import { PromptLanguage } from './prompt/language'
@@ -406,6 +408,14 @@ plugin.configs!.recommended = [
 
 // Factory options
 export interface HarlanzwOptions {
+  /**
+   * Shared override blocks: ignores, node globals, test and markdown relaxations.
+   *
+   * Opt in with `true` for the defaults, or pass {@link BaseOptions}.
+   *
+   * @default false
+   */
+  base?: boolean | BaseOptions
   link?: boolean | LinkRuleOptions & { requireTrailingSlash?: boolean }
   nuxt?: boolean
   vue?: boolean
@@ -468,6 +478,10 @@ function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boo
 function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[]): Linter.Config[] {
   const detected = detectFramework()
   const configs: Linter.Config[] = []
+
+  if (options.base) {
+    configs.push(...base(typeof options.base === 'object' ? options.base : {}))
+  }
 
   if (options.link !== false) {
     const linkOpts = typeof options.link === 'object' ? options.link : {}
@@ -538,6 +552,8 @@ interface HarlanzwFactory {
 
 const harlanzwWithPlugin: HarlanzwFactory = Object.assign(harlanzw, { plugin, detectFramework })
 
+export type { BaseOptions } from './base'
+export { base } from './base'
 export { harlanzwWithPlugin as harlanzw, plugin }
 export default harlanzwWithPlugin
 
