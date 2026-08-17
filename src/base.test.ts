@@ -59,11 +59,35 @@ describe('base', () => {
       .toHaveProperty('ts/explicit-function-return-type')
   })
 
+  it('ignores agent files by default', () => {
+    const ignores = blockNamed(base(), 'harlanzw/base/ignores').ignores
+
+    expect(ignores).toContain('**/CLAUDE.md')
+    expect(ignores).toContain('**/.claude/**')
+  })
+
+  it('leaves agent files alone when something else lints them', () => {
+    const ignores = blockNamed(base({ agentFiles: 'lint' }), 'harlanzw/base/ignores').ignores
+
+    expect(ignores).not.toContain('**/CLAUDE.md')
+    expect(ignores).not.toContain('**/.claude/**')
+    // The non-agent entries are unaffected either way.
+    expect(ignores).toContain('**/playground/**')
+  })
+
+  it('ignores nested playgrounds, fixtures, and data dirs', () => {
+    const ignores = blockNamed(base(), 'harlanzw/base/ignores').ignores as string[]
+
+    for (const glob of ignores) {
+      expect(glob.startsWith('**/'), `${glob} is root anchored`).toBe(true)
+    }
+  })
+
   it('appends extra ignores to the shared set', () => {
     const ignores = blockNamed(base({ ignores: ['docs/**'] }), 'harlanzw/base/ignores').ignores
 
     expect(ignores).toContain('docs/**')
-    expect(ignores).toContain('playground/**')
+    expect(ignores).toContain('**/playground/**')
   })
 })
 
@@ -83,6 +107,20 @@ describe('harlanzw({ base })', () => {
     expect(names[0]).toBe('harlanzw/base/ignores')
     expect(names).toContain('harlanzw/nuxt')
     expect(names.indexOf('harlanzw/base/examples')).toBeLessThan(names.indexOf('harlanzw/nuxt'))
+  })
+
+  it('keeps agent files lintable when the prompt config is on', () => {
+    const withPrompt = harlanzw({ ...off, base: true, prompt: true })
+    const withoutPrompt = harlanzw({ ...off, base: true, prompt: false })
+
+    expect(blockNamed(withPrompt, 'harlanzw/base/ignores').ignores).not.toContain('**/CLAUDE.md')
+    expect(blockNamed(withoutPrompt, 'harlanzw/base/ignores').ignores).toContain('**/CLAUDE.md')
+  })
+
+  it('lets an explicit agentFiles choice win over the prompt default', () => {
+    const configs = harlanzw({ ...off, base: { agentFiles: 'ignore' }, prompt: true })
+
+    expect(blockNamed(configs, 'harlanzw/base/ignores').ignores).toContain('**/CLAUDE.md')
   })
 
   it('forwards base options', () => {

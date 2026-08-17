@@ -481,9 +481,16 @@ function buildLinkRules(linkOpts: LinkRuleOptions & { requireTrailingSlash?: boo
 function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[]): Linter.Config[] {
   const detected = detectFramework()
   const configs: Linter.Config[] = []
+  const enablePrompt = options.prompt ?? detected.prompt
 
   if (options.base) {
-    configs.push(...base(typeof options.base === 'object' ? options.base : {}))
+    const baseOpts = typeof options.base === 'object' ? options.base : {}
+    configs.push(...base({
+      // A global ignore beats the prompt configs' `files`, so agent files stay
+      // in the lint run whenever the prompt rules are there to lint them.
+      agentFiles: enablePrompt ? 'lint' : 'ignore',
+      ...baseOpts,
+    }))
   }
 
   if (options.link !== false) {
@@ -497,7 +504,6 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     })
   }
 
-  const enablePrompt = options.prompt ?? detected.prompt
   if (enablePrompt) {
     const preset = typeof options.prompt === 'string' ? options.prompt : 'recommended'
     configs.push(...plugin.configs![`prompt:${preset}`] as Linter.Config[])

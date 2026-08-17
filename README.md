@@ -154,7 +154,9 @@ export default antfu(
 )
 ```
 
-`type` defaults to `'lib'`, which also turns off `ts/explicit-function-return-type`. `ignores` appends to the shared set.
+`type` defaults to `'lib'`, which also turns off `ts/explicit-function-return-type`. `ignores` appends to the shared set. Every shared ignore glob is recursive, so nested playgrounds and fixtures in a monorepo are covered.
+
+`agentFiles` decides what happens to `CLAUDE.md`, `AGENTS.md`, `.claude`, and `.cursor`. It defaults to `'ignore'`, keeping them out of the lint run. A global ignore beats any `files`-scoped config, so `harlanzw()` switches it to `'lint'` whenever its prompt config is enabled, otherwise the prompt rules would never see those files. Set it explicitly to override that.
 
 Every rule in these blocks is set to `off`, and flat config ignores an `off` entry for a rule whose plugin is absent. So the blocks are safe with any preset, and need no dependency on `@antfu/eslint-config`.
 
@@ -172,7 +174,7 @@ Contents:
 
 | Block | Applies to | Turns off |
 | --- | --- | --- |
-| `harlanzw/base/ignores` | global | `CLAUDE.md`, `AGENTS.md`, `.claude`, `.cursor`, `.data`, fixtures, `playground`, `worker-configuration.d.ts` |
+| `harlanzw/base/ignores` | global | `.data`, fixtures, `playground`, `worker-configuration.d.ts`, plus `CLAUDE.md`, `AGENTS.md`, `.claude`, `.cursor` when `agentFiles` is `'ignore'` |
 | `harlanzw/base/rules` | all files | `no-use-before-define`, `node/prefer-global/process`, `node/prefer-global/buffer` (+ `ts/explicit-function-return-type` for libs) |
 | `harlanzw/base/tests` | test files | `no-console`, `ts/no-unsafe-function-type`, `antfu/no-top-level-await`, `e18e/prefer-static-regex` |
 | `harlanzw/base/markdown` | `**/*.md/**` | `no-console`, tabs, `style/max-statements-per-line`, `e18e/prefer-static-regex`, unused imports |
