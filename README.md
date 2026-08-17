@@ -156,6 +156,8 @@ export default antfu(
 
 `type` defaults to `'lib'`, which also turns off `ts/explicit-function-return-type`. `ignores` appends to the shared set. Every shared ignore glob is recursive, so nested playgrounds and fixtures in a monorepo are covered.
 
+Pass `ignores: false` to drop the shared ignore block and declare your own. A global ignore cannot be undone by a later config, so this is the only way to keep linting something the shared set covers, such as a playground you lint on purpose. The rule blocks still apply.
+
 `agentFiles` decides what happens to `CLAUDE.md`, `AGENTS.md`, `.claude`, and `.cursor`. It defaults to `'ignore'`, keeping them out of the lint run. A global ignore beats any `files`-scoped config, so `harlanzw()` switches it to `'lint'` whenever its prompt config is enabled, otherwise the prompt rules would never see those files. Set it explicitly to override that.
 
 Every rule in these blocks is set to `off`, and flat config ignores an `off` entry for a rule whose plugin is absent. So the blocks are safe with any preset, and need no dependency on `@antfu/eslint-config`.
