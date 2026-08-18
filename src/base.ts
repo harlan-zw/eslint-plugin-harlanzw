@@ -23,7 +23,7 @@ export interface BaseOptions {
    */
   ignores?: string[] | false
   /**
-   * What to do with `CLAUDE.md`, `AGENTS.md`, and the agent tool directories.
+   * What to do with the prompts you wrote: `CLAUDE.md`, `AGENTS.md`, `.cursor`.
    *
    * `ignore` keeps them out of the lint run entirely, which is what most repos
    * did by hand. `lint` leaves them for the prompt configs to pick up.
@@ -32,6 +32,9 @@ export interface BaseOptions {
    * here would silently stop the prompt rules from ever seeing them.
    * {@link harlanzw} passes `lint` whenever its prompt config is enabled.
    *
+   * Agent content nobody authored is ignored either way, see
+   * {@link GENERATED_AGENT_IGNORES}.
+   *
    * @default 'ignore'
    */
   agentFiles?: 'ignore' | 'lint'
@@ -39,11 +42,31 @@ export interface BaseOptions {
 
 // Globs are recursive: monorepo packages carry their own playground, fixtures,
 // and agent files, and a root-anchored glob misses every nested copy.
-const AGENT_IGNORES = [
+
+/** Prompts written in this repo. {@link BaseOptions.agentFiles} decides these. */
+const AUTHORED_AGENT_IGNORES = [
   '**/CLAUDE.md',
   '**/AGENTS.md',
-  '**/.claude/**',
   '**/.cursor/**',
+]
+
+/**
+ * The agent tool directory, which holds no prompt this repo wrote.
+ *
+ * Its skills are upstream package docs installed by skilld; the skills you write
+ * live in `skills/`. Its context is generated design notes and job state. It also
+ * picks up local machine state, and agents drop whole repo checkouts in there,
+ * which would pull thousands of files into the lint run.
+ *
+ * The set of things that land here keeps growing, so the whole directory goes,
+ * rather than a list that has to be chased. `CLAUDE.md` and `AGENTS.md` sit
+ * outside it and stay lintable, which is the point of splitting these apart.
+ *
+ * Ignored whatever `agentFiles` says, and kept out of the {@link BaseOptions.ignores}
+ * block so `ignores: false` does not hand it back.
+ */
+const GENERATED_AGENT_IGNORES = [
+  '**/.claude/**',
 ]
 
 /** Ignored everywhere, whatever the agent file handling is. */
@@ -86,15 +109,18 @@ export function base(options: BaseOptions = {}): Linter.Config[] {
   }
 
   return [
+    {
+      name: 'harlanzw/base/agent-ignores',
+      ignores: [
+        ...GENERATED_AGENT_IGNORES,
+        ...(agentFiles === 'ignore' ? AUTHORED_AGENT_IGNORES : []),
+      ],
+    },
     ...(ignores === false
       ? []
       : [{
           name: 'harlanzw/base/ignores',
-          ignores: [
-            ...BASE_IGNORES,
-            ...(agentFiles === 'ignore' ? AGENT_IGNORES : []),
-            ...ignores,
-          ],
+          ignores: [...BASE_IGNORES, ...ignores],
         }]),
     {
       name: 'harlanzw/base/rules',
