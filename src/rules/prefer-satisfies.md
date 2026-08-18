@@ -39,7 +39,7 @@ The annotation must erase a known key set, and the object must be safe to freeze
 - the value type `V` is not `any` or `unknown`
 - the initialiser is a non-empty object literal with no spread elements
 - the variable is never written to afterwards
-- the variable is never read with a computed non-literal key
+- the variable is never read with a computed non-literal key, in the script or in a Vue template
 
 ## Examples
 
@@ -105,6 +105,26 @@ export function decode(name: string) {
 
 A literal key names one member, so it does not exempt the map. `XML_ENTITIES['amp']`
 is still reported.
+
+The same applies to a Vue template, whose expressions the script's scope analysis
+never sees:
+
+```vue
+<script setup lang="ts">
+const defaultIcons: Record<string, string> = {
+  info: 'i-carbon-information',
+}
+</script>
+
+<template>
+  <UIcon :name="defaultIcons[variant]" />
+</template>
+```
+
+Two blind spots remain, because both need type information the rule does not have.
+A map that is exported and indexed in another file, and a map that is spread into
+another object which is then indexed, are still reported. Check the suggestion
+before taking it.
 
 A bag of `unknown` or `any` values carries no evidence worth preserving:
 
