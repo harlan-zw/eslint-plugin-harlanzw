@@ -158,7 +158,9 @@ export default antfu(
 
 Pass `ignores: false` to drop the shared ignore block and declare your own. A global ignore cannot be undone by a later config, so this is the only way to keep linting something the shared set covers, such as a playground you lint on purpose. The rule blocks still apply.
 
-`agentFiles` decides what happens to `CLAUDE.md`, `AGENTS.md`, `.claude`, and `.cursor`. It defaults to `'ignore'`, keeping them out of the lint run. A global ignore beats any `files`-scoped config, so `harlanzw()` switches it to `'lint'` whenever its prompt config is enabled, otherwise the prompt rules would never see those files. Set it explicitly to override that.
+`agentFiles` decides what happens to the prompts you wrote: `CLAUDE.md`, `AGENTS.md`, and `.cursor`. It defaults to `'ignore'`, keeping them out of the lint run. A global ignore beats any `files`-scoped config, so `harlanzw()` switches it to `'lint'` whenever its prompt config is enabled, otherwise the prompt rules would never see those files. Set it explicitly to override that.
+
+The `.claude` directory is always ignored, whatever `agentFiles` says. Nothing in it is a prompt this repo wrote: its skills are upstream package docs installed by skilld, its context is generated notes and job state, and agents drop whole repo checkouts in there. It also sits in its own block, so `ignores: false` does not hand it back.
 
 Every rule in these blocks is set to `off`, and flat config ignores an `off` entry for a rule whose plugin is absent. So the blocks are safe with any preset, and need no dependency on `@antfu/eslint-config`.
 
@@ -176,7 +178,8 @@ Contents:
 
 | Block | Applies to | Turns off |
 | --- | --- | --- |
-| `harlanzw/base/ignores` | global | `.data`, fixtures, `playground`, `worker-configuration.d.ts`, plus `CLAUDE.md`, `AGENTS.md`, `.claude`, `.cursor` when `agentFiles` is `'ignore'` |
+| `harlanzw/base/agent-ignores` | global | `.claude` always, plus `CLAUDE.md`, `AGENTS.md`, `.cursor` when `agentFiles` is `'ignore'` |
+| `harlanzw/base/ignores` | global | `.data`, fixtures, `playground`, `worker-configuration.d.ts`, plus your `ignores`. Dropped by `ignores: false` |
 | `harlanzw/base/rules` | all files | `no-use-before-define`, `node/prefer-global/process`, `node/prefer-global/buffer` (+ `ts/explicit-function-return-type` for libs) |
 | `harlanzw/base/tests` | test files | `no-console`, `ts/no-unsafe-function-type`, `antfu/no-top-level-await`, `e18e/prefer-static-regex` |
 | `harlanzw/base/markdown` | `**/*.md/**` | `no-console`, tabs, `style/max-statements-per-line`, `e18e/prefer-static-regex`, unused imports |

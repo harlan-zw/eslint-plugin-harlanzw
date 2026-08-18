@@ -59,20 +59,46 @@ describe('base', () => {
       .toHaveProperty('ts/explicit-function-return-type')
   })
 
-  it('ignores agent files by default', () => {
-    const ignores = blockNamed(base(), 'harlanzw/base/ignores').ignores
+  it('ignores the prompts you wrote by default', () => {
+    const ignores = blockNamed(base(), 'harlanzw/base/agent-ignores').ignores
 
     expect(ignores).toContain('**/CLAUDE.md')
-    expect(ignores).toContain('**/.claude/**')
+    expect(ignores).toContain('**/AGENTS.md')
   })
 
-  it('leaves agent files alone when something else lints them', () => {
-    const ignores = blockNamed(base({ agentFiles: 'lint' }), 'harlanzw/base/ignores').ignores
+  it('leaves the prompts you wrote alone when something else lints them', () => {
+    const ignores = blockNamed(base({ agentFiles: 'lint' }), 'harlanzw/base/agent-ignores').ignores
 
     expect(ignores).not.toContain('**/CLAUDE.md')
-    expect(ignores).not.toContain('**/.claude/**')
-    // The non-agent entries are unaffected either way.
-    expect(ignores).toContain('**/playground/**')
+    expect(ignores).not.toContain('**/AGENTS.md')
+  })
+
+  it('ignores the agent tool directory whatever agentFiles says', () => {
+    for (const agentFiles of ['ignore', 'lint'] as const) {
+      const ignores = blockNamed(base({ agentFiles }), 'harlanzw/base/agent-ignores').ignores
+
+      expect(ignores, agentFiles).toContain('**/.claude/**')
+    }
+  })
+
+  it('keeps a checked-out worktree under the agent directory out of the run', () => {
+    const configs = [
+      { files: ['**/*.ts'], rules: { 'no-console': 'error' } } as LinterTypes.Config,
+      ...base({ agentFiles: 'lint' }),
+    ]
+
+    const nested = '.claude/w/some-branch/src/index.ts'
+    expect(lint('console.log(1)\n', configs, nested)).not.toContain('no-console')
+  })
+
+  it('keeps a vendored skill out of the run while linting the repo CLAUDE.md', () => {
+    const configs = [
+      { files: ['**/*.md'], rules: { 'no-console': 'error' } } as LinterTypes.Config,
+      ...base({ agentFiles: 'lint' }),
+    ]
+
+    expect(lint('console.log(1)\n', configs, 'CLAUDE.md')).toEqual(['no-console'])
+    expect(lint('console.log(1)\n', configs, '.claude/skills/vitest-skilld/SKILL.md')).not.toContain('no-console')
   })
 
   it('ignores nested playgrounds, fixtures, and data dirs', () => {
@@ -83,12 +109,22 @@ describe('base', () => {
     }
   })
 
-  it('drops the ignore block entirely when the repo wants to own it', () => {
+  it('drops the path ignore block entirely when the repo wants to own it', () => {
     const configs = base({ ignores: false })
 
     expect(configs.find(c => c.name === 'harlanzw/base/ignores')).toBeUndefined()
     // The rule blocks still apply.
     expect(configs.map(c => c.name)).toContain('harlanzw/base/rules')
+  })
+
+  it('keeps vendored agent content ignored even when the repo owns its ignores', () => {
+    const configs = [
+      { files: ['**/*.md'], rules: { 'no-console': 'error' } } as LinterTypes.Config,
+      ...base({ ignores: false, agentFiles: 'lint' }),
+    ]
+
+    // A repo that lints its playground still has no reason to lint upstream docs.
+    expect(lint('console.log(1)\n', configs, '.claude/skills/vitest-skilld/SKILL.md')).not.toContain('no-console')
   })
 
   it('keeps a file lintable when the shared ignores are dropped', () => {
@@ -128,7 +164,7 @@ describe('harlanzw({ base })', () => {
     const configs = harlanzw({ ...off, base: true, nuxt: true })
     const names = configs.map(c => c.name)
 
-    expect(names[0]).toBe('harlanzw/base/ignores')
+    expect(names[0]).toBe('harlanzw/base/agent-ignores')
     expect(names).toContain('harlanzw/nuxt')
     expect(names.indexOf('harlanzw/base/examples')).toBeLessThan(names.indexOf('harlanzw/nuxt'))
   })
@@ -137,14 +173,14 @@ describe('harlanzw({ base })', () => {
     const withPrompt = harlanzw({ ...off, base: true, prompt: true })
     const withoutPrompt = harlanzw({ ...off, base: true, prompt: false })
 
-    expect(blockNamed(withPrompt, 'harlanzw/base/ignores').ignores).not.toContain('**/CLAUDE.md')
-    expect(blockNamed(withoutPrompt, 'harlanzw/base/ignores').ignores).toContain('**/CLAUDE.md')
+    expect(blockNamed(withPrompt, 'harlanzw/base/agent-ignores').ignores).not.toContain('**/CLAUDE.md')
+    expect(blockNamed(withoutPrompt, 'harlanzw/base/agent-ignores').ignores).toContain('**/CLAUDE.md')
   })
 
   it('lets an explicit agentFiles choice win over the prompt default', () => {
     const configs = harlanzw({ ...off, base: { agentFiles: 'ignore' }, prompt: true })
 
-    expect(blockNamed(configs, 'harlanzw/base/ignores').ignores).toContain('**/CLAUDE.md')
+    expect(blockNamed(configs, 'harlanzw/base/agent-ignores').ignores).toContain('**/CLAUDE.md')
   })
 
   it('forwards base options', () => {
