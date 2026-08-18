@@ -39,15 +39,16 @@ The annotation must erase a known key set, and the object must be safe to freeze
 - the value type `V` is not `any` or `unknown`
 - the initialiser is a non-empty object literal with no spread elements
 - the variable is never written to afterwards
+- the variable is never read with a computed non-literal key
 
 ## Examples
 
 Incorrect:
 
 ```ts
-const XML_ENTITIES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
+const HANDLERS: Record<string, Handler> = {
+  start: startHandler,
+  stop: stopHandler,
 }
 
 const products: Record<number, Product> = {
@@ -62,10 +63,10 @@ const TITLES: Readonly<Record<string, string>> = {
 Correct:
 
 ```ts
-const XML_ENTITIES = {
-  amp: '&',
-  lt: '<',
-} satisfies Record<string, string>
+const HANDLERS = {
+  start: startHandler,
+  stop: stopHandler,
+} satisfies Record<string, Handler>
 ```
 
 ## When Not To Use It
@@ -87,6 +88,23 @@ A mutable map needs the open key type, because `satisfies` would reject any new 
 const counts: Record<string, number> = { total: 0 }
 counts[key] = 1
 ```
+
+A lookup map read by a computed key needs the open key type. Narrowing it makes every
+read an implicit `any`, so `satisfies` would trade this warning for a type error:
+
+```ts
+const XML_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+}
+
+export function decode(name: string) {
+  return XML_ENTITIES[name]
+}
+```
+
+A literal key names one member, so it does not exempt the map. `XML_ENTITIES['amp']`
+is still reported.
 
 A bag of `unknown` or `any` values carries no evidence worth preserving:
 
