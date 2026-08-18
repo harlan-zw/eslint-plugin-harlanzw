@@ -115,8 +115,43 @@ run({
         mode: 'strict',
       }
     `,
+    // read by a computed key, so narrowing would make the read an implicit any
+    $`
+      const icons: Record<string, string> = {
+        vue: 'i-logos-vue',
+      }
+      export function iconFor(name: string) {
+        return icons[name]
+      }
+    `,
+    // the computed key can be any expression
+    $`
+      const weights: Record<string, number> = {
+        bold: 700,
+      }
+      export function weightFor(prefix: string) {
+        return weights['font-' + prefix]
+      }
+    `,
+    // indexed inside a callback over its own keys
+    $`
+      const styles: Record<string, string> = {
+        color: 'red',
+      }
+      export const pairs = Object.keys(styles).map(k => [k, styles[k]])
+    `,
   ],
   invalid: [
+    // a literal computed key names one key, so the key set can still be narrowed
+    {
+      code: $`
+        const handlers: Record<string, Handler> = {
+          start: startHandler,
+        }
+        export const first = handlers['start']
+      `,
+      errors: [{ messageId: 'preferSatisfies' }],
+    },
     // Record<string, V>
     {
       code: $`
@@ -194,14 +229,14 @@ run({
       `,
       errors: [{ messageId: 'preferSatisfies' }],
     },
-    // read-only usage elsewhere does not exempt it
+    // read-only usage by a static key does not exempt it
     {
       code: $`
         const labels: Record<string, string> = {
           start: 'Start',
         }
-        export function label(key: string) {
-          return labels[key]
+        export function label() {
+          return labels.start
         }
       `,
       errors: [{ messageId: 'preferSatisfies' }],

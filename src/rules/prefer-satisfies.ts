@@ -69,6 +69,22 @@ function hasStaticKeys(node: TSESTree.ObjectExpression): boolean {
 }
 
 /**
+ * A lookup map read by a computed key needs the wide annotation to stay indexable.
+ * Narrowing it to its literal keys makes every `map[someString]` an implicit `any`,
+ * so `satisfies` would trade a lint warning for a type error.
+ */
+function isDynamicallyIndexed(references: TSESTree.Identifier[]): boolean {
+  return references.some((id) => {
+    const parent = id.parent
+    if (parent?.type !== 'MemberExpression' || parent.object !== id || !parent.computed)
+      return false
+
+    // `x['a']` and `x[0]` name one key, so the key set can still be narrowed.
+    return parent.property.type !== 'Literal'
+  })
+}
+
+/**
  * `satisfies` freezes the key set, so an object that is written to after
  * declaration genuinely needs the wide annotation.
  */
@@ -147,7 +163,7 @@ export default createEslintRule<Options, MessageIds>({
           .filter(ref => ref.identifier !== node.id)
           .map(ref => ref.identifier as TSESTree.Identifier)
 
-        if (isMutated(references))
+        if (isMutated(references) || isDynamicallyIndexed(references))
           return
 
         const annotationText = sourceCode.getText(annotation)
