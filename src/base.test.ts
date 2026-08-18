@@ -83,6 +83,30 @@ describe('base', () => {
     }
   })
 
+  it('drops the ignore block entirely when the repo wants to own it', () => {
+    const configs = base({ ignores: false })
+
+    expect(configs.find(c => c.name === 'harlanzw/base/ignores')).toBeUndefined()
+    // The rule blocks still apply.
+    expect(configs.map(c => c.name)).toContain('harlanzw/base/rules')
+  })
+
+  it('keeps a file lintable when the shared ignores are dropped', () => {
+    const configs = [
+      { files: ['**/*.js'], rules: { 'no-console': 'error' } } as LinterTypes.Config,
+      ...base({ ignores: false }),
+    ]
+
+    const shared = [
+      { files: ['**/*.js'], rules: { 'no-console': 'error' } } as LinterTypes.Config,
+      ...base(),
+    ]
+
+    // `playground/**` is in the shared set, so the rule only reaches it without.
+    expect(lint('console.log(1)\n', shared, 'playground/a.js')).not.toContain('no-console')
+    expect(lint('console.log(1)\n', configs, 'playground/a.js')).toEqual(['no-console'])
+  })
+
   it('appends extra ignores to the shared set', () => {
     const ignores = blockNamed(base({ ignores: ['docs/**'] }), 'harlanzw/base/ignores').ignores
 

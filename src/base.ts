@@ -16,8 +16,12 @@ export interface BaseOptions {
   type?: 'lib' | 'app'
   /**
    * Paths to ignore on top of the shared ignore set.
+   *
+   * `false` drops the shared ignore block, leaving the repo to declare its own.
+   * A global ignore cannot be undone by a later config, so this is the only way
+   * to keep linting something the shared set covers, such as a playground.
    */
-  ignores?: string[]
+  ignores?: string[] | false
   /**
    * What to do with `CLAUDE.md`, `AGENTS.md`, and the agent tool directories.
    *
@@ -82,14 +86,16 @@ export function base(options: BaseOptions = {}): Linter.Config[] {
   }
 
   return [
-    {
-      name: 'harlanzw/base/ignores',
-      ignores: [
-        ...BASE_IGNORES,
-        ...(agentFiles === 'ignore' ? AGENT_IGNORES : []),
-        ...ignores,
-      ],
-    },
+    ...(ignores === false
+      ? []
+      : [{
+          name: 'harlanzw/base/ignores',
+          ignores: [
+            ...BASE_IGNORES,
+            ...(agentFiles === 'ignore' ? AGENT_IGNORES : []),
+            ...ignores,
+          ],
+        }]),
     {
       name: 'harlanzw/base/rules',
       rules,
