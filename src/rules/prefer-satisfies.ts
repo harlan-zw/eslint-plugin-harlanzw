@@ -85,6 +85,51 @@ function isDynamicallyIndexed(references: TSESTree.Identifier[]): boolean {
 }
 
 /**
+ * Vue template expressions are parsed into a separate AST, so the script's scope
+ * analysis never sees `<UIcon :name="icons[label]" />`. Collect the names read
+ * with a computed key straight from the template body instead.
+ */
+function templateComputedReads(sourceCode: any): Set<string> {
+  const names = new Set<string>()
+  const body = sourceCode?.ast?.templateBody
+  if (!body)
+    return names
+
+  const seen = new Set<object>()
+  const stack: any[] = [body]
+  while (stack.length) {
+    const node = stack.pop()
+    if (!node || typeof node !== 'object' || seen.has(node))
+      continue
+    seen.add(node)
+
+    if (Array.isArray(node)) {
+      stack.push(...node)
+      continue
+    }
+
+    if (
+      node.type === 'MemberExpression'
+      && node.computed
+      && node.object?.type === 'Identifier'
+      && node.property?.type !== 'Literal'
+    ) {
+      names.add(node.object.name)
+    }
+
+    for (const key of Object.keys(node)) {
+      // `parent` walks back up and would loop forever.
+      if (key === 'parent')
+        continue
+      const value = node[key]
+      if (value && typeof value === 'object')
+        stack.push(value)
+    }
+  }
+  return names
+}
+
+/**
  * `satisfies` freezes the key set, so an object that is written to after
  * declaration genuinely needs the wide annotation.
  */
@@ -138,6 +183,8 @@ export default createEslintRule<Options, MessageIds>({
   defaultOptions: [],
   create: (context) => {
     const sourceCode = context.sourceCode ?? context.getSourceCode()
+    // The template AST is fixed for the file, so walk it at most once.
+    let templateReads: Set<string> | null = null
 
     return {
       VariableDeclarator(node) {
@@ -164,6 +211,10 @@ export default createEslintRule<Options, MessageIds>({
           .map(ref => ref.identifier as TSESTree.Identifier)
 
         if (isMutated(references) || isDynamicallyIndexed(references))
+          return
+
+        templateReads ??= templateComputedReads(sourceCode)
+        if (templateReads.has(node.id.name))
           return
 
         const annotationText = sourceCode.getText(annotation)

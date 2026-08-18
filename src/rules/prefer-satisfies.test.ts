@@ -1,6 +1,6 @@
 import type { Linter } from 'eslint'
 import { unindent as $ } from 'eslint-vitest-rule-tester'
-import { run } from './_test'
+import { run, runVue } from './_test'
 import rule, { RULE_NAME } from './prefer-satisfies'
 
 /** Applies a report's single suggestion to `code` so the rewrite can be asserted. */
@@ -238,6 +238,63 @@ run({
         export function label() {
           return labels.start
         }
+      `,
+      errors: [{ messageId: 'preferSatisfies' }],
+    },
+  ],
+})
+
+runVue({
+  name: `${RULE_NAME} (vue)`,
+  rule,
+  valid: [
+    // read by a computed key in the template, which the script scope cannot see
+    {
+      filename: 'test.vue',
+      code: $`
+        <script setup lang="ts">
+        const defaultIcons: Record<string, string> = {
+          info: 'i-carbon-information',
+        }
+        const props = defineProps<{ variant: string }>()
+        </script>
+
+        <template>
+          <UIcon :name="defaultIcons[props.variant]" />
+        </template>
+      `,
+    },
+    // optional chaining off the computed read still counts
+    {
+      filename: 'test.vue',
+      code: $`
+        <script setup lang="ts">
+        const labels: Record<string, { text: string }> = {
+          rel: { text: 'Rel' },
+        }
+        const props = defineProps<{ rel: string }>()
+        </script>
+
+        <template>
+          <span>{{ labels[props.rel]?.text }}</span>
+        </template>
+      `,
+    },
+  ],
+  invalid: [
+    // only ever read by a static key, in script and template alike
+    {
+      filename: 'test.vue',
+      code: $`
+        <script setup lang="ts">
+        const defaultIcons: Record<string, string> = {
+          info: 'i-carbon-information',
+        }
+        </script>
+
+        <template>
+          <UIcon :name="defaultIcons.info" />
+        </template>
       `,
       errors: [{ messageId: 'preferSatisfies' }],
     },
