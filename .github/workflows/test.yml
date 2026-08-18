@@ -8,7 +8,9 @@ on:
       - main
     paths-ignore:
       - '**/README.md'
-  pull_request_target:
+  # `pull_request`, not `pull_request_target`. The latter checks out the base
+  # branch, so every run tested main and no pull request was ever tested.
+  pull_request:
     branches:
       - main
 
