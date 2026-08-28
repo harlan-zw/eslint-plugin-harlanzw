@@ -20,7 +20,7 @@ pnpm release
 - `src/ast-utils.ts` — general AST helpers (calls, awaits, returns, scope)
 - `playground/` — Nuxt 4 app for manual rule testing
 
-Shared configs: `link`, `nuxt`, `vue`, `recommended` (those three), `content` (deslop), `prompt:recommended`, `prompt:strict`, `prompt:skill`. `base` is opt in and turns rules off rather than on.
+Shared configs: `link`, `nuxt`, `vue`, `tests`, `recommended`, `content`, `prompt:recommended`, `prompt:strict`, `prompt:skill`. `base` is opt in and turns rules off rather than on.
 
 `createReactivityChecker` returns `hasReactivityInStatement`/`hasReactivityInExpression` and is shared by the composable rules; reach for it rather than re-walking for reactivity calls.
 

@@ -1,10 +1,12 @@
-import type { ESLint } from 'eslint'
+import type { ESLint, Linter as LinterTypes } from 'eslint'
 import type { RuleOptions } from './index'
+import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
 import harlanzw, { plugin } from './index'
 
 const linkOptions: RuleOptions['link-lowercase'] = [{ ignoreExternal: true }]
 const factoryPlugin: ESLint.Plugin = harlanzw.plugin
+const linter = new Linter()
 
 describe('plugin configs', () => {
   it('preserves options for every exported rule type', () => {
@@ -30,5 +32,21 @@ describe('plugin configs', () => {
       '**/*.mts',
       '**/*.cts',
     ])
+  })
+
+  it('warns on file reads in tests without warning on source files', () => {
+    const configs = harlanzw({
+      content: false,
+      link: false,
+      nuxt: true,
+      pnpm: false,
+      prompt: false,
+      vue: false,
+    }) as LinterTypes.Config[]
+    const code = `import { readFileSync } from 'node:fs'\nreadFileSync('src/index.ts', 'utf8')\n`
+
+    expect(linter.verify(code, configs, 'src/example.test.js').map(({ ruleId, severity }) => ({ ruleId, severity })))
+      .toEqual([{ ruleId: 'harlanzw/no-test-file-reads', severity: 1 }])
+    expect(linter.verify(code, configs, 'src/example.js')).toEqual([])
   })
 })

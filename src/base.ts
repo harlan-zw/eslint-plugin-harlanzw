@@ -78,10 +78,10 @@ const BASE_IGNORES = [
   '**/worker-configuration.d.ts',
 ]
 
-const TEST_FILES = [
-  '**/*.{test,spec}.{ts,tsx,js,jsx,mts,mjs}',
-  '**/test/**/*.{ts,tsx,js,jsx,mts,mjs}',
-  '**/tests/**/*.{ts,tsx,js,jsx,mts,mjs}',
+export const TEST_FILES = [
+  '**/*.{test,spec}.{ts,tsx,js,jsx,mts,mjs,cts,cjs,vue}',
+  '**/test/**/*.{ts,tsx,js,jsx,mts,mjs,cts,cjs,vue}',
+  '**/tests/**/*.{ts,tsx,js,jsx,mts,mjs,cts,cjs,vue}',
 ]
 
 /** Code fences in markdown are illustrative, so most style and safety rules do not apply. */
