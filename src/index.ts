@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { version } from '../package.json'
-import { base } from './base'
+import { base, TEST_FILES } from './base'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
 import { CONTENT_FILES, NUXT_CONTENT_FILES } from './prompt/deslop-constants'
 import { PromptLanguage } from './prompt/language'
@@ -54,6 +54,7 @@ import linkRequireDescriptiveText from './rules/link-require-descriptive-text'
 import linkRequireHref from './rules/link-require-href'
 import linkTrailingSlash from './rules/link-trailing-slash'
 import noSilentCatch from './rules/no-silent-catch'
+import noTestFileReads from './rules/no-test-file-reads'
 import nuxtAwaitNavigateTo from './rules/nuxt-await-navigate-to'
 import nuxtNoRandom from './rules/nuxt-no-random'
 import nuxtNoRedundantComponentImports from './rules/nuxt-no-redundant-component-imports'
@@ -111,6 +112,7 @@ const rules = defineRules({
   'link-require-href': linkRequireHref,
   'link-trailing-slash': linkTrailingSlash,
   'no-silent-catch': noSilentCatch,
+  'no-test-file-reads': noTestFileReads,
   'nuxt-await-navigate-to': nuxtAwaitNavigateTo,
   'nuxt-no-random': nuxtNoRandom,
   'nuxt-no-redundant-component-imports': nuxtNoRedundantComponentImports,
@@ -402,11 +404,25 @@ plugin.configs!.pnpm = [
   },
 ]
 
-// Recommended config (all link + nuxt + vue rules)
+// Test config
+plugin.configs!.tests = [
+  {
+    name: 'harlanzw/tests',
+    files: TEST_FILES,
+    ignores: CODE_IGNORES,
+    plugins: { harlanzw: plugin },
+    rules: {
+      'harlanzw/no-test-file-reads': 'warn',
+    },
+  },
+]
+
+// Recommended config
 plugin.configs!.recommended = [
   ...plugin.configs!.link,
   ...plugin.configs!.nuxt,
   ...plugin.configs!.vue,
+  ...plugin.configs!.tests,
 ]
 
 // Factory options
@@ -425,6 +441,8 @@ export interface HarlanzwOptions {
   prompt?: boolean | 'recommended' | 'strict' | 'skill'
   content?: boolean
   pnpm?: boolean
+  /** Enable rules scoped to test files. Nuxt and Vue presets enable them by default. */
+  tests?: boolean
 }
 
 const PROMPT_MARKERS = [
@@ -517,6 +535,11 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
   const enableVue = options.vue ?? detected.vue
   if (enableVue) {
     configs.push(...plugin.configs!.vue as Linter.Config[])
+  }
+
+  const enableTests = options.tests ?? (enableNuxt || enableVue)
+  if (enableTests) {
+    configs.push(...plugin.configs!.tests as Linter.Config[])
   }
 
   const enableContent = options.content ?? detected.content

@@ -73,6 +73,7 @@ The rules are organized into the following categories:
 | [`vue-require-composable-prefix`](./src/rules/vue-require-composable-prefix.ts) | enforce `use*` prefix for functions using Vue reactivity |
 | **General** | |
 | [`no-silent-catch`](./src/rules/no-silent-catch.md) | disallow silently swallowing errors in `.catch()` or `try/catch` |
+| [`no-test-file-reads`](./src/rules/no-test-file-reads.md) | warn when tests read files instead of exercising exported behaviour |
 | [`prefer-node-style-text`](./src/rules/prefer-node-style-text.ts) | prefer Node.js `styleText()` over raw ANSI escape codes |
 | [`prefer-satisfies`](./src/rules/prefer-satisfies.md) | prefer `satisfies` over a widening type annotation on object literals |
 | **AI Deslop** | |
@@ -135,6 +136,13 @@ export default harlanzw({
   vue: true,
 })
 ```
+
+### Test Rules
+
+Nuxt and Vue presets enable test rules automatically.
+`no-test-file-reads` warns when tests call Node.js `readFile()` or `readFileSync()`.
+
+Enable test rules alone with `tests: true`. Disable them with `tests: false`.
 
 ### Shared Base
 
@@ -251,6 +259,7 @@ export default [
   ...plugin.configs.link,
   ...plugin.configs.nuxt,
   ...plugin.configs.vue,
+  ...plugin.configs.tests,
 ]
 ```
 

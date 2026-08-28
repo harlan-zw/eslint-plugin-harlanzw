@@ -12,6 +12,7 @@ const hasDocs = [
   'link-require-descriptive-text',
   'link-require-href',
   'link-trailing-slash',
+  'no-test-file-reads',
   'nuxt-no-random',
   'nuxt-no-redundant-component-imports',
   'nuxt-no-redundant-import-meta',
