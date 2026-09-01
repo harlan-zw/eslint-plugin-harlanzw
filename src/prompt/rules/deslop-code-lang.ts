@@ -5,10 +5,14 @@ import { getCodeBlockLines, getFrontmatterEnd, isInScope, parseLineScopes, shoul
 // Word boundary before opening backtick ensures we're not inside another construct
 const INLINE_CODE_RE = /(?:^|(?<=[\s\p{P}]))`([^`]+[>)])`(?!\{lang)/gu
 
-const LANG_MAP: Record<string, string> = {
-  ')': 'ts',
-  '>': 'html',
-}
+// The closing character only makes a candidate. The shape decides the language,
+// so prose that happens to end in `>` or `)` keeps its backticks untouched.
+const LANG_SHAPES: { lang: string, shape: RegExp }[] = [
+  // One whole tag: `<title>`, `</div>`, `<script defer>`. Not `chore: <problem>`.
+  { lang: 'html', shape: /^<\/?[A-Z][\w.:-]*(?:\s[^<>]*)?\/?>$/i },
+  // One whole call: `useHead()`, `foo.bar(1)`. Not `RFC 2119 (BCP 14)`.
+  { lang: 'ts', shape: /^[\w$][\w$.]*\([^()]*\)$/ },
+]
 
 export default {
   meta: {
@@ -43,12 +47,10 @@ export default {
             if (isInScope(scopes, match.index, match.index + match[0].length, ['link-url']))
               continue
             const code = match[1]
-            const lastChar = code.at(-1)
-            if (!lastChar)
+            const matched = LANG_SHAPES.find(({ shape }) => shape.test(code))
+            if (!matched)
               continue
-            const lang = LANG_MAP[lastChar]
-            if (!lang)
-              continue
+            const lang = matched.lang
 
             // Position of the closing backtick
             const closingBacktickIdx = match.index + match[0].length - 1
