@@ -17,6 +17,14 @@ ruleTester.run('harlanzw/ai-deslop-code-lang', rule, {
     '``',
     // Code block with non-matching content
     'Set `enabled` to true.',
+    // Prose that happens to end in a placeholder, not an HTML tag
+    'Use `chore: <specific problem>` for CI repairs.',
+    'Read `docs/plans/<name>` before starting.',
+    // A path template built from placeholders
+    'The key is `<repo>/<branch>/<filename>`.',
+    // Parentheses closing prose, not a call
+    'Read `RFC 2119 (BCP 14)` first.',
+    'Run `pnpm dlx wrangler@4 r2 object put (remote)`.',
   ],
   invalid: [
     {
