@@ -140,7 +140,8 @@ export default harlanzw({
 ### Test Rules
 
 Nuxt and Vue presets enable test rules automatically.
-`no-test-file-reads` warns when tests call Node.js `readFile()` or `readFileSync()`.
+`no-test-file-reads` warns when tests read source files or files with unknown paths.
+Known non-source paths, such as generated `.json`, `.md`, and `.txt` files, are allowed.
 
 Enable test rules alone with `tests: true`. Disable them with `tests: false`.
 

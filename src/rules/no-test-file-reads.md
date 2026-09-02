@@ -1,8 +1,9 @@
 # Disallow file reads in tests
 
-Warn when tests call Node.js `readFile()` or `readFileSync()`.
+Warn when tests read source files or files with unknown paths.
 
 File text checks often restate implementation details. They can pass while behaviour is broken.
+Known non-source paths, such as generated `.json`, `.md`, and `.txt` files, are allowed.
 
 ```ts
 // Bad
@@ -20,7 +21,7 @@ const result = resolvePath('/srv/app', '../../etc/passwd')
 expect(result).toEqual({ _tag: 'Err', reason: 'escapes-root' })
 ```
 
-Disable the warning with a reason when reading a file is part of the public behaviour.
+Disable the warning with a reason when a dynamic path targets generated output.
 
 ```ts
 // The command writes this customer-visible report.
