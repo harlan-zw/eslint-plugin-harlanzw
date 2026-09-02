@@ -37,6 +37,35 @@ run({
         }
       `,
     },
+    {
+      filename: 'example.test.ts',
+      code: $`
+        import { readFile } from 'node:fs/promises'
+        import { join } from 'node:path'
+
+        const outputDir = '/tmp/output'
+        const pages = JSON.parse(await readFile(join(outputDir, 'pages.json'), 'utf8'))
+        const markdown = await readFile(join(outputDir, \`content\${route}.md\`), 'utf8')
+      `,
+    },
+    {
+      filename: 'example.test.ts',
+      code: $`
+        import { readFile } from 'node:fs/promises'
+        import { join } from 'node:path'
+
+        const headersPath = join(outputDir, '_headers')
+        const headers = await readFile(headersPath, 'utf8')
+      `,
+    },
+    {
+      filename: 'example.test.ts',
+      code: $`
+        import { readFile } from 'node:fs/promises'
+
+        const output = await readFile(getPublicPath('llms.txt'), 'utf8')
+      `,
+    },
   ],
   invalid: [
     {
@@ -125,6 +154,33 @@ run({
         const source = load('src/index.ts', 'utf8')
       `,
       errors: [{ messageId: 'noTestFileRead', data: { name: 'readFileSync' } }],
+    },
+    {
+      filename: 'example.test.ts',
+      code: $`
+        import { readFile } from 'node:fs/promises'
+        const source = await readFile(resolvePath('Component.vue'), 'utf8')
+      `,
+      errors: [{ messageId: 'noTestFileRead', data: { name: 'readFile' } }],
+    },
+    {
+      filename: 'example.test.ts',
+      code: $`
+        import { readFile } from 'node:fs/promises'
+        import { join } from 'node:path'
+
+        const sourcePath = join(root, 'src/index.ts')
+        const source = await readFile(sourcePath, 'utf8')
+      `,
+      errors: [{ messageId: 'noTestFileRead', data: { name: 'readFile' } }],
+    },
+    {
+      filename: 'example.test.ts',
+      code: $`
+        import { readFile } from 'node:fs/promises'
+        const source = await readFile(filename, 'utf8')
+      `,
+      errors: [{ messageId: 'noTestFileRead', data: { name: 'readFile' } }],
     },
   ],
 })

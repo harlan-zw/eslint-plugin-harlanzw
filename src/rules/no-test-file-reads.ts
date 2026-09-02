@@ -28,6 +28,8 @@ const READ_NAMES = new Set<ReadName>([
   'readFileSync',
 ])
 
+const SOURCE_FILE_RE = /\.(?:[cm]?[jt]s|jsx|tsx|vue)$/i
+
 function readName(value: string | null): ReadName | null {
   return value && READ_NAMES.has(value as ReadName) ? value as ReadName : null
 }
@@ -88,11 +90,11 @@ export default createEslintRule<Options, MessageIds>({
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'warn when tests read files instead of exercising exported behaviour',
+      description: 'warn when tests read source files or files with unknown paths',
     },
     schema: [],
     messages: {
-      noTestFileRead: 'Test exported behaviour. Do not inspect files with `{{name}}()`.',
+      noTestFileRead: 'Test exported behaviour. Do not inspect source or unknown files with `{{name}}()`.',
     },
   },
   defaultOptions: [],
@@ -100,6 +102,7 @@ export default createEslintRule<Options, MessageIds>({
     const sourceCode = context.sourceCode ?? context.getSourceCode()
     const directReaders = new Map<ScopeVariable, ReadName>()
     const fsNamespaces = new Set<ScopeVariable>()
+    const knownPathEnds = new Map<ScopeVariable, string>()
 
     function declaredVariable(node: TSESTree.Node, name: string): ScopeVariable | null {
       const variables = sourceCode.getDeclaredVariables(node as any) as unknown as ScopeVariable[]
@@ -128,6 +131,42 @@ export default createEslintRule<Options, MessageIds>({
       const variable = declaredVariable(node, localName)
       if (variable)
         fsNamespaces.add(variable)
+    }
+
+    function knownPathEnd(node: TSESTree.Node): string | null {
+      if (node.type === 'Literal')
+        return typeof node.value === 'string' ? node.value : null
+      if (node.type === 'TemplateLiteral') {
+        const end = node.quasis.at(-1)?.value.cooked
+        return end || null
+      }
+      if (node.type === 'Identifier') {
+        const variable = resolvedVariable(node)
+        return variable ? knownPathEnds.get(variable) ?? null : null
+      }
+      if (node.type === 'CallExpression') {
+        const lastArgument = node.arguments.at(-1)
+        return lastArgument && lastArgument.type !== 'SpreadElement'
+          ? knownPathEnd(lastArgument)
+          : null
+      }
+      if (
+        node.type === 'ChainExpression'
+        || node.type === 'TSAsExpression'
+        || node.type === 'TSNonNullExpression'
+        || node.type === 'TSTypeAssertion'
+      ) {
+        return knownPathEnd(node.expression)
+      }
+      return null
+    }
+
+    function readsKnownNonSourceFile(node: TSESTree.CallExpression): boolean {
+      const path = node.arguments[0]
+      if (!path || path.type === 'SpreadElement')
+        return false
+      const end = knownPathEnd(path)
+      return end !== null && !SOURCE_FILE_RE.test(end)
     }
 
     function trackPattern(node: TSESTree.VariableDeclarator, pattern: TSESTree.BindingName): void {
@@ -207,6 +246,12 @@ export default createEslintRule<Options, MessageIds>({
       VariableDeclarator(node) {
         if (!node.init)
           return
+        if (node.parent.kind === 'const' && node.id.type === 'Identifier') {
+          const end = knownPathEnd(node.init)
+          const variable = declaredVariable(node, node.id.name)
+          if (end && variable)
+            knownPathEnds.set(variable, end)
+        }
         if (isTrackedNamespace(node.init)) {
           trackPattern(node, node.id)
           return
@@ -227,6 +272,8 @@ export default createEslintRule<Options, MessageIds>({
           name = memberReadName(node.callee)
         }
         if (!name)
+          return
+        if (readsKnownNonSourceFile(node))
           return
         context.report({
           node: node.callee,
