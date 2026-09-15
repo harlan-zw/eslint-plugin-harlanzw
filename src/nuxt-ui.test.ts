@@ -124,8 +124,9 @@ describe('component sizing guidance', () => {
   })
 
   it('distinguishes arbitrary font sizes from text colors', () => {
-    const messages = lint('<template><UInput class="text-[14px] text-[length:var(--font-size)] text-[var(--color)]" /></template>')
+    const messages = lint('<template><UInput class="text-[14px] text-[length:var(--font-size)] text-(length:--font-size) text-[var(--color)]" /></template>')
     expect(messages.map(m => m.message)).toEqual([
+      expect.stringContaining('Use the size prop.'),
       expect.stringContaining('Use the size prop.'),
       expect.stringContaining('Use the size prop.'),
       expect.stringContaining('Use the color or variant prop.'),

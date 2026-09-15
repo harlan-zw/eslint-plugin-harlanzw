@@ -232,7 +232,9 @@ export default createEslintRule<Options, MessageIds>({
               continue
             const sizing = /^(?:p[xytrblse]?|gap(?:-[xy])?|size|[wh]|min-[wh]|max-[wh])-/.test(utility)
               || /^text-(?:xs|sm|base|lg|xl|[2-9]xl)(?:\/.*)?$/.test(utility)
-              || /^text-\[(?:length:|[\d.]+(?:px|r?em|vw|vh|%))/.test(utility)
+              || /^text-(?:\[|\()(?:length:|[\d.]+(?:px|r?em|vw|vh|%))/.test(utility)
+              || theme?.fontSizeClasses.includes(className) === true
+              || (utility.startsWith('text-') && /(?:^|[;{\s])font-size\s*:/.test(theme?.compile(className) ?? ''))
             if (/^text-(?:left|center|right|justify|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)$/.test(utility))
               continue
             const appearanceOverride = /^(?:bg|text|border|ring|outline|shadow|rounded|font|tracking|leading)(?:-|$)/.test(utility)

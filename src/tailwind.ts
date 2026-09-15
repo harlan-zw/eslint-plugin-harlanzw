@@ -36,6 +36,7 @@ export async function tailwind({ stylesheet, stylesheets = [], files = ['**/*.vu
   const hash = createHash('sha256')
   for (const dependency of [...dependencies].sort())
     hash.update(dependency).update(await readFile(dependency))
+  const compiledCss = compiler.build([])
   const canonical = new Map<string, string>()
   const cache = new Map<string, string | null>()
   return {
@@ -47,7 +48,8 @@ export async function tailwind({ stylesheet, stylesheets = [], files = ['**/*.vu
       'harlanzw/tailwind': {
         stylesheet: path,
         fingerprint: hash.digest('hex'),
-        classes: cssClasses(compiler.build([])),
+        classes: cssClasses(compiledCss),
+        fontSizeClasses: cssClasses(compiledCss, 'font-size'),
         isUtility: (candidate: string) => system.parseCandidate(candidate).length > 0 || roots.has(candidate.split('-')[0]),
         canonicalize(candidate: string) {
           if (!canonical.has(candidate))

@@ -136,3 +136,18 @@ it('accepts Nuxt UI semantic colors declared by the generated theme', async () =
 it('checks complete utilities next to a partially constructed class', () => {
   expect(lint('<template><div :class="`bg-brnad hook-${id} p-4`" /></template>').map(message => message.ruleId)).toEqual(['harlanzw/vue-valid-tailwind-classes'])
 })
+
+it('uses compiled font-size utilities for wrapper sizing guidance', async () => {
+  const path = join(directory, 'font-size-guidance.css')
+  writeFileSync(path, '@theme { --text-mini: 0.625rem; --color-muted: #888888; } @tailwind utilities; @utility text-caption { font-size: 0.75rem; } .text-micro { @apply text-[10px]; } .text-muted span { font-size: 2rem; }')
+  const theme = await tailwind({ stylesheet: path })
+  const messages = new Linter().verify('<template><UiChip class="text-mini text-caption text-micro text-muted" /></template>', [parser, theme, {
+    rules: { 'harlanzw/nuxt-ui-no-restyle': ['warn', { components: { UiChip: { sizes: ['xs', 'sm'], appearanceProp: 'purpose', variants: ['status', 'tag'] } } }] },
+  }], 'app.vue')
+  expect(messages.map(message => message.message)).toEqual([
+    expect.stringContaining('Use the size prop: xs, sm.'),
+    expect.stringContaining('Use the size prop: xs, sm.'),
+    expect.stringContaining('Use the size prop: xs, sm.'),
+    expect.stringContaining('Use the purpose prop: status, tag.'),
+  ])
+})

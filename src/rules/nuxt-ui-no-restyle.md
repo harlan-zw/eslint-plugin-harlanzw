@@ -116,6 +116,9 @@ export default defineAppConfig({
 Lint options describe the site's policy. They do not replace Nuxt UI configuration.
 The rule does not execute `app.config.ts` or discover its sizes and variants.
 Keep configured guidance consistent with your site's installed Nuxt UI version.
+When Tailwind context is loaded, font-size utilities and direct CSS classes receive sizing guidance.
+This includes custom tokens and classes declared with `@apply`, such as NuxtSEO's `text-mini`.
+The rule does not infer sizing from ancestor selectors or runtime styles.
 
 If a wrapper owns its own appearance, disable this rule inside that wrapper through a file override.
 Keep the dynamic-class rule enabled there.

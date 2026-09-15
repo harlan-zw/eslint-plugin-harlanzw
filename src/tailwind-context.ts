@@ -6,17 +6,22 @@ export interface TailwindContext {
   stylesheet: string
   fingerprint: string
   classes: string[]
+  fontSizeClasses: string[]
   isUtility: (candidate: string) => boolean
   canonicalize: (candidate: string) => string
   compile: (candidate: string) => string | null
 }
 
-export function cssClasses(css: string): string[] {
+export function cssClasses(css: string, property?: string): string[] {
   const classes = new Set<string>()
   postcss.parse(css).walkRules((rule) => {
+    if (property && !rule.nodes.some(node => node.type === 'decl' && node.prop === property))
+      return
     selectorParser((selectors) => {
       selectors.walkClasses((node) => {
-        classes.add(node.value)
+        // Property guidance requires a direct class selector, not an ancestor or descendant.
+        if (!property || (node.parent?.type === 'selector' && node.parent.nodes.length === 1))
+          classes.add(node.value)
       })
     }).processSync(rule.selector)
   })
