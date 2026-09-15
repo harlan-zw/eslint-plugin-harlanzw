@@ -260,3 +260,12 @@ it('does not report class-object entries that Vue always excludes', () => {
 it('checks complete classes beside concatenated class fragments', () => {
   expect(lint('<template><UButton :class="\'rounded-full hook-\' + id + \' p-4\'" /></template>').map(message => message.messageId)).toEqual(['restyle', 'restyle'])
 })
+
+it('checks only effective ui slots for styling and dynamic classes', () => {
+  expect(lint('<template><UButton :ui="{ base: \'p-4\', ...{ base: \'w-full\' } }" /></template>')).toEqual([])
+  expect(lint('<template><UButton :ui="{ base: `p-${size}`, ...unknown }" /></template>')).toEqual([])
+  expect(lint('<template><UButton :ui="{ ...{ base: \'p-4\' } }" /></template>').map(message => message.messageId)).toEqual(['restyle'])
+  expect(lint('<template><UButton :ui="{ ...unknown, base: `p-${size}` }" /></template>').map(message => message.messageId)).toEqual(['partialClass'])
+  expect(lint('<template><UButton :ui="{ base: \'p-4\', [slot]: \'w-full\' }" /></template>')).toEqual([])
+  expect(lint('<template><UButton :ui="{ base: \'p-4\', base: \'w-full\' }" /></template>')).toEqual([])
+})

@@ -126,6 +126,8 @@ Keep the dynamic-class rule enabled there.
 ## Coverage and limits
 
 Checks include static classes, conditional classes, arrays, object bindings, and literal `ui` slots.
+For `ui` object spreads, only effective slot values are checked.
+An unknown spread or computed key hides earlier slot values. Explicit later values remain checked.
 Top-level `const` bindings are followed, including aliases. Template locals take precedence.
 Known imports from `@nuxt/ui` and `#components` support aliases.
 Foreign imports shadow default auto-import names. Explicit component configuration takes precedence.

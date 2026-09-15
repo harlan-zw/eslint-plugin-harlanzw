@@ -151,3 +151,13 @@ it('uses compiled font-size utilities for wrapper sizing guidance', async () => 
     expect.stringContaining('Use the purpose prop: status, tag.'),
   ])
 })
+
+it('checks effective ui slot classes after object spread overrides', () => {
+  expect(lint('<template><UInput :ui="{ base: \'bg-brnad\', ...{ base: \'bg-brand\' } }" /></template>')).toEqual([])
+  expect(lint('<script setup>const slots = { base: "bg-brand" }</script><template><UInput :ui="{ base: \'bg-brnad\', ...slots }" /></template>')).toEqual([])
+  expect(lint('<template><UInput :ui="{ base: \'bg-brnad\', ...unknown }" /></template>')).toEqual([])
+  expect(lint('<template><UInput :ui="{ ...unknown, base: \'bg-brnad\' }" /></template>').map(message => message.messageId)).toEqual(['invalid'])
+  expect(lint('<template><UInput :ui="{ base: \'bg-brnad\', ...{ ...unknown, base: \'bg-brand\' } }" /></template>')).toEqual([])
+  expect(lint('<template><UInput :ui="{ ...{ base: \'bg-brnad\' } }" /></template>').map(message => message.messageId)).toEqual(['invalid'])
+  expect(lint('<template><UInput :ui="{ base: \'bg-brnad\', ...{ label: \'bg-brand\' } }" /></template>').map(message => message.messageId)).toEqual(['invalid'])
+})

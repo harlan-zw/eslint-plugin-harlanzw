@@ -102,6 +102,42 @@ export function attributeClasses(attribute: ClassAttribute, resolve: ResolveClas
   return expressionClasses(attribute.value.expression, name === 'ui' ? 'slots' : 'classes', resolve)
 }
 
+/** Object spreads replace slot values. Unknown keys invalidate earlier values. */
+function effectiveSlots(node: TSESTree.Expression | null | undefined, resolve: ResolveClass, seen = new Set<string>()): {
+  unknown: boolean
+  values: Map<string, TSESTree.Expression | undefined>
+} {
+  if (node?.type === 'Identifier' && !seen.has(node.name))
+    return effectiveSlots(resolve(node.name), resolve, new Set([...seen, node.name]))
+  if (node?.type === 'TSAsExpression' || node?.type === 'TSSatisfiesExpression' || node?.type === 'TSNonNullExpression')
+    return effectiveSlots(node.expression, resolve, seen)
+  const values = new Map<string, TSESTree.Expression | undefined>()
+  if (node?.type !== 'ObjectExpression')
+    return { unknown: true, values }
+  let unknown = false
+  for (const property of node.properties) {
+    if (property.type === 'SpreadElement') {
+      const spread = effectiveSlots(property.argument, resolve, seen)
+      if (spread.unknown) {
+        values.clear()
+        unknown = true
+      }
+      for (const [name, value] of spread.values) values.set(name, value)
+      continue
+    }
+    const name = !property.computed && property.key.type === 'Identifier'
+      ? property.key.name
+      : property.key.type === 'Literal' && typeof property.key.value === 'string' ? property.key.value : undefined
+    if (name === undefined) {
+      values.clear()
+      unknown = true
+      continue
+    }
+    values.set(name, property.kind === 'init' ? property.value as TSESTree.Expression : undefined)
+  }
+  return { unknown, values }
+}
+
 function expressionClasses(
   node: TSESTree.Expression | null | undefined,
   mode: 'slots' | 'classes',
@@ -128,17 +164,11 @@ function expressionClasses(
   if (node.type === 'ArrayExpression')
     return node.elements.flatMap(value => value && value.type !== 'SpreadElement' ? expressionClasses(value, mode, resolve, slot, seen) : [])
   if (node.type === 'ObjectExpression') {
+    if (mode === 'slots')
+      return [...effectiveSlots(node, resolve).values].flatMap(([name, value]) => expressionClasses(value, 'classes', resolve, name, seen))
     return node.properties.flatMap((property) => {
       if (property.type !== 'Property')
         return []
-      if (mode === 'slots') {
-        const name = !property.computed && property.key.type === 'Identifier'
-          ? property.key.name
-          : property.key.type === 'Literal' && typeof property.key.value === 'string' ? property.key.value : undefined
-        return name && property.value.type !== 'AssignmentPattern'
-          ? expressionClasses(property.value as TSESTree.Expression, 'classes', resolve, name, seen)
-          : []
-      }
       if (property.value.type === 'Literal' && !property.value.value)
         return []
       if (property.key.type === 'Literal' || property.computed)
