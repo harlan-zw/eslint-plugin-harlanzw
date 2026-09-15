@@ -14,7 +14,8 @@ Use classes for placement and site-approved exceptions.
 <UButton :ui="{ base: 'p-4' }" />
 ```
 
-The rule checks `UButton` and `UBadge` by default.
+Defaults cover `UButton`, `UBadge`, `UInput`, `UTextarea`, `USelect`, `USelectMenu`, `UInputMenu`,
+`UCheckbox`, `URadioGroup`, `USwitch`, and `UAvatar`.
 It reports other classes on these components, including unrecognized custom classes.
 It does not change code automatically.
 
@@ -51,7 +52,9 @@ export default withNuxt(
 No Nuxt runtime module is required for linting.
 Nuxt ESLint supplies the Vue parser. Nuxt UI supplies the rendered components.
 The preset adds a styling warning and a partial-class error on `.vue` files.
-It remains off unless you enable `nuxtUi`.
+The factory enables it when the current package declares `@nuxt/ui` in dependencies or devDependencies.
+Use `nuxtUi: false` to disable it.
+If a different workspace package owns `@nuxt/ui`, set `nuxtUi: true` or pass component options.
 
 For raw configs, use `plugin.configs.nuxtUi` with a Vue parser.
 For one rule, configure `harlanzw/nuxt-ui-no-restyle` directly.
@@ -65,6 +68,7 @@ For one rule, configure `harlanzw/nuxt-ui-no-restyle` directly.
 | `components[name].allow` | Allowed base classes. Replaces the default layout allowance. |
 | `components[name].slots` | Allowed classes per `ui` slot. Replaces the component allowance for that slot. |
 | `components[name].sizes` | Site-supported values shown in size guidance. |
+| `components[name].appearanceProp` | Appearance prop named in guidance, such as `purpose`. Defaults to `color or variant`. |
 | `components[name].variants` | Site-supported values shown in appearance guidance. |
 | `components[name].message` | Custom repair guidance. Replaces the built-in guidance. |
 
@@ -81,7 +85,7 @@ Patterns do not inspect the resulting CSS.
 Default allowed classes:
 
 - Margins: `m-*`, `mx-*`, `my-*`, `mt-*`, `mr-*`, `mb-*`, `ml-*`, `ms-*`, `me-*`.
-- Width: `w-full`, `w-auto`.
+- Layout dimensions: `w-*`, `min-w-*`, `max-w-*`, `h-full`, `h-auto`.
 - Placement: `self-*`, `justify-self-*`, `order-*`, `col-*`, `row-*`.
 - Flex sizing: `grow`, `grow-*`, `shrink`, `shrink-*`, `basis-*`.
 
@@ -115,9 +119,62 @@ Known imports from `@nuxt/ui` and `#components` support aliases.
 Foreign imports shadow default auto-import names. Explicit component configuration takes precedence.
 
 The rule does not resolve imported class values, helper calls, mutable bindings, or props spreads.
-It does not trace wrappers, namespace imports, CSS selectors, or runtime changes to objects.
+Register wrappers explicitly. The rule does not infer wrapper APIs from their source.
+Configured wrappers support named import aliases and default imports from matching `.vue` filenames.
+It does not trace namespace imports, CSS selectors, or runtime changes to objects.
 It supports Vue templates, not JSX or standalone stylesheets.
 Use browser review for visual quality and interaction behavior.
 
 The component-policy idea was inspired by [shadcn lint](https://github.com/shadcn-ui/lint).
 This implementation uses our own Vue rules and has no shadcn dependency.
+
+
+## Wrapped components
+
+A wrapper can change the underlying Nuxt UI API.
+For example, nuxtseo.com's `UiButton` exposes `purpose`, while `UiCard` defines its own sizes.
+Configure those public props directly:
+
+```ts
+export default withNuxt(
+  ...harlanzw({
+    nuxtUi: {
+      source: 'layers/design-system/app/app.config.ts',
+      components: {
+        UiButton: {
+          sizes: ['xs', 'sm', 'md', 'lg', 'xl'],
+          appearanceProp: 'purpose',
+          variants: ['cta', 'secondary', 'quiet', 'danger', 'link'],
+        },
+        UiInput: { sizes: ['xs', 'sm', 'md', 'lg', 'xl'] },
+        UiSelect: { sizes: ['xs', 'sm', 'md', 'lg', 'xl'] },
+        UiCard: {
+          sizes: ['xs', 'sm', 'md', 'lg'],
+          appearanceProp: 'variant',
+        },
+        UiStatusBadge: {
+          sizes: ['sm', 'md'],
+          appearanceProp: 'status',
+        },
+      },
+    },
+  }),
+  {
+    files: ['layers/design-system/app/components/**/*.vue'],
+    rules: { 'harlanzw/nuxt-ui-no-restyle': 'off' },
+  },
+)
+```
+
+The file override lets wrappers implement their shared appearance.
+Call sites still receive warnings for padding, dimensions, text sizes, and other overrides.
+This includes classes inside `:ui` slots.
+Existing defaults remain valid. Callers do not need an explicit `size` on every component.
+Margins, widths, and container-relative heights remain allowed.
+
+Do not register components without a relevant styling API.
+For example, nuxtseo.com's `UiIcon` accepts icon names and uses classes for dimensions.
+Its `size-4` class remains valid.
+
+These options provide repair guidance. TypeScript remains responsible for checking prop values.
+No pixel-to-size autofix is safe because wrapper defaults and themes can change their dimensions.

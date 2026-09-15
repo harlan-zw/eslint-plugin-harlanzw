@@ -248,9 +248,11 @@ export default withNuxt(
 )
 ```
 
-`nuxtUi` is opt in. It adds two Vue template checks:
+`nuxtUi` enables automatically when the current package declares `@nuxt/ui` in dependencies or devDependencies.
+Use `nuxtUi: false` to disable it. Use `nuxtUi: true` when another workspace package owns the dependency.
+It adds two Vue template checks:
 
-- Warn when `UButton` or `UBadge` classes override component appearance.
+- Warn when Nuxt UI controls or configured wrappers override component appearance.
 - Report partial Tailwind class construction in `:class` and `:ui` bindings.
 
 Messages guide agents toward component props and shared styling.

@@ -457,7 +457,7 @@ export interface HarlanzwOptions {
    */
   base?: boolean | BaseOptions
   link?: boolean | LinkRuleOptions & { requireTrailingSlash?: boolean }
-  /** Opt-in Vue template design checks for Nuxt UI sites. */
+  /** Auto-enabled when the current package declares @nuxt/ui. False disables detection. */
   nuxtUi?: boolean | NuxtUiDesignOptions
   nuxt?: boolean
   vue?: boolean
@@ -555,7 +555,7 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     configs.push(...plugin.configs!.nuxt as Linter.Config[])
   }
 
-  if (options.nuxtUi)
+  if (options.nuxtUi ?? detected.nuxtUi)
     configs.push(...nuxtUiConfig(typeof options.nuxtUi === 'object' ? options.nuxtUi : {}))
 
   const enableVue = options.vue ?? detected.vue
@@ -583,23 +583,23 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
   return configs
 }
 
-function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, content: boolean, pnpm: boolean } {
+function detectFramework(): { nuxt: boolean, nuxtUi: boolean, vue: boolean, prompt: boolean, content: boolean, pnpm: boolean } {
   const cwd = process.cwd()
   let nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
   let vue = nuxt
-  if (!vue || !nuxt) {
-    const packagePath = resolve(cwd, 'package.json')
-    if (existsSync(packagePath)) {
-      const pkg = JSON.parse(readFileSync(packagePath, 'utf-8'))
-      const deps = { ...pkg.dependencies, ...pkg.devDependencies }
-      nuxt = nuxt || !!deps.nuxt
-      vue = vue || !!(deps.vue || deps.nuxt)
-    }
+  let nuxtUi = false
+  const packagePath = resolve(cwd, 'package.json')
+  if (existsSync(packagePath)) {
+    const pkg = JSON.parse(readFileSync(packagePath, 'utf-8'))
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+    nuxt = nuxt || !!deps.nuxt
+    nuxtUi = !!deps['@nuxt/ui']
+    vue = vue || !!(deps.vue || deps.nuxt || nuxtUi)
   }
   const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))
   const content = existsSync(resolve(cwd, 'content')) || existsSync(resolve(cwd, 'docs'))
   const pnpm = existsSync(resolve(cwd, 'pnpm-workspace.yaml'))
-  return { nuxt, vue, prompt, content, pnpm }
+  return { nuxt, nuxtUi, vue, prompt, content, pnpm }
 }
 
 interface HarlanzwFactory {

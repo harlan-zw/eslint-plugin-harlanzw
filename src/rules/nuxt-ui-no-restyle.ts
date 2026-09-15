@@ -10,6 +10,8 @@ export interface ComponentStyleOptions {
   /** Allowed utilities for individual ui slots. Replaces the component allowance. */
   slots?: Record<string, string[]>
   sizes?: string[]
+  /** Appearance prop exposed by a wrapper, such as purpose. */
+  appearanceProp?: string
   variants?: string[]
   message?: string
 }
@@ -25,7 +27,7 @@ export const RULE_NAME = 'nuxt-ui-no-restyle'
 export type Options = [NuxtUiDesignOptions?]
 export type MessageIds = 'restyle'
 
-const LAYOUT = ['m-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-full', 'w-auto', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
+const LAYOUT = ['m-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-*', 'min-w-*', 'max-w-*', 'h-full', 'h-auto', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
 const normalize = (name: string) => name.replace(/-/g, '').toLowerCase()
 const strings = { type: 'array', items: { type: 'string' }, uniqueItems: true } as const
 
@@ -51,6 +53,7 @@ export default createEslintRule<Options, MessageIds>({
                   allow: strings,
                   slots: { type: 'object', additionalProperties: strings },
                   sizes: strings,
+                  appearanceProp: { type: 'string', minLength: 1 },
                   variants: strings,
                   message: { type: 'string', minLength: 1 },
                 },
@@ -64,10 +67,10 @@ export default createEslintRule<Options, MessageIds>({
   },
   defaultOptions: [{}],
   create(context, [options = {}]) {
-    const components = new Map<string, { name: string, options: ComponentStyleOptions }>([
-      ['ubutton', { name: 'UButton', options: {} }],
-      ['ubadge', { name: 'UBadge', options: {} }],
-    ])
+    const components = new Map<string, { name: string, options: ComponentStyleOptions }>(
+      ['UButton', 'UBadge', 'UInput', 'UTextarea', 'USelect', 'USelectMenu', 'UInputMenu', 'UCheckbox', 'URadioGroup', 'USwitch', 'UAvatar']
+        .map(name => [normalize(name), { name, options: {} }]),
+    )
     const configured = new Set(Object.keys(options.components ?? {}).map(normalize))
     for (const [name, config] of Object.entries(options.components ?? {})) {
       if (config === false)
@@ -91,8 +94,10 @@ export default createEslintRule<Options, MessageIds>({
             if (allowed.some(pattern => matchesUtility(utility, pattern)))
               continue
             const sizing = /^(?:p[xytrblse]?|gap(?:-[xy])?|size|[wh]|min-[wh]|max-[wh])-/.test(utility)
+              || /^text-(?:xs|sm|base|lg|xl|[2-9]xl)(?:\/.*)?$/.test(utility)
+              || /^text-\[(?:length:|[\d.]+(?:px|r?em|vw|vh|%))/.test(utility)
             const values = sizing ? component.options.sizes : component.options.variants
-            const prop = sizing ? 'size' : 'color or variant'
+            const prop = sizing ? 'size' : component.options.appearanceProp ?? 'color or variant'
             const guidance = component.options.message
               ?? `Use the ${prop} prop${values?.length ? `: ${values.join(', ')}` : ''}. See ${options.source ?? 'app/app.config.ts'} for shared styling.`
             context.report({ node: finding.node, messageId: 'restyle', data: { className, component: component.name, guidance } })
@@ -110,17 +115,20 @@ export default createEslintRule<Options, MessageIds>({
           if (specifier.type === 'ImportSpecifier' && specifier.importKind === 'type')
             continue
           const local = normalize(specifier.local.name)
-          if (!nuxtImport) {
-            if (!configured.has(local))
-              components.delete(local)
-            continue
-          }
           const imported = specifier.type === 'ImportSpecifier'
             ? (specifier.imported.type === 'Identifier' ? specifier.imported.name : specifier.imported.value)
             : specifier.type === 'ImportDefaultSpecifier' ? source.split('/').pop()?.replace(/\.vue$/, '') : undefined
-          if (!imported)
+          if (!imported) {
+            if (!nuxtImport && !configured.has(local))
+              components.delete(local)
             continue
-          const component = definitions.get(normalize(imported)) ?? (source !== '#components' ? definitions.get(normalize(`U${imported}`)) : undefined)
+          }
+          const importedName = normalize(imported)
+          const component = nuxtImport || configured.has(importedName)
+            ? definitions.get(importedName) ?? (source !== '#components' && nuxtImport ? definitions.get(normalize(`U${imported}`)) : undefined)
+            : undefined
+          if (!nuxtImport && !component && !configured.has(local))
+            components.delete(local)
           if (component && !configured.has(local))
             components.set(local, component)
         }

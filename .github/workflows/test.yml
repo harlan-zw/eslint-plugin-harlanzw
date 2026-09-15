@@ -7,12 +7,14 @@ on:
     branches:
       - main
     paths-ignore:
-      - '**/README.md'
+      - '**/*.md'
   # `pull_request`, not `pull_request_target`. The latter checks out the base
   # branch, so every run tested main and no pull request was ever tested.
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
   build:
