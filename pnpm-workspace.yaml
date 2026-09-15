@@ -1,18 +1,20 @@
-minimumReleaseAgeExclude:
-  - '@antfu/eslint-config@9.2.0'
-  - '@antfu/ni@30.3.0'
-shellEmulator: true
+minimumReleaseAgeExcludePrune: true
+
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
   - semver@6.3.1
 
+shellEmulator: true
+
 packages:
   - playground
-onlyBuiltDependencies:
-  - esbuild
+
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   unrs-resolver: true
   vue-demi: true
+
+onlyBuiltDependencies:
+  - esbuild
