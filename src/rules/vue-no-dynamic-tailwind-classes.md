@@ -49,3 +49,6 @@ Authored CSS families and library hooks, such as `zone-band--${zone}` and `shj-l
 Loaded theme CSS and local CSS distinguish custom families from Tailwind utilities.
 Without a loaded theme, the rule uses common Tailwind prefixes.
 It cannot prove every runtime class has generated CSS.
+
+Complete classes beside an interpolation still receive the other design checks.
+Mutable bindings remain unknown rather than producing reports from stale initializer values.

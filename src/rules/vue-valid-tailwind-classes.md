@@ -58,7 +58,7 @@ Do not use strict mode without registering external hooks and styles.
 ## Coverage
 
 The rule checks static `class`, bound arrays and objects, conditional branches, constants, and `:ui` slots.
-It does not evaluate helper calls, imported class variables, object spreads, or arbitrary runtime expressions.
+It does not evaluate helper calls, imported class variables, class-object spreads, or arbitrary runtime expressions.
 Use `vue-no-dynamic-tailwind-classes` for partial class construction.
 
 Validation uses the complete candidate, including variants and important markers.

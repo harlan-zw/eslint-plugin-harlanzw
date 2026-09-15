@@ -20,6 +20,34 @@ type ResolveClass = (name: string) => TSESTree.Expression | undefined
 /** Track top-level const bindings. Template locals take precedence. */
 export function createClassBindings(sourceCode: TSESLint.SourceCode) {
   const declarations = new Map<string, TSESTree.Expression>()
+  // Follow aliases when checking writes. A const object can still change through its properties.
+  function stable(variable: TSESLint.Scope.Variable, seen = new Set<TSESLint.Scope.Variable>()): boolean {
+    if (seen.has(variable))
+      return true
+    seen.add(variable)
+    return variable.references.every((reference) => {
+      if (reference.isWrite())
+        return !!reference.init
+      let root: TSESTree.Node = reference.identifier
+      while (root.parent && ['TSAsExpression', 'TSSatisfiesExpression', 'TSNonNullExpression'].includes(root.parent.type))
+        root = root.parent
+      let node = root
+      while (node.parent?.type === 'MemberExpression' && node.parent.object === node)
+        node = node.parent
+      const parent = node.parent
+      if ((parent?.type === 'AssignmentExpression' && parent.left === node) || parent?.type === 'UpdateExpression')
+        return false
+      // Calls may mutate arguments or the receiver. Do not execute helpers to guess their behavior.
+      if (parent?.type === 'CallExpression' || parent?.type === 'NewExpression')
+        return false
+      if (parent?.type === 'VariableDeclarator' && parent.init === node && node === root) {
+        const alias = sourceCode.getDeclaredVariables(parent).find(value => parent.id.type === 'Identifier' && value.name === parent.id.name)
+        return !!alias && stable(alias, seen)
+      }
+      // An object stored inside another object may escape through that container.
+      return !(node === root && (parent?.type === 'Property' || parent?.type === 'ArrayExpression'))
+    })
+  }
   return {
     visitors: {
       VariableDeclaration(node: TSESTree.VariableDeclaration) {
@@ -30,7 +58,11 @@ export function createClassBindings(sourceCode: TSESLint.SourceCode) {
             continue
           const name = declaration.id.name
           const variable = sourceCode.getDeclaredVariables(node).find(value => value.name === name)
-          if (variable?.references.some(reference => reference.isWrite() && !reference.init))
+          let initializer = declaration.init
+          while (initializer.type === 'TSAsExpression' || initializer.type === 'TSSatisfiesExpression' || initializer.type === 'TSNonNullExpression')
+            initializer = initializer.expression
+          const immutable = initializer.type === 'Literal' || initializer.type === 'TemplateLiteral'
+          if (variable && (immutable ? variable.references.some(reference => reference.isWrite() && !reference.init) : !stable(variable)))
             continue
           declarations.set(declaration.id.name, declaration.init)
         }
@@ -107,6 +139,8 @@ function expressionClasses(
           ? expressionClasses(property.value as TSESTree.Expression, 'classes', resolve, name, seen)
           : []
       }
+      if (property.value.type === 'Literal' && !property.value.value)
+        return []
       if (property.key.type === 'Literal' || property.computed)
         return expressionClasses(property.key as TSESTree.Expression, 'classes', resolve, slot, seen)
       return [{ _tag: 'Static', node: property.key, value: property.key.name, slot }]
@@ -119,8 +153,21 @@ function expressionClasses(
   if (node.type === 'TemplateLiteral') {
     const partial = node.expressions.some((_, index) =>
       /\S$/.test(node.quasis[index].value.raw) || /^\S/.test(node.quasis[index + 1].value.raw))
-    if (partial)
-      return [{ _tag: 'Partial', node }]
+    if (partial) {
+      const complete = node.quasis.map((quasi, index) => {
+        let value = quasi.value.cooked ?? quasi.value.raw
+        if (index > 0)
+          value = value.replace(/^\S+/, '')
+        if (index < node.quasis.length - 1)
+          value = value.replace(/\S+$/, '')
+        return { _tag: 'Static' as const, node: quasi, value, slot }
+      })
+      const expressions = node.expressions.flatMap((expression, index) =>
+        !/\S$/.test(node.quasis[index].value.raw) && !/^\S/.test(node.quasis[index + 1].value.raw)
+          ? expressionClasses(expression as TSESTree.Expression, mode, resolve, slot, seen)
+          : [])
+      return [...complete, ...expressions, { _tag: 'Partial', node }]
+    }
     return [
       ...node.quasis.map(quasi => ({ _tag: 'Static' as const, node: quasi, value: quasi.value.cooked ?? quasi.value.raw, slot })),
       ...node.expressions.flatMap(value => expressionClasses(value as TSESTree.Expression, mode, resolve, slot, seen)),
@@ -138,7 +185,15 @@ function expressionClasses(
       (leftEnd?._tag === 'Static' && /\S$/.test(leftEnd.value))
       || (rightStart?._tag === 'Static' && /^\S/.test(rightStart.value))
     )) {
-      return [{ _tag: 'Partial', node }]
+      return [
+        ...left.flatMap((finding, index) => finding._tag === 'Static'
+          ? [{ ...finding, value: index === left.length - 1 ? finding.value.replace(/\S+$/, '') : finding.value }]
+          : []),
+        ...right.flatMap((finding, index) => finding._tag === 'Static'
+          ? [{ ...finding, value: index === 0 ? finding.value.replace(/^\S+/, '') : finding.value }]
+          : []),
+        { _tag: 'Partial', node },
+      ]
     }
     return [...left, ...right]
   }

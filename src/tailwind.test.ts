@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string -- Fixtures contain Vue template expressions. */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -130,4 +131,8 @@ it('accepts Nuxt UI semantic colors declared by the generated theme', async () =
   const theme = await tailwind({ stylesheet: path })
   const messages = new Linter().verify('<template><div class="p-[1px]" /><UBadge color="important" /><UBadge color="brand" /></template>', [parser, theme, { rules: { 'harlanzw/nuxt-ui-no-restyle': 'warn' } }], 'app.vue')
   expect(messages.filter(message => message.messageId === 'invalidProp').map(message => message.message)).toEqual([expect.stringContaining('"brand" is not a supported UBadge color')])
+})
+
+it('checks complete utilities next to a partially constructed class', () => {
+  expect(lint('<template><div :class="`bg-brnad hook-${id} p-4`" /></template>').map(message => message.ruleId)).toEqual(['harlanzw/vue-valid-tailwind-classes'])
 })

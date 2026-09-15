@@ -67,6 +67,76 @@ function propValues(node: TSESTree.Expression | null | undefined, resolve: (name
   return []
 }
 
+interface ResolvedProp { node: TSESTree.Node, values: string[] }
+interface ResolvedProps { _tag: 'Known' | 'Unknown', props: Map<string, ResolvedProp> }
+type ResolveProp = (name: string) => TSESTree.Expression | undefined
+
+function forgetValues(props: Map<string, ResolvedProp>) {
+  for (const [name, prop] of props)
+    props.set(name, { ...prop, values: [] })
+}
+
+/** Unknown spreads may replace values, but cannot remove an existing prop. */
+function objectProps(node: TSESTree.Expression | null | undefined, resolve: ResolveProp, seen = new Set<string>()): ResolvedProps {
+  if (!node)
+    return { _tag: 'Unknown', props: new Map() }
+  if (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression' || node.type === 'TSNonNullExpression')
+    return objectProps(node.expression, resolve, seen)
+  if (node.type === 'Identifier' && !seen.has(node.name))
+    return objectProps(resolve(node.name), resolve, new Set([...seen, node.name]))
+  if (node.type !== 'ObjectExpression')
+    return { _tag: 'Unknown', props: new Map() }
+  const props = new Map<string, ResolvedProp>()
+  let tag: ResolvedProps['_tag'] = 'Known'
+  for (const property of node.properties) {
+    if (property.type === 'SpreadElement') {
+      const spread = objectProps(property.argument, resolve, seen)
+      if (spread._tag === 'Unknown') {
+        forgetValues(props)
+        tag = 'Unknown'
+      }
+      for (const [name, prop] of spread.props) props.set(name, prop)
+      continue
+    }
+    const name = !property.computed && property.key.type === 'Identifier'
+      ? property.key.name
+      : property.key.type === 'Literal' ? String(property.key.value) : undefined
+    if (!name) {
+      tag = 'Unknown'
+      forgetValues(props)
+      continue
+    }
+    props.set(name, { node: property, values: property.kind === 'init' ? propValues(property.value as TSESTree.Expression, resolve) : [] })
+  }
+  return { _tag: tag, props }
+}
+
+function elementProps(attributes: ClassAttribute[], resolve: (attribute: ClassAttribute) => ResolveProp): Map<string, ResolvedProp> {
+  const props = new Map<string, ResolvedProp>()
+  for (const attribute of attributes) {
+    if (!attribute.directive) {
+      props.set(String(attribute.key.name), { node: attribute as unknown as TSESTree.Node, values: attribute.value?.value === undefined ? [] : [attribute.value.value] })
+      continue
+    }
+    if (typeof attribute.key.name === 'string' || attribute.key.name.name !== 'bind')
+      continue
+    const argument = attribute.key.argument
+    if (!argument) {
+      const spread = objectProps(attribute.value?.expression, resolve(attribute))
+      if (spread._tag === 'Unknown')
+        forgetValues(props)
+      for (const [name, prop] of spread.props) props.set(name, prop)
+    }
+    else if (argument.type === 'VIdentifier' && argument.name) {
+      props.set(argument.name, { node: attribute as unknown as TSESTree.Node, values: propValues(attribute.value?.expression, resolve(attribute)) })
+    }
+    else {
+      forgetValues(props)
+    }
+  }
+  return props
+}
+
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
   meta: {
@@ -122,35 +192,36 @@ export default createEslintRule<Options, MessageIds>({
     const definitions = new Map(components)
     const bindings = createClassBindings(context.sourceCode)
     return defineTemplateBodyVisitor(context, {
+      VElement(element: { name: string, startTag: { attributes: ClassAttribute[] } }) {
+        const component = components.get(normalize(element.name))
+        if (!component)
+          return
+        for (const [name, prop] of elementProps(element.startTag.attributes, bindings.resolve)) {
+          const appearance = component.options.appearanceProp ?? 'variant'
+          const builtin = component.options.extends ?? BUILT_INS.find(name => normalize(name) === normalize(component.name))
+          if (typeof name === 'string' && component.options.forbiddenProps?.includes(name)) {
+            const guidance = component.options.appearanceProp ? `Use the ${component.options.appearanceProp} prop.` : 'Use the shared component API.'
+            context.report({ node: prop.node, messageId: 'forbiddenProp', data: { component: component.name, prop: name, guidance } })
+            continue
+          }
+          const values = name === 'size'
+            ? component.options.sizes ?? (builtin ? builtin === 'UAvatar' ? ['3xs', '2xs', ...SIZES, '2xl', '3xl'] : SIZES : undefined)
+            : name === appearance
+              ? component.options.variants ?? (builtin ? VARIANTS[builtin] : undefined)
+              : name === 'color' ? component.options.colors ?? (builtin ? COLORS : undefined) : undefined
+          for (const value of new Set(prop.values)) {
+            const semanticColor = name === 'color' && builtin && !component.options.colors
+              && /^[a-z][a-z0-9-]*$/.test(value) && theme?.compile(`bg-${value}`)?.includes(`var(--ui-${value})`)
+            if (values?.length && !values.includes(value) && !semanticColor)
+              context.report({ node: prop.node, messageId: 'invalidProp', data: { component: component.name, prop: String(name), value, values: values.join(', ') } })
+          }
+        }
+      },
       VAttribute(attribute: ClassAttribute) {
         const component = components.get(normalize(attribute.parent.parent.name))
         if (!component)
           return
-        const name = attribute.directive
-          ? typeof attribute.key.name !== 'string' && attribute.key.name.name === 'bind' && attribute.key.argument?.type === 'VIdentifier'
-            ? attribute.key.argument.name
-            : undefined
-          : attribute.key.name
-        const appearance = component.options.appearanceProp ?? 'variant'
         const builtin = component.options.extends ?? BUILT_INS.find(name => normalize(name) === normalize(component.name))
-        if (typeof name === 'string' && component.options.forbiddenProps?.includes(name)) {
-          const guidance = component.options.appearanceProp ? `Use the ${component.options.appearanceProp} prop.` : 'Use the shared component API.'
-          context.report({ node: attribute as unknown as TSESTree.Node, messageId: 'forbiddenProp', data: { component: component.name, prop: name, guidance } })
-        }
-        const values = name === 'size'
-          ? component.options.sizes ?? (builtin ? builtin === 'UAvatar' ? ['3xs', '2xs', ...SIZES, '2xl', '3xl'] : SIZES : undefined)
-          : name === appearance
-            ? component.options.variants ?? (builtin ? VARIANTS[builtin] : undefined)
-            : name === 'color' ? component.options.colors ?? (builtin ? COLORS : undefined) : undefined
-        const supplied = !attribute.directive
-          ? attribute.value?.value === undefined ? [] : [attribute.value.value]
-          : propValues(attribute.value?.expression, bindings.resolve(attribute))
-        for (const value of new Set(supplied)) {
-          const semanticColor = name === 'color' && builtin && !component.options.colors
-            && /^[a-z][a-z0-9-]*$/.test(value) && theme?.compile(`bg-${value}`)?.includes(`var(--ui-${value})`)
-          if (values?.length && !values.includes(value) && !semanticColor)
-            context.report({ node: attribute as unknown as TSESTree.Node, messageId: 'invalidProp', data: { component: component.name, prop: String(name), value, values: values.join(', ') } })
-        }
         for (const finding of attributeClasses(attribute, bindings.resolve(attribute))) {
           if (finding._tag !== 'Static')
             continue
@@ -171,7 +242,7 @@ export default createEslintRule<Options, MessageIds>({
             const values = sizing ? component.options.sizes : component.options.variants
             const prop = mappedProp ?? (sizing
               ? builtin || component.options.sizes ? 'size' : undefined
-              : /^(?:bg|text)-(?!\[?(?:length|inherit))/.test(utility) ? component.options.appearanceProp ?? (builtin ? 'color or variant' : undefined) : undefined)
+              : /^(?:bg|text)-(?!\[?(?:length|inherit))/.test(utility) ? component.options.appearanceProp ?? (builtin ? VARIANTS[builtin] ? 'color or variant' : 'color' : undefined) : undefined)
             const guidance = component.options.message
               ?? `${prop ? `Use the ${prop} prop${!mappedProp && values?.length ? `: ${values.join(', ')}` : ''}. ` : ''}See ${options.source ?? 'app/app.config.ts'} for shared styling.`
             context.report({ node: finding.node, messageId: 'restyle', data: { className, component: component.name, guidance } })

@@ -220,3 +220,42 @@ it.each(['^2.21.1', '^3.3.7'])('does not apply v4 prop defaults to Nuxt UI %s', 
     rmSync(cwd, { recursive: true, force: true })
   }
 })
+
+it('checks complete classes beside custom dynamic hooks', () => {
+  expect(lint('<template><UButton :class="`rounded-full hook-${id} p-4`" /></template>').map(message => message.messageId)).toEqual(['restyle', 'restyle'])
+})
+
+it('does not suggest a variant prop on components without variants', () => {
+  expect(lint('<template><UAvatar class="bg-red-500" /></template>')[0]?.message).not.toContain('variant')
+})
+
+it('validates object bindings and resolved spreads in Vue override order', () => {
+  const code = `<script setup>const base = { size: 'huge', variant: 'solid' }; const props = { ...base, size: 'lg' }</script>
+<template><UButton v-bind="base" /><UButton v-bind="props" /><UButton v-bind="base" size="sm" /><UButton size="sm" v-bind="base" /></template>`
+  expect(lint(code).map(message => message.messageId)).toEqual(['invalidProp', 'invalidProp'])
+})
+
+it('keeps forbidden prop checks when a spread value is unknown', () => {
+  expect(lint('<template><UiButton v-bind="{ variant: current, ...external }" /></template>', { nuxtUi: { components: { UiButton: { appearanceProp: 'purpose', forbiddenProps: ['variant'] } } } }).map(message => message.messageId)).toEqual(['forbiddenProp'])
+  expect(lint('<template><UButton v-bind="{ size: \'huge\', ...external }" /></template>')).toEqual([])
+})
+
+it('does not trust values overwritten by nested unknown spreads', () => {
+  expect(lint(`<script setup>const props = { ...external }</script><template><UButton v-bind="{ size: 'huge', ...props }" /></template>`)).toEqual([])
+})
+
+it.each(['props.size = "sm"', 'const alias = props; alias.size = "sm"', 'const alias = props as { size: string }; alias.size = "sm"'])('does not validate stale object values after mutation: %s', (mutation) => {
+  expect(lint(`<script setup>const props = { size: 'huge' }; ${mutation}</script><template><UButton v-bind="props" /></template>`)).toEqual([])
+})
+
+it('keeps immutable class literals known when passed to a function', () => {
+  expect(lint(`<script setup>const classes = 'p-4'; log(classes)</script><template><UButton :class="classes" /></template>`).map(message => message.messageId)).toEqual(['restyle'])
+})
+
+it('does not report class-object entries that Vue always excludes', () => {
+  expect(lint('<template><UButton :class="{ \'p-4\': false, \'rounded-full\': 0, \'bg-red-500\': null }" /></template>')).toEqual([])
+})
+
+it('checks complete classes beside concatenated class fragments', () => {
+  expect(lint('<template><UButton :class="\'rounded-full hook-\' + id + \' p-4\'" /></template>').map(message => message.messageId)).toEqual(['restyle', 'restyle'])
+})

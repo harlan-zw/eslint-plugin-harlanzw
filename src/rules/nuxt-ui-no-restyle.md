@@ -215,7 +215,9 @@ Explicit arrays override inherited prop values.
 Custom wrappers have no assumed size or color values without a declared contract.
 Radius, border, and font overrides point to shared styling instead of an unrelated appearance prop.
 Forbidden props report even when their bound value is dynamic.
-Object spreads and object-form `v-bind` remain outside prop validation.
+Object-form `v-bind` follows local constants and object spreads in Vue attribute order.
+Unknown spreads invalidate earlier values. Known forbidden prop names still report.
+Bindings that mutate, escape through calls, or mutate through aliases remain unknown.
 
 Load generated Nuxt UI CSS through `tailwind({ stylesheets: ['./.nuxt/ui.css'], stylesheet: '...' })`.
 This accepts additional Nuxt UI semantic colors, such as `important`, from the generated theme.
@@ -226,3 +228,6 @@ Keep documented exceptions for code typography, branded content, and accessible 
 Use file overrides for primitive definitions and deliberate component demonstrations.
 
 Automatic detection skips known Nuxt UI versions below v4. Explicit `nuxtUi` configuration overrides detection.
+
+Complete classes beside interpolated class fragments still receive style checks.
+Class and `ui` values inside object-form `v-bind` remain outside class extraction.
