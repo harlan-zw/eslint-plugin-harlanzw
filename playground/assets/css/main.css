@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+:root {
+  --ui-primary: var(--color-blue-700);
+}
+
+.dark {
+  --ui-primary: var(--color-blue-400);
+}

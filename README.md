@@ -94,6 +94,9 @@ The rules are organized into the following categories:
 | [`ai-deslop-vue-ts-lang`](./src/prompt/rules/deslop-vue-ts-lang.ts) | require `lang="ts"` on Vue `<script>` blocks in code examples |
 | **pnpm** | |
 | [`pnpm-require-trust-policy`](./src/prompt/rules/pnpm-require-trust-policy.ts) | require `trustPolicyIgnoreAfter: 262800` in `pnpm-workspace.yaml` |
+| **Nuxt UI design, opt in** | |
+| [`nuxt-ui-no-restyle`](./src/rules/nuxt-ui-no-restyle.md) | use component props and site-approved classes for Nuxt UI appearance |
+| [`vue-no-dynamic-tailwind-classes`](./src/rules/vue-no-dynamic-tailwind-classes.md) | use complete Tailwind class names in Vue bindings |
 <!-- rules:end -->
 
 The plugin also includes 20 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
@@ -231,6 +234,32 @@ export default withNuxt(
   ...harlanzw({ link: true, nuxt: true, vue: true }),
 )
 ```
+
+### Nuxt UI Design Rules
+
+Enable our design rules through your site's existing Nuxt ESLint config:
+
+```js
+import { harlanzw } from 'eslint-plugin-harlanzw'
+import withNuxt from './.nuxt/eslint.config.mjs'
+
+export default withNuxt(
+  ...harlanzw({ nuxt: true, vue: true, nuxtUi: true }),
+)
+```
+
+`nuxtUi` is opt in. It adds two Vue template checks:
+
+- Warn when `UButton` or `UBadge` classes override component appearance.
+- Report partial Tailwind class construction in `:class` and `:ui` bindings.
+
+Messages guide agents toward component props and shared styling.
+The rules never change appearance automatically.
+No runtime Nuxt module or shadcn dependency is needed.
+
+Pass an object to configure component names, allowed classes, slots, sizes, and repair messages.
+See [site configuration](./src/rules/nuxt-ui-no-restyle.md#site-configuration) for a complete example and coverage limits.
+Size and variant guidance comes from these explicit options. App configuration is not executed or automatically discovered.
 
 ### Public API
 

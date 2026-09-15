@@ -2,6 +2,15 @@
   <div>
     <h1>ESLint Plugin Harlanzw - Playground</h1>
     
+    <h2>Nuxt UI Design Rules</h2>
+    <ul>
+      <li>
+        <NuxtLink to="/design-lint">
+          Component styling and complete class names
+        </NuxtLink>
+      </li>
+    </ul>
+
     <h2>Link Rules</h2>
     <ul>
       <li>

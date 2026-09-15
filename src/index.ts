@@ -1,6 +1,7 @@
 import type { ESLint, Linter } from 'eslint'
 import type { BaseOptions } from './base'
 import type { LinkRuleOptions } from './link-utils'
+import type { NuxtUiDesignOptions } from './rules/nuxt-ui-no-restyle'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
@@ -66,10 +67,12 @@ import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
 import nuxtPreferLayerAlias from './rules/nuxt-prefer-layer-alias'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
+import nuxtUiNoRestyle from './rules/nuxt-ui-no-restyle'
 import nuxtUiPreferShorthandCss from './rules/nuxt-ui-prefer-shorthand-css'
 import preferNodeStyleText from './rules/prefer-node-style-text'
 import preferSatisfies from './rules/prefer-satisfies'
 import vueNoAsyncLifecycleHook from './rules/vue-no-async-lifecycle-hook'
+import vueNoDynamicTailwindClasses from './rules/vue-no-dynamic-tailwind-classes'
 import vueNoFauxComposables from './rules/vue-no-faux-composables'
 import vueNoNestedReactivity from './rules/vue-no-nested-reactivity'
 import vueNoPassingRefsAsProps from './rules/vue-no-passing-refs-as-props'
@@ -124,6 +127,7 @@ const rules = defineRules({
   'nuxt-prefer-layer-alias': nuxtPreferLayerAlias,
   'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
   'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
+  'nuxt-ui-no-restyle': nuxtUiNoRestyle,
   'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
   'pnpm-require-trust-policy': pnpmRequireTrustPolicy,
   'prefer-node-style-text': preferNodeStyleText,
@@ -149,6 +153,7 @@ const rules = defineRules({
   'prompt-vague-term': promptVagueTerm,
   'prompt-weak-instruction': promptWeakInstruction,
   'vue-no-async-lifecycle-hook': vueNoAsyncLifecycleHook,
+  'vue-no-dynamic-tailwind-classes': vueNoDynamicTailwindClasses,
   'vue-no-faux-composables': vueNoFauxComposables,
   'vue-no-nested-reactivity': vueNoNestedReactivity,
   'vue-no-passing-refs-as-props': vueNoPassingRefsAsProps,
@@ -352,6 +357,22 @@ plugin.configs!.nuxt = [
   },
 ]
 
+// Opt-in design checks. The host Nuxt config supplies vue-eslint-parser.
+function nuxtUiConfig(options: NuxtUiDesignOptions = {}): Linter.Config[] {
+  return [{
+    name: 'harlanzw/nuxt-ui',
+    files: ['**/*.vue'],
+    ignores: CODE_IGNORES,
+    plugins: { harlanzw: plugin },
+    rules: {
+      'harlanzw/nuxt-ui-no-restyle': ['warn', options],
+      'harlanzw/vue-no-dynamic-tailwind-classes': 'error',
+    },
+  }]
+}
+
+plugin.configs!.nuxtUi = nuxtUiConfig()
+
 // Vue config
 plugin.configs!.vue = [
   {
@@ -436,6 +457,8 @@ export interface HarlanzwOptions {
    */
   base?: boolean | BaseOptions
   link?: boolean | LinkRuleOptions & { requireTrailingSlash?: boolean }
+  /** Opt-in Vue template design checks for Nuxt UI sites. */
+  nuxtUi?: boolean | NuxtUiDesignOptions
   nuxt?: boolean
   vue?: boolean
   prompt?: boolean | 'recommended' | 'strict' | 'skill'
@@ -532,6 +555,9 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     configs.push(...plugin.configs!.nuxt as Linter.Config[])
   }
 
+  if (options.nuxtUi)
+    configs.push(...nuxtUiConfig(typeof options.nuxtUi === 'object' ? options.nuxtUi : {}))
+
   const enableVue = options.vue ?? detected.vue
   if (enableVue) {
     configs.push(...plugin.configs!.vue as Linter.Config[])
@@ -586,6 +612,7 @@ const harlanzwWithPlugin: HarlanzwFactory = Object.assign(harlanzw, { plugin, de
 
 export type { BaseOptions } from './base'
 export { base } from './base'
+export type { ComponentStyleOptions, NuxtUiDesignOptions } from './rules/nuxt-ui-no-restyle'
 export { harlanzwWithPlugin as harlanzw, plugin }
 export default harlanzwWithPlugin
 
@@ -594,9 +621,11 @@ type RuleDefinitions = typeof rules
 export type RuleOptions = {
   [K in keyof RuleDefinitions]: K extends 'link-trailing-slash'
     ? [LinkRuleOptions & { requireTrailingSlash?: boolean }]
-    : K extends typeof LINK_RULES_WITH_OPTIONS[number]
-      ? [LinkRuleOptions]
-      : []
+    : K extends 'nuxt-ui-no-restyle'
+      ? [NuxtUiDesignOptions?]
+      : K extends typeof LINK_RULES_WITH_OPTIONS[number]
+        ? [LinkRuleOptions]
+        : []
 }
 
 export type Rules = {

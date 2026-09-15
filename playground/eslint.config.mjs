@@ -1,9 +1,20 @@
-import harlanzw from 'eslint-plugin-harlanzw'
+import { harlanzw, plugin } from 'eslint-plugin-harlanzw'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
-export default withNuxt([{
+export default withNuxt(...harlanzw({
+  nuxtUi: {
+    source: 'app.config.ts',
+    components: { UButton: { sizes: ['xs', 'sm', 'md', 'lg', 'xl'], slots: { label: ['truncate'] } } },
+  },
+  link: false,
+  nuxt: false,
+  vue: false,
+  prompt: false,
+  content: false,
+  pnpm: false,
+}), {
   plugins: {
-    harlanzw,
+    harlanzw: plugin,
   },
   rules: {
     'harlanzw/link-ascii-only': 'error',
@@ -23,4 +34,4 @@ export default withNuxt([{
     'harlanzw/vue-no-ref-access-in-templates': 'error',
     'harlanzw/vue-no-torefs-on-props': 'error',
   },
-}])
+})
