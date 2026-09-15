@@ -20,15 +20,19 @@ const hasDocs = [
   'nuxt-no-unsafe-date',
   'nuxt-prefer-navigate-to-over-router-push-replace',
   'nuxt-prefer-nuxt-link-over-router-link',
+  'nuxt-ui-no-restyle',
   'prefer-satisfies',
   'use-composables-must-use-reactivity',
   'vue-no-async-lifecycle-hook',
+  'vue-no-dynamic-tailwind-classes',
   'vue-no-nested-reactivity',
   'vue-no-passing-refs-as-props',
   'vue-no-reactive-destructuring',
   'vue-no-reactivity-after-await',
   'vue-no-ref-access-in-templates',
   'vue-no-torefs-on-props',
+  'vue-prefer-theme-tokens',
+  'vue-valid-tailwind-classes',
 ]
 
 const blobUrl = 'https://github.com/harlan-zw/eslint-plugin-harlanzw/blob/main/src/rules/'

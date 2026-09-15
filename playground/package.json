@@ -8,17 +8,20 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:design": "eslint pages/design-lint.vue --max-warnings 0"
   },
   "dependencies": {
-    "@nuxt/devtools": "latest",
+    "@nuxt/devtools": "3.4.2",
+    "@nuxt/ui": "^4.11.1",
     "nuxt": "^4.5.2",
     "vue": "latest"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",
     "eslint": "^10.9.1",
-    "eslint-plugin-harlanzw": "latest",
-    "typescript": "^7.0.2"
+    "eslint-plugin-harlanzw": "workspace:*",
+    "tailwindcss": "4.3.3",
+    "typescript": "^6.0.3"
   }
 }

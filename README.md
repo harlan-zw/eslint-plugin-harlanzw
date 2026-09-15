@@ -94,6 +94,9 @@ The rules are organized into the following categories:
 | [`ai-deslop-vue-ts-lang`](./src/prompt/rules/deslop-vue-ts-lang.ts) | require `lang="ts"` on Vue `<script>` blocks in code examples |
 | **pnpm** | |
 | [`pnpm-require-trust-policy`](./src/prompt/rules/pnpm-require-trust-policy.ts) | require `trustPolicyIgnoreAfter: 262800` in `pnpm-workspace.yaml` |
+| **Nuxt UI design, opt in** | |
+| [`nuxt-ui-no-restyle`](./src/rules/nuxt-ui-no-restyle.md) | use component props and site-approved classes for Nuxt UI appearance |
+| [`vue-no-dynamic-tailwind-classes`](./src/rules/vue-no-dynamic-tailwind-classes.md) | use complete Tailwind class names in Vue bindings |
 <!-- rules:end -->
 
 The plugin also includes 20 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
@@ -232,6 +235,56 @@ export default withNuxt(
 )
 ```
 
+### Nuxt UI Design Rules
+
+Enable our design rules through your site's existing Nuxt ESLint config:
+
+```js
+import { harlanzw } from 'eslint-plugin-harlanzw'
+import withNuxt from './.nuxt/eslint.config.mjs'
+
+export default withNuxt(
+  ...harlanzw({ nuxt: true, vue: true, nuxtUi: true }),
+)
+```
+
+`nuxtUi` enables automatically when the current package declares `@nuxt/ui` in dependencies or devDependencies.
+Use `nuxtUi: false` to disable it. Use `nuxtUi: true` when another workspace package owns the dependency.
+It adds two Vue template checks:
+
+- Warn when Nuxt UI controls or configured wrappers override component appearance.
+- Report partial Tailwind class construction in `:class` and `:ui` bindings.
+
+Messages guide agents toward component props and shared styling.
+The rules never change appearance automatically.
+No runtime Nuxt module or shadcn dependency is needed.
+
+Pass an object to configure component names, allowed classes, slots, sizes, and repair messages.
+See [site configuration](./src/rules/nuxt-ui-no-restyle.md#site-configuration) for a complete example and coverage limits.
+Size and variant guidance comes from these explicit options. App configuration is not executed or automatically discovered.
+
+### Theme-aware checks
+
+Load the site's CSS to validate utility names, colors, and spacing:
+
+```js
+import { tailwind } from 'eslint-plugin-harlanzw/tailwind'
+
+export default withNuxt(
+  ...harlanzw(),
+  await tailwind({ stylesheet: './app/assets/css/main.css' }),
+)
+```
+
+Install `@tailwindcss/node@~4.3.3` for this optional helper.
+It uses your CSS imports, theme tokens, and component styles.
+
+- [Valid classes](./src/rules/vue-valid-tailwind-classes.md): compiler-backed checks, custom hooks, and layer styles.
+- [Theme tokens](./src/rules/vue-prefer-theme-tokens.md): known token equivalents and optional color and spacing policies.
+- [Component props](./src/rules/nuxt-ui-no-restyle.md): size, color, variant, and configured wrapper values.
+
+OG-image templates are excluded from theme checks by default because their renderer has separate styling rules.
+
 ### Public API
 
 The factory exposes the raw plugin and framework detection. The package also exports typed rule maps for custom configs.
@@ -368,3 +421,5 @@ Licensed under the [MIT license](https://github.com/harlan-zw/eslint-plugin-harl
 
 [license-src]: https://img.shields.io/github/license/harlan-zw/eslint-plugin-harlanzw.svg?style=flat&colorA=080f12&colorB=1fa669
 [license-href]: https://github.com/harlan-zw/eslint-plugin-harlanzw/blob/main/LICENSE
+
+Automatic detection skips known Nuxt UI versions below v4. Explicit `nuxtUi` configuration overrides detection.

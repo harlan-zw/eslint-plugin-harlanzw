@@ -1,9 +1,22 @@
-import harlanzw from 'eslint-plugin-harlanzw'
+import { fileURLToPath } from 'node:url'
+import { harlanzw, plugin } from 'eslint-plugin-harlanzw'
+import { tailwind } from 'eslint-plugin-harlanzw/tailwind'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
-export default withNuxt([{
+export default withNuxt(...harlanzw({
+  nuxtUi: {
+    source: 'app.config.ts',
+    components: { UButton: { sizes: ['xs', 'sm', 'md', 'lg', 'xl'], slots: { label: ['truncate'] } } },
+  },
+  link: false,
+  nuxt: false,
+  vue: false,
+  prompt: false,
+  content: false,
+  pnpm: false,
+}), await tailwind({ stylesheet: fileURLToPath(new URL('./assets/css/main.css', import.meta.url)) }), {
   plugins: {
-    harlanzw,
+    harlanzw: plugin,
   },
   rules: {
     'harlanzw/link-ascii-only': 'error',
@@ -23,4 +36,4 @@ export default withNuxt([{
     'harlanzw/vue-no-ref-access-in-templates': 'error',
     'harlanzw/vue-no-torefs-on-props': 'error',
   },
-}])
+})

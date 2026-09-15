@@ -18,7 +18,8 @@
   ],
   "sideEffects": false,
   "exports": {
-    ".": "./dist/index.mjs"
+    ".": "./dist/index.mjs",
+    "./tailwind": "./dist/tailwind.mjs"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -35,15 +36,24 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@tailwindcss/node": "~4.3.3",
     "eslint": ">=9.0.0"
   },
+  "peerDependenciesMeta": {
+    "@tailwindcss/node": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "@eslint/plugin-kit": "^0.7.2"
+    "@eslint/plugin-kit": "^0.7.2",
+    "postcss": "^8.5.28",
+    "postcss-selector-parser": "^7.1.6"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.3.0",
     "@antfu/ni": "^30.5.0",
     "@antfu/utils": "^9.3.0",
+    "@tailwindcss/node": "4.3.3",
     "@types/eslint": "^9.6.1",
     "@types/node": "^26.4.0",
     "@typescript-eslint/parser": "^8.68.0",

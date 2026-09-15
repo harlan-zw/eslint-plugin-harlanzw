@@ -1,6 +1,9 @@
 import type { ESLint, Linter } from 'eslint'
 import type { BaseOptions } from './base'
 import type { LinkRuleOptions } from './link-utils'
+import type { NuxtUiDesignOptions } from './rules/nuxt-ui-no-restyle'
+import type { ThemeTokenOptions } from './rules/vue-prefer-theme-tokens'
+import type { ValidClassOptions } from './rules/vue-valid-tailwind-classes'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
@@ -66,10 +69,12 @@ import nuxtNoUnsafeDate from './rules/nuxt-no-unsafe-date'
 import nuxtPreferLayerAlias from './rules/nuxt-prefer-layer-alias'
 import nuxtPreferNavigateToOverRouterPushReplace from './rules/nuxt-prefer-navigate-to-over-router-push-replace'
 import nuxtPreferNuxtLinkOverRouterLink from './rules/nuxt-prefer-nuxt-link-over-router-link'
+import nuxtUiNoRestyle from './rules/nuxt-ui-no-restyle'
 import nuxtUiPreferShorthandCss from './rules/nuxt-ui-prefer-shorthand-css'
 import preferNodeStyleText from './rules/prefer-node-style-text'
 import preferSatisfies from './rules/prefer-satisfies'
 import vueNoAsyncLifecycleHook from './rules/vue-no-async-lifecycle-hook'
+import vueNoDynamicTailwindClasses from './rules/vue-no-dynamic-tailwind-classes'
 import vueNoFauxComposables from './rules/vue-no-faux-composables'
 import vueNoNestedReactivity from './rules/vue-no-nested-reactivity'
 import vueNoPassingRefsAsProps from './rules/vue-no-passing-refs-as-props'
@@ -80,7 +85,9 @@ import vueNoResolveComponentInComposables from './rules/vue-no-resolve-component
 import vueNoTorefsOnProps from './rules/vue-no-torefs-on-props'
 import vueNoUnresolvableDefineEmits from './rules/vue-no-unresolvable-define-emits'
 import vuePreferDefineEmitsObjectSyntax from './rules/vue-prefer-define-emits-object-syntax'
+import vuePreferThemeTokens from './rules/vue-prefer-theme-tokens'
 import vueRequireComposablePrefix from './rules/vue-require-composable-prefix'
+import vueValidTailwindClasses from './rules/vue-valid-tailwind-classes'
 
 function defineRules<const TName extends string>(definitions: Record<TName, unknown>): Record<TName, unknown> {
   return definitions
@@ -124,6 +131,7 @@ const rules = defineRules({
   'nuxt-prefer-layer-alias': nuxtPreferLayerAlias,
   'nuxt-prefer-navigate-to-over-router-push-replace': nuxtPreferNavigateToOverRouterPushReplace,
   'nuxt-prefer-nuxt-link-over-router-link': nuxtPreferNuxtLinkOverRouterLink,
+  'nuxt-ui-no-restyle': nuxtUiNoRestyle,
   'nuxt-ui-prefer-shorthand-css': nuxtUiPreferShorthandCss,
   'pnpm-require-trust-policy': pnpmRequireTrustPolicy,
   'prefer-node-style-text': preferNodeStyleText,
@@ -149,6 +157,7 @@ const rules = defineRules({
   'prompt-vague-term': promptVagueTerm,
   'prompt-weak-instruction': promptWeakInstruction,
   'vue-no-async-lifecycle-hook': vueNoAsyncLifecycleHook,
+  'vue-no-dynamic-tailwind-classes': vueNoDynamicTailwindClasses,
   'vue-no-faux-composables': vueNoFauxComposables,
   'vue-no-nested-reactivity': vueNoNestedReactivity,
   'vue-no-passing-refs-as-props': vueNoPassingRefsAsProps,
@@ -159,7 +168,9 @@ const rules = defineRules({
   'vue-no-torefs-on-props': vueNoTorefsOnProps,
   'vue-no-unresolvable-define-emits': vueNoUnresolvableDefineEmits,
   'vue-prefer-define-emits-object-syntax': vuePreferDefineEmitsObjectSyntax,
+  'vue-prefer-theme-tokens': vuePreferThemeTokens,
   'vue-require-composable-prefix': vueRequireComposablePrefix,
+  'vue-valid-tailwind-classes': vueValidTailwindClasses,
 })
 
 const plugin: ESLint.Plugin = {
@@ -352,6 +363,22 @@ plugin.configs!.nuxt = [
   },
 ]
 
+// Opt-in design checks. The host Nuxt config supplies vue-eslint-parser.
+function nuxtUiConfig(options: NuxtUiDesignOptions = {}): Linter.Config[] {
+  return [{
+    name: 'harlanzw/nuxt-ui',
+    files: ['**/*.vue'],
+    ignores: CODE_IGNORES,
+    plugins: { harlanzw: plugin },
+    rules: {
+      'harlanzw/nuxt-ui-no-restyle': ['warn', options],
+      'harlanzw/vue-no-dynamic-tailwind-classes': 'error',
+    },
+  }]
+}
+
+plugin.configs!.nuxtUi = nuxtUiConfig()
+
 // Vue config
 plugin.configs!.vue = [
   {
@@ -436,6 +463,8 @@ export interface HarlanzwOptions {
    */
   base?: boolean | BaseOptions
   link?: boolean | LinkRuleOptions & { requireTrailingSlash?: boolean }
+  /** Auto-enabled when the current package declares @nuxt/ui. False disables detection. */
+  nuxtUi?: boolean | NuxtUiDesignOptions
   nuxt?: boolean
   vue?: boolean
   prompt?: boolean | 'recommended' | 'strict' | 'skill'
@@ -532,6 +561,9 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
     configs.push(...plugin.configs!.nuxt as Linter.Config[])
   }
 
+  if (options.nuxtUi ?? detected.nuxtUi)
+    configs.push(...nuxtUiConfig(typeof options.nuxtUi === 'object' ? options.nuxtUi : {}))
+
   const enableVue = options.vue ?? detected.vue
   if (enableVue) {
     configs.push(...plugin.configs!.vue as Linter.Config[])
@@ -557,23 +589,26 @@ function harlanzw(options: HarlanzwOptions = {}, ...extraConfigs: Linter.Config[
   return configs
 }
 
-function detectFramework(): { nuxt: boolean, vue: boolean, prompt: boolean, content: boolean, pnpm: boolean } {
+function detectFramework(): { nuxt: boolean, nuxtUi: boolean, vue: boolean, prompt: boolean, content: boolean, pnpm: boolean } {
   const cwd = process.cwd()
   let nuxt = existsSync(resolve(cwd, 'nuxt.config.ts')) || existsSync(resolve(cwd, 'nuxt.config.js'))
   let vue = nuxt
-  if (!vue || !nuxt) {
-    const packagePath = resolve(cwd, 'package.json')
-    if (existsSync(packagePath)) {
-      const pkg = JSON.parse(readFileSync(packagePath, 'utf-8'))
-      const deps = { ...pkg.dependencies, ...pkg.devDependencies }
-      nuxt = nuxt || !!deps.nuxt
-      vue = vue || !!(deps.vue || deps.nuxt)
-    }
+  let nuxtUi = false
+  const packagePath = resolve(cwd, 'package.json')
+  if (existsSync(packagePath)) {
+    const pkg = JSON.parse(readFileSync(packagePath, 'utf-8'))
+    const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+    nuxt = nuxt || !!deps.nuxt
+    const installedUi = resolve(cwd, 'node_modules/@nuxt/ui/package.json')
+    const uiVersion = existsSync(installedUi) ? JSON.parse(readFileSync(installedUi, 'utf8')).version : deps['@nuxt/ui']
+    const uiMajor = typeof uiVersion === 'string' ? /^[~^]?(\d+)\./.exec(uiVersion)?.[1] : undefined
+    nuxtUi = !!deps['@nuxt/ui'] && (!uiMajor || Number(uiMajor) >= 4)
+    vue = vue || !!(deps.vue || deps.nuxt || nuxtUi)
   }
   const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))
   const content = existsSync(resolve(cwd, 'content')) || existsSync(resolve(cwd, 'docs'))
   const pnpm = existsSync(resolve(cwd, 'pnpm-workspace.yaml'))
-  return { nuxt, vue, prompt, content, pnpm }
+  return { nuxt, nuxtUi, vue, prompt, content, pnpm }
 }
 
 interface HarlanzwFactory {
@@ -586,6 +621,7 @@ const harlanzwWithPlugin: HarlanzwFactory = Object.assign(harlanzw, { plugin, de
 
 export type { BaseOptions } from './base'
 export { base } from './base'
+export type { ComponentStyleOptions, NuxtUiDesignOptions } from './rules/nuxt-ui-no-restyle'
 export { harlanzwWithPlugin as harlanzw, plugin }
 export default harlanzwWithPlugin
 
@@ -594,9 +630,15 @@ type RuleDefinitions = typeof rules
 export type RuleOptions = {
   [K in keyof RuleDefinitions]: K extends 'link-trailing-slash'
     ? [LinkRuleOptions & { requireTrailingSlash?: boolean }]
-    : K extends typeof LINK_RULES_WITH_OPTIONS[number]
-      ? [LinkRuleOptions]
-      : []
+    : K extends 'vue-prefer-theme-tokens'
+      ? [ThemeTokenOptions?]
+      : K extends 'vue-valid-tailwind-classes'
+        ? [ValidClassOptions?]
+        : K extends 'nuxt-ui-no-restyle'
+          ? [NuxtUiDesignOptions?]
+          : K extends typeof LINK_RULES_WITH_OPTIONS[number]
+            ? [LinkRuleOptions]
+            : []
 }
 
 export type Rules = {
