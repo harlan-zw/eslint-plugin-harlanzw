@@ -2,6 +2,8 @@ import type { ESLint, Linter } from 'eslint'
 import type { BaseOptions } from './base'
 import type { LinkRuleOptions } from './link-utils'
 import type { NuxtUiDesignOptions } from './rules/nuxt-ui-no-restyle'
+import type { ThemeTokenOptions } from './rules/vue-prefer-theme-tokens'
+import type { ValidClassOptions } from './rules/vue-valid-tailwind-classes'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
@@ -83,7 +85,9 @@ import vueNoResolveComponentInComposables from './rules/vue-no-resolve-component
 import vueNoTorefsOnProps from './rules/vue-no-torefs-on-props'
 import vueNoUnresolvableDefineEmits from './rules/vue-no-unresolvable-define-emits'
 import vuePreferDefineEmitsObjectSyntax from './rules/vue-prefer-define-emits-object-syntax'
+import vuePreferThemeTokens from './rules/vue-prefer-theme-tokens'
 import vueRequireComposablePrefix from './rules/vue-require-composable-prefix'
+import vueValidTailwindClasses from './rules/vue-valid-tailwind-classes'
 
 function defineRules<const TName extends string>(definitions: Record<TName, unknown>): Record<TName, unknown> {
   return definitions
@@ -164,7 +168,9 @@ const rules = defineRules({
   'vue-no-torefs-on-props': vueNoTorefsOnProps,
   'vue-no-unresolvable-define-emits': vueNoUnresolvableDefineEmits,
   'vue-prefer-define-emits-object-syntax': vuePreferDefineEmitsObjectSyntax,
+  'vue-prefer-theme-tokens': vuePreferThemeTokens,
   'vue-require-composable-prefix': vueRequireComposablePrefix,
+  'vue-valid-tailwind-classes': vueValidTailwindClasses,
 })
 
 const plugin: ESLint.Plugin = {
@@ -621,11 +627,15 @@ type RuleDefinitions = typeof rules
 export type RuleOptions = {
   [K in keyof RuleDefinitions]: K extends 'link-trailing-slash'
     ? [LinkRuleOptions & { requireTrailingSlash?: boolean }]
-    : K extends 'nuxt-ui-no-restyle'
-      ? [NuxtUiDesignOptions?]
-      : K extends typeof LINK_RULES_WITH_OPTIONS[number]
-        ? [LinkRuleOptions]
-        : []
+    : K extends 'vue-prefer-theme-tokens'
+      ? [ThemeTokenOptions?]
+      : K extends 'vue-valid-tailwind-classes'
+        ? [ValidClassOptions?]
+        : K extends 'nuxt-ui-no-restyle'
+          ? [NuxtUiDesignOptions?]
+          : K extends typeof LINK_RULES_WITH_OPTIONS[number]
+            ? [LinkRuleOptions]
+            : []
 }
 
 export type Rules = {

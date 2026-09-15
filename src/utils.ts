@@ -31,6 +31,8 @@ const hasDocs = [
   'vue-no-reactivity-after-await',
   'vue-no-ref-access-in-templates',
   'vue-no-torefs-on-props',
+  'vue-prefer-theme-tokens',
+  'vue-valid-tailwind-classes',
 ]
 
 const blobUrl = 'https://github.com/harlan-zw/eslint-plugin-harlanzw/blob/main/src/rules/'

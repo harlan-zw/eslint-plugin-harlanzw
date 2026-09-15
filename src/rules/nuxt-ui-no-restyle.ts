@@ -13,6 +13,7 @@ export interface ComponentStyleOptions {
   /** Appearance prop exposed by a wrapper, such as purpose. */
   appearanceProp?: string
   variants?: string[]
+  colors?: string[]
   message?: string
 }
 
@@ -25,11 +26,39 @@ export interface NuxtUiDesignOptions {
 
 export const RULE_NAME = 'nuxt-ui-no-restyle'
 export type Options = [NuxtUiDesignOptions?]
-export type MessageIds = 'restyle'
+export type MessageIds = 'restyle' | 'invalidProp'
 
-const LAYOUT = ['m-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-*', 'min-w-*', 'max-w-*', 'h-full', 'h-auto', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
+const LAYOUT = ['m-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-*', 'min-w-*', 'max-w-*', 'h-full', 'h-auto', 'min-h-*', 'max-h-*', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
+const SIZES = ['xs', 'sm', 'md', 'lg', 'xl']
+const COLORS = ['primary', 'secondary', 'success', 'info', 'warning', 'error', 'neutral']
+const VARIANTS: Record<string, string[]> = {
+  UButton: ['solid', 'outline', 'soft', 'subtle', 'ghost', 'link'],
+  UBadge: ['solid', 'outline', 'soft', 'subtle'],
+  UInput: ['outline', 'soft', 'subtle', 'ghost', 'none'],
+  UTextarea: ['outline', 'soft', 'subtle', 'ghost', 'none'],
+  USelect: ['outline', 'soft', 'subtle', 'ghost', 'none'],
+  USelectMenu: ['outline', 'soft', 'subtle', 'ghost', 'none'],
+  UInputMenu: ['outline', 'soft', 'subtle', 'ghost', 'none'],
+  UCheckbox: ['list', 'card'],
+  URadioGroup: ['list', 'card', 'table'],
+}
+const BUILT_INS = [...Object.keys(VARIANTS), 'USwitch', 'UAvatar']
 const normalize = (name: string) => name.replace(/-/g, '').toLowerCase()
 const strings = { type: 'array', items: { type: 'string' }, uniqueItems: true } as const
+
+function propValues(node: TSESTree.Expression | null | undefined, resolve: (name: string) => TSESTree.Expression | undefined, seen = new Set<string>()): string[] {
+  if (!node)
+    return []
+  if (node.type === 'Literal')
+    return typeof node.value === 'string' ? [node.value] : []
+  if (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression' || node.type === 'TSNonNullExpression')
+    return propValues(node.expression, resolve, seen)
+  if (node.type === 'ConditionalExpression')
+    return [...propValues(node.consequent, resolve, seen), ...propValues(node.alternate, resolve, seen)]
+  if (node.type === 'Identifier' && !seen.has(node.name))
+    return propValues(resolve(node.name), resolve, new Set([...seen, node.name]))
+  return []
+}
 
 export default createEslintRule<Options, MessageIds>({
   name: RULE_NAME,
@@ -55,6 +84,7 @@ export default createEslintRule<Options, MessageIds>({
                   sizes: strings,
                   appearanceProp: { type: 'string', minLength: 1 },
                   variants: strings,
+                  colors: strings,
                   message: { type: 'string', minLength: 1 },
                 },
               },
@@ -63,12 +93,12 @@ export default createEslintRule<Options, MessageIds>({
         },
       },
     }],
-    messages: { restyle: '"{{className}}" overrides {{component}} styling. {{guidance}}' },
+    messages: { invalidProp: '"{{value}}" is not a supported {{component}} {{prop}}. Use: {{values}}.', restyle: '"{{className}}" overrides {{component}} styling. {{guidance}}' },
   },
   defaultOptions: [{}],
   create(context, [options = {}]) {
     const components = new Map<string, { name: string, options: ComponentStyleOptions }>(
-      ['UButton', 'UBadge', 'UInput', 'UTextarea', 'USelect', 'USelectMenu', 'UInputMenu', 'UCheckbox', 'URadioGroup', 'USwitch', 'UAvatar']
+      BUILT_INS
         .map(name => [normalize(name), { name, options: {} }]),
     )
     const configured = new Set(Object.keys(options.components ?? {}).map(normalize))
@@ -85,6 +115,25 @@ export default createEslintRule<Options, MessageIds>({
         const component = components.get(normalize(attribute.parent.parent.name))
         if (!component)
           return
+        const name = attribute.directive
+          ? typeof attribute.key.name !== 'string' && attribute.key.name.name === 'bind' && attribute.key.argument?.type === 'VIdentifier'
+            ? attribute.key.argument.name
+            : undefined
+          : attribute.key.name
+        const appearance = component.options.appearanceProp ?? 'variant'
+        const builtin = BUILT_INS.find(name => normalize(name) === normalize(component.name))
+        const values = name === 'size'
+          ? component.options.sizes ?? (builtin ? builtin === 'UAvatar' ? ['3xs', '2xs', ...SIZES, '2xl', '3xl'] : SIZES : undefined)
+          : name === appearance
+            ? component.options.variants ?? (builtin ? VARIANTS[builtin] : undefined)
+            : name === 'color' ? component.options.colors ?? (builtin ? COLORS : undefined) : undefined
+        const supplied = !attribute.directive
+          ? attribute.value?.value === undefined ? [] : [attribute.value.value]
+          : propValues(attribute.value?.expression, bindings.resolve(attribute))
+        for (const value of new Set(supplied)) {
+          if (values?.length && !values.includes(value))
+            context.report({ node: attribute as unknown as TSESTree.Node, messageId: 'invalidProp', data: { component: component.name, prop: String(name), value, values: values.join(', ') } })
+        }
         for (const finding of attributeClasses(attribute, bindings.resolve(attribute))) {
           if (finding._tag !== 'Static')
             continue
@@ -96,6 +145,11 @@ export default createEslintRule<Options, MessageIds>({
             const sizing = /^(?:p[xytrblse]?|gap(?:-[xy])?|size|[wh]|min-[wh]|max-[wh])-/.test(utility)
               || /^text-(?:xs|sm|base|lg|xl|[2-9]xl)(?:\/.*)?$/.test(utility)
               || /^text-\[(?:length:|[\d.]+(?:px|r?em|vw|vh|%))/.test(utility)
+            if (/^text-(?:left|center|right|justify|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)$/.test(utility))
+              continue
+            const appearanceOverride = /^(?:bg|text|border|ring|outline|shadow|rounded|font|tracking|leading)(?:-|$)/.test(utility)
+            if (!sizing && !appearanceOverride)
+              continue
             const values = sizing ? component.options.sizes : component.options.variants
             const prop = sizing ? 'size' : component.options.appearanceProp ?? 'color or variant'
             const guidance = component.options.message

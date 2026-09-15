@@ -138,3 +138,33 @@ it('allows caller-controlled width and container height', () => {
     nuxtUi: { components: { UiCard: { sizes: ['xs', 'sm', 'md', 'lg'] } } },
   })).toEqual([])
 })
+
+it('validates configured wrapper prop values and built-in variants', () => {
+  const messages = lint(`<template><UButton variant="solidd" /><UiButton purpose="primary" /><UiCard :size="'huge'" /></template>`, {
+    nuxtUi: { components: {
+      UiButton: { appearanceProp: 'purpose', variants: ['cta', 'secondary', 'quiet'] },
+      UiCard: { sizes: ['xs', 'sm', 'md', 'lg'] },
+    } },
+  })
+  expect(messages.map(m => m.messageId)).toEqual(['invalidProp', 'invalidProp', 'invalidProp'])
+  expect(messages[1].message).toContain('cta, secondary, quiet')
+})
+
+it('allows layout and custom hook classes without suggesting appearance props', () => {
+  expect(lint('<template><UButton class="relative flex items-center custom-hook transition-transform" /></template>')).toEqual([])
+})
+
+it('preserves accessible minimum touch targets and responsive height limits', () => {
+  expect(lint('<template><UInput class="min-h-11 sm:min-h-0 max-h-40" /><UButton class="opacity-0 group-hover:opacity-100" /></template>')).toEqual([])
+})
+
+it('validates static branches and constants in component prop bindings', () => {
+  const messages = lint(`<script setup>const variant = 'solidd'</script><template><UButton :variant="variant" /><UInput :size="compact ? 'sm' : 'huge'" /></template>`)
+  expect(messages.map(m => m.messageId)).toEqual(['invalidProp', 'invalidProp'])
+})
+
+it('keeps built-in prop validation when configured through a kebab-case name', () => {
+  expect(lint('<template><u-button variant="solidd" /></template>', {
+    nuxtUi: { components: { 'u-button': {} } },
+  })[0]?.messageId).toBe('invalidProp')
+})

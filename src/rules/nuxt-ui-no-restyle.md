@@ -16,7 +16,8 @@ Use classes for placement and site-approved exceptions.
 
 Defaults cover `UButton`, `UBadge`, `UInput`, `UTextarea`, `USelect`, `USelectMenu`, `UInputMenu`,
 `UCheckbox`, `URadioGroup`, `USwitch`, and `UAvatar`.
-It reports other classes on these components, including unrecognized custom classes.
+It reports size and appearance utilities on these components.
+Layout utilities and unknown custom hooks remain valid.
 It does not change code automatically.
 
 ## Site configuration
@@ -67,9 +68,10 @@ For one rule, configure `harlanzw/nuxt-ui-no-restyle` directly.
 | `components` | Component names mapped to options. `false` disables a component. |
 | `components[name].allow` | Allowed base classes. Replaces the default layout allowance. |
 | `components[name].slots` | Allowed classes per `ui` slot. Replaces the component allowance for that slot. |
-| `components[name].sizes` | Site-supported values shown in size guidance. |
+| `components[name].sizes` | Supported size values used for validation and guidance. |
 | `components[name].appearanceProp` | Appearance prop named in guidance, such as `purpose`. Defaults to `color or variant`. |
-| `components[name].variants` | Site-supported values shown in appearance guidance. |
+| `components[name].variants` | Supported appearance values used for validation and guidance. |
+| `components[name].colors` | Supported color prop values. |
 | `components[name].message` | Custom repair guidance. Replaces the built-in guidance. |
 
 Names accept PascalCase and kebab-case.
@@ -85,7 +87,7 @@ Patterns do not inspect the resulting CSS.
 Default allowed classes:
 
 - Margins: `m-*`, `mx-*`, `my-*`, `mt-*`, `mr-*`, `mb-*`, `ml-*`, `ms-*`, `me-*`.
-- Layout dimensions: `w-*`, `min-w-*`, `max-w-*`, `h-full`, `h-auto`.
+- Layout dimensions: `w-*`, `min-w-*`, `max-w-*`, `h-full`, `h-auto`, `min-h-*`, `max-h-*`.
 - Placement: `self-*`, `justify-self-*`, `order-*`, `col-*`, `row-*`.
 - Flex sizing: `grow`, `grow-*`, `shrink`, `shrink-*`, `basis-*`.
 
@@ -176,5 +178,14 @@ Do not register components without a relevant styling API.
 For example, nuxtseo.com's `UiIcon` accepts icon names and uses classes for dimensions.
 Its `size-4` class remains valid.
 
-These options provide repair guidance. TypeScript remains responsible for checking prop values.
+The rule validates literal size, color, and appearance prop values.
+Built-in values follow Nuxt UI v4. Component options replace their respective value lists.
+An empty list disables validation for that prop.
+Wrappers use their configured lists and appearance prop name.
+Bound literals, constant aliases, and static conditional branches are checked.
+Other runtime expressions remain TypeScript's responsibility.
 No pixel-to-size autofix is safe because wrapper defaults and themes can change their dimensions.
+
+Minimum and maximum heights remain valid because sites use them for accessible touch targets and container constraints.
+Direct height, padding, and text-size overrides still receive prop guidance.
+Opacity and visibility changes remain valid interaction styles.

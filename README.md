@@ -263,6 +263,28 @@ Pass an object to configure component names, allowed classes, slots, sizes, and 
 See [site configuration](./src/rules/nuxt-ui-no-restyle.md#site-configuration) for a complete example and coverage limits.
 Size and variant guidance comes from these explicit options. App configuration is not executed or automatically discovered.
 
+### Theme-aware checks
+
+Load the site's CSS to validate utility names, colors, and spacing:
+
+```js
+import { tailwind } from 'eslint-plugin-harlanzw/tailwind'
+
+export default withNuxt(
+  ...harlanzw(),
+  await tailwind({ stylesheet: './app/assets/css/main.css' }),
+)
+```
+
+Install `@tailwindcss/node@~4.3.3` for this optional helper.
+It uses your CSS imports, theme tokens, and component styles.
+
+- [Valid classes](./src/rules/vue-valid-tailwind-classes.md): compiler-backed checks, custom hooks, and layer styles.
+- [Theme tokens](./src/rules/vue-prefer-theme-tokens.md): hard-coded colors and spacing, plus optional approved values.
+- [Component props](./src/rules/nuxt-ui-no-restyle.md): size, color, variant, and configured wrapper values.
+
+OG-image templates are excluded from theme checks by default because their renderer has separate styling rules.
+
 ### Public API
 
 The factory exposes the raw plugin and framework detection. The package also exports typed rule maps for custom configs.

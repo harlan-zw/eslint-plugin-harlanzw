@@ -1,4 +1,6 @@
+import { fileURLToPath } from 'node:url'
 import { harlanzw, plugin } from 'eslint-plugin-harlanzw'
+import { tailwind } from 'eslint-plugin-harlanzw/tailwind'
 import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(...harlanzw({
@@ -12,7 +14,7 @@ export default withNuxt(...harlanzw({
   prompt: false,
   content: false,
   pnpm: false,
-}), {
+}), await tailwind({ stylesheet: fileURLToPath(new URL('./assets/css/main.css', import.meta.url)) }), {
   plugins: {
     harlanzw: plugin,
   },
