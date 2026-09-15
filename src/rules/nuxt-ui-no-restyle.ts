@@ -10,6 +10,8 @@ export interface ComponentStyleOptions {
   extends?: string
   /** Props the wrapper intentionally removes from its public API. */
   forbiddenProps?: string[]
+  /** Complete class-attribute patterns owned by this component. Does not limit ui slots or props. */
+  classPatterns?: string[]
   /** Base utility patterns mapped to the prop that owns their style. */
   classProps?: Record<string, string>
   /** Allowed base utilities or complete classes with variants. Replaces the default layout allowance. */
@@ -35,7 +37,7 @@ export const RULE_NAME = 'nuxt-ui-no-restyle'
 export type Options = [NuxtUiDesignOptions?]
 export type MessageIds = 'restyle' | 'invalidProp' | 'forbiddenProp'
 
-const LAYOUT = ['m-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-*', 'min-w-*', 'max-w-*', 'h-full', 'h-auto', 'min-h-*', 'max-h-*', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
+const LAYOUT = ['size-full', 'size-auto', 'm-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-*', 'min-w-*', 'max-w-*', 'h-full', 'h-auto', 'min-h-*', 'max-h-*', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl']
 const COLORS = ['primary', 'secondary', 'success', 'info', 'warning', 'error', 'neutral']
 const VARIANTS: Record<string, string[]> = {
@@ -158,6 +160,7 @@ export default createEslintRule<Options, MessageIds>({
                 properties: {
                   extends: { type: 'string', enum: BUILT_INS },
                   forbiddenProps: strings,
+                  classPatterns: strings,
                   classProps: { type: 'object', additionalProperties: { type: 'string', minLength: 1 } },
                   allow: strings,
                   slots: { type: 'object', additionalProperties: strings },
@@ -200,7 +203,7 @@ export default createEslintRule<Options, MessageIds>({
           const appearance = component.options.appearanceProp ?? 'variant'
           const builtin = component.options.extends ?? BUILT_INS.find(name => normalize(name) === normalize(component.name))
           if (typeof name === 'string' && component.options.forbiddenProps?.includes(name)) {
-            const guidance = component.options.appearanceProp ? `Use the ${component.options.appearanceProp} prop.` : 'Use the shared component API.'
+            const guidance = component.options.appearanceProp && ['color', 'variant'].includes(name) ? `Use the ${component.options.appearanceProp} prop.` : 'Use the shared component API.'
             context.report({ node: prop.node, messageId: 'forbiddenProp', data: { component: component.name, prop: name, guidance } })
             continue
           }
@@ -221,11 +224,16 @@ export default createEslintRule<Options, MessageIds>({
         const component = components.get(normalize(attribute.parent.parent.name))
         if (!component)
           return
+        const name = typeof attribute.key.name === 'string' ? attribute.key.name : attribute.key.argument?.name
+        if (name && component.options.forbiddenProps?.includes(name))
+          return
         const builtin = component.options.extends ?? BUILT_INS.find(name => normalize(name) === normalize(component.name))
         for (const finding of attributeClasses(attribute, bindings.resolve(attribute))) {
           if (finding._tag !== 'Static')
             continue
           for (const className of finding.value.split(/\s+/).filter(Boolean)) {
+            if (!finding.slot && component.options.classPatterns && !component.options.classPatterns.some(pattern => matchesUtility(className, pattern)))
+              continue
             const utility = baseUtility(className)
             const allowed = (finding.slot && component.options.slots?.[finding.slot]) || component.options.allow || LAYOUT
             if (allowed.some(pattern => matchesUtility(utility, pattern) || matchesUtility(className, pattern)))

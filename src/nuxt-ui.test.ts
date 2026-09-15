@@ -269,3 +269,20 @@ it('checks only effective ui slots for styling and dynamic classes', () => {
   expect(lint('<template><UButton :ui="{ base: \'p-4\', [slot]: \'w-full\' }" /></template>')).toEqual([])
   expect(lint('<template><UButton :ui="{ base: \'p-4\', base: \'w-full\' }" /></template>')).toEqual([])
 })
+
+it('checks wrapper-owned class targets without rejecting its layout container', () => {
+  const options = { nuxtUi: { components: { UiCard: { classPatterns: ['[&_[data-card-body]]:*'], forbiddenProps: ['ui'], sizes: ['sm', 'md'] } } } }
+  expect(lint('<template><UiCard class="p-4 rounded-t-none bg-default gap-3" /></template>', options)).toEqual([])
+  expect(lint('<template><UiCard class="[&_[data-card-body]]:!p-4" /></template>', options).map(message => message.messageId)).toEqual(['restyle'])
+  expect(lint('<template><UiCard :ui="{ body: \'!p-0\' }" /></template>', options).map(message => message.messageId)).toEqual(['forbiddenProp'])
+  expect(lint('<template><UiCard :ui="{ body: \'!p-0\' }" /></template>', { nuxtUi: { components: { UiCard: { forbiddenProps: ['ui'], appearanceProp: 'variant' } } } })[0].message).toBe('UiCard does not expose ui. Use the shared component API.')
+  expect(lint('<template><UiCard size="huge" /></template>', options).map(message => message.messageId)).toEqual(['invalidProp'])
+  expect(lint('<template><UiInput class="bg-default" :ui="{ base: \'p-4\' }" /></template>', {
+    nuxtUi: { components: { UiInput: { extends: 'UInput', classPatterns: ['[&_input]:*'] } } },
+  }).map(message => message.messageId)).toEqual(['restyle'])
+})
+
+it('allows parent-filling dimensions without allowing fixed component sizes', () => {
+  expect(lint('<template><UAvatar class="size-full! sm:size-auto" /></template>')).toEqual([])
+  expect(lint('<template><UAvatar class="size-8" /></template>').map(message => message.messageId)).toEqual(['restyle'])
+})

@@ -67,6 +67,7 @@ For one rule, configure `harlanzw/nuxt-ui-no-restyle` directly.
 | `source` | Shared styling path shown in messages. Defaults to `app/app.config.ts`. |
 | `components` | Component names mapped to options. `false` disables a component. |
 | `components[name].extends` | Nuxt UI primitive whose prop values the wrapper forwards, such as `UInput`. |
+| `components[name].classPatterns` | Complete class-attribute patterns owned by the component. Omit to check all. Does not restrict `ui` slots or prop checks. |
 | `components[name].classProps` | Base utility patterns mapped to their owning prop, such as `{ 'font-mono': 'mono' }`. |
 | `components[name].forbiddenProps` | Styling props removed by the wrapper, such as `color` and `variant`. |
 | `components[name].allow` | Allowed base classes or complete classes with variants. Replaces the default layout allowance. |
@@ -94,7 +95,7 @@ Patterns do not inspect the resulting CSS.
 Default allowed classes:
 
 - Margins: `m-*`, `mx-*`, `my-*`, `mt-*`, `mr-*`, `mb-*`, `ml-*`, `ms-*`, `me-*`.
-- Layout dimensions: `w-*`, `min-w-*`, `max-w-*`, `h-full`, `h-auto`, `min-h-*`, `max-h-*`.
+- Layout dimensions: `size-full`, `size-auto`, `w-*`, `min-w-*`, `max-w-*`, `h-full`, `h-auto`, `min-h-*`, `max-h-*`.
 - Placement: `self-*`, `justify-self-*`, `order-*`, `col-*`, `row-*`.
 - Flex sizing: `grow`, `grow-*`, `shrink`, `shrink-*`, `basis-*`.
 
@@ -240,3 +241,24 @@ Automatic detection skips known Nuxt UI versions below v4. Explicit `nuxtUi` con
 
 Complete classes beside interpolated class fragments still receive style checks.
 Class and `ui` values inside object-form `v-bind` remain outside class extraction.
+
+## Wrapper containers
+
+A wrapper may apply caller classes to an outer container rather than its styled component.
+Declare which class targets the wrapper owns:
+
+```js
+components: {
+  UiCard: {
+    classPatterns: ['[&_[data-card-body]]:*'],
+    forbiddenProps: ['ui'],
+    sizes: ['xs', 'sm', 'md', 'lg'],
+  },
+}
+```
+
+This example checks selectors reaching the card body while allowing outer-container styling.
+`classPatterns` matches complete classes, including variants and important markers. `*` matches any characters.
+An empty array skips class-attribute checks. Slot and prop validation remain active.
+Only use this contract when the wrapper source confirms the separate container.
+Unsupported styling props receive one prop diagnostic, without duplicate styling diagnostics.
