@@ -6,6 +6,9 @@ runVue({
   name: 'nuxt-ui-no-restyle',
   rule,
   valid: [
+    { code: '<template><UCheckbox class="[&_button]:size-11 sm:[&_button]:size-4" /></template>', options: [{ components: { UCheckbox: { allow: ['[&_button]:size-11', 'sm:[&_button]:size-4'] } } }] },
+    { code: '<template><UiCard class="focus-visible:ring-2 focus-visible:ring-primary" /></template>', options: [{ components: { UiCard: { allow: ['focus-visible:ring-*'] } } }] },
+    { code: '<template><UInput :ui="{ base: \'focus-visible:ring-2\' }" /></template>', options: [{ components: { UInput: { slots: { base: ['focus-visible:ring-*'] } } } }] },
     '<script setup>import { Button } from "#components"</script><template><Button class="p-4" /></template>',
 
     '<script setup>const classes = "p-4"</script><template><UButton v-for="classes in items" :class="classes" /></template>',
@@ -22,6 +25,8 @@ runVue({
     { code: '<template><UButton class="p-4" /></template>', options: [{ components: { UButton: false } }] },
   ].map(value => typeof value === 'string' ? { code: value, filename: 'test.vue' } : { ...value, filename: 'test.vue' }),
   invalid: [
+    { code: '<template><UiCard class="ring-2 hover:ring-2 focus-visible:ring-2 bg-red-500" /></template>', options: [{ components: { UiCard: { allow: ['focus-visible:ring-*'] } } }], errors: 3 },
+    { code: '<template><UCheckbox class="size-11 [&_button]:size-11 sm:[&_button]:size-11" /></template>', options: [{ components: { UCheckbox: { allow: ['[&_button]:size-11'] } } }], errors: 2 },
     { code: '<script setup>import UButton from "./UButton.vue"; import Action from "@nuxt/ui/components/Button.vue"</script><template><UButton class="p-4" /><Action class="p-4" /></template>', errors: 1 },
 
     { code: '<script setup lang="ts">import type { UButton } from "types"</script><template><UButton class="p-4" /></template>', errors: 1 },

@@ -12,7 +12,7 @@ export interface ComponentStyleOptions {
   forbiddenProps?: string[]
   /** Base utility patterns mapped to the prop that owns their style. */
   classProps?: Record<string, string>
-  /** Allowed base utilities. Replaces the default layout allowance. */
+  /** Allowed base utilities or complete classes with variants. Replaces the default layout allowance. */
   allow?: string[]
   /** Allowed utilities for individual ui slots. Replaces the component allowance. */
   slots?: Record<string, string[]>
@@ -228,7 +228,7 @@ export default createEslintRule<Options, MessageIds>({
           for (const className of finding.value.split(/\s+/).filter(Boolean)) {
             const utility = baseUtility(className)
             const allowed = (finding.slot && component.options.slots?.[finding.slot]) || component.options.allow || LAYOUT
-            if (allowed.some(pattern => matchesUtility(utility, pattern)))
+            if (allowed.some(pattern => matchesUtility(utility, pattern) || matchesUtility(className, pattern)))
               continue
             const sizing = /^(?:p[xytrblse]?|gap(?:-[xy])?|size|[wh]|min-[wh]|max-[wh])-/.test(utility)
               || /^text-(?:xs|sm|base|lg|xl|[2-9]xl)(?:\/.*)?$/.test(utility)

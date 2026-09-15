@@ -69,7 +69,7 @@ For one rule, configure `harlanzw/nuxt-ui-no-restyle` directly.
 | `components[name].extends` | Nuxt UI primitive whose prop values the wrapper forwards, such as `UInput`. |
 | `components[name].classProps` | Base utility patterns mapped to their owning prop, such as `{ 'font-mono': 'mono' }`. |
 | `components[name].forbiddenProps` | Styling props removed by the wrapper, such as `color` and `variant`. |
-| `components[name].allow` | Allowed base classes. Replaces the default layout allowance. |
+| `components[name].allow` | Allowed base classes or complete classes with variants. Replaces the default layout allowance. |
 | `components[name].slots` | Allowed classes per `ui` slot. Replaces the component allowance for that slot. |
 | `components[name].sizes` | Supported size values used for validation and guidance. |
 | `components[name].appearanceProp` | Appearance prop named in guidance, such as `purpose`. Defaults to `color or variant`. |
@@ -82,9 +82,13 @@ Register custom Nuxt UI prefixes and local wrappers through `components`.
 Unspecified components keep their defaults.
 An empty `allow` array permits no classes. Use `['*']` to allow every class.
 
-Patterns match whole base classes. `*` matches any characters.
-Responsive and state variants, negative prefixes, and important markers do not change matching.
+Patterns match whole base classes or complete classes. `*` matches any characters.
+Base patterns ignore responsive and state variants, negative prefixes, and important markers.
 For example, `mt-*` permits `md:-mt-4!`.
+Patterns containing variants match the complete class, including variant order and important markers.
+For example, `focus-visible:ring-*` permits `focus-visible:ring-2`, but still reports `ring-2` and `hover:ring-2`.
+Use `[&_button]:size-11` to approve that descendant target without approving every component's `size-11`.
+The same matching applies to `slots` allowances.
 Patterns do not inspect the resulting CSS.
 
 Default allowed classes:
