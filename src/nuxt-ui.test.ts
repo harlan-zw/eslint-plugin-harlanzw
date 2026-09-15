@@ -168,3 +168,55 @@ it('keeps built-in prop validation when configured through a kebab-case name', (
     nuxtUi: { components: { 'u-button': {} } },
   })[0]?.messageId).toBe('invalidProp')
 })
+
+it('does not mistake authored CSS hooks for Tailwind construction', () => {
+  expect(lint('<template><div :class="`zone-band--${band}`" /><code :class="`shj-lang-${language}`" /><span :class="`is-${state}`" /></template><style>.is-ready { color: green; } .zone-band--healthy { opacity: 1; }</style>')).toEqual([])
+})
+
+it('gives shared-style guidance when a prop does not control the override', () => {
+  const messages = lint('<template><UiButton class="rounded-full" /></template>', { nuxtUi: { components: { UiButton: { appearanceProp: 'purpose' } } } })
+  expect(messages[0]?.message).not.toContain('Use the purpose prop')
+  expect(messages[0]?.message).toContain('shared styling')
+})
+
+it('uses declared wrapper prop contracts without inventing defaults', () => {
+  const messages = lint('<template><UiInput size="huge" variant="solidd" /><UiButton color="primary" :variant="variant" purpose="cta" /></template>', {
+    nuxtUi: { components: {
+      UiInput: { extends: 'UInput' },
+      UiButton: { sizes: ['sm', 'md', 'lg'], appearanceProp: 'purpose', variants: ['cta', 'quiet'], forbiddenProps: ['color', 'variant'] },
+    } },
+  })
+  expect(messages.map(message => message.messageId)).toEqual(['invalidProp', 'invalidProp', 'forbiddenProp', 'forbiddenProp'])
+})
+
+it('keeps utility construction visible when global CSS also targets that utility', () => {
+  expect(lint('<template><div :class="`rounded-${radius}`" /></template><style>.rounded-lg { corner-shape: squircle; }</style>').map(message => message.messageId)).toEqual(['partialClass'])
+})
+
+it('checks class bindings without parsing unsupported style languages as CSS', () => {
+  expect(lint('<template><div :class="`p-${size}`" /></template><style lang="stylus">.card\n  color red</style>').map(message => message.messageId)).toEqual(['partialClass'])
+})
+
+it('points wrapper overrides to the prop that actually owns the style', () => {
+  const messages = lint('<template><UiChip class="font-mono text-sm tabular-nums" /></template>', {
+    nuxtUi: { components: { UiChip: { sizes: ['xs', 'sm', 'md'], classProps: { 'font-mono': 'mono', 'tabular-nums': 'tabular' } } } },
+  })
+  expect(messages.map(message => message.message)).toEqual([
+    expect.stringContaining('Use the mono prop.'),
+    expect.stringContaining('Use the size prop: xs, sm, md.'),
+    expect.stringContaining('Use the tabular prop.'),
+  ])
+})
+
+it.each(['^2.21.1', '^3.3.7'])('does not apply v4 prop defaults to Nuxt UI %s', (version) => {
+  const cwd = mkdtempSync(join(tmpdir(), 'design-legacy-'))
+  writeFileSync(join(cwd, 'package.json'), JSON.stringify({ dependencies: { '@nuxt/ui': version } }))
+  const spy = vi.spyOn(process, 'cwd').mockReturnValue(cwd)
+  try {
+    expect(lint('<template><UBadge color="red" /></template>', {})).toEqual([])
+  }
+  finally {
+    spy.mockRestore()
+    rmSync(cwd, { recursive: true, force: true })
+  }
+})

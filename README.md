@@ -280,7 +280,7 @@ Install `@tailwindcss/node@~4.3.3` for this optional helper.
 It uses your CSS imports, theme tokens, and component styles.
 
 - [Valid classes](./src/rules/vue-valid-tailwind-classes.md): compiler-backed checks, custom hooks, and layer styles.
-- [Theme tokens](./src/rules/vue-prefer-theme-tokens.md): hard-coded colors and spacing, plus optional approved values.
+- [Theme tokens](./src/rules/vue-prefer-theme-tokens.md): known token equivalents and optional color and spacing policies.
 - [Component props](./src/rules/nuxt-ui-no-restyle.md): size, color, variant, and configured wrapper values.
 
 OG-image templates are excluded from theme checks by default because their renderer has separate styling rules.
@@ -421,3 +421,5 @@ Licensed under the [MIT license](https://github.com/harlan-zw/eslint-plugin-harl
 
 [license-src]: https://img.shields.io/github/license/harlan-zw/eslint-plugin-harlanzw.svg?style=flat&colorA=080f12&colorB=1fa669
 [license-href]: https://github.com/harlan-zw/eslint-plugin-harlanzw/blob/main/LICENSE
+
+Automatic detection skips known Nuxt UI versions below v4. Explicit `nuxtUi` configuration overrides detection.

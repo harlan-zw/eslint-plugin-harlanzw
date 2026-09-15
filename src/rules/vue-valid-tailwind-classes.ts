@@ -1,6 +1,6 @@
 import type { ClassAttribute } from '../design-classes'
 import { attributeClasses, baseUtility, createClassBindings, matchesUtility } from '../design-classes'
-import { cssClasses, tailwindContext } from '../tailwind-context'
+import { componentClasses, tailwindContext } from '../tailwind-context'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor } from '../vue-utils'
 
@@ -16,15 +16,7 @@ export default createEslintRule<[ValidClassOptions?], 'invalid'>({
   defaultOptions: [{}],
   create(context, [options = {}]) {
     const theme = tailwindContext(context.settings)
-    const classes = new Set(theme.classes)
-    // Vue's document fragment separates styles from strings inside script blocks.
-    const services = context.sourceCode.parserServices as { getDocumentFragment?: () => { children: { type: string, name?: string, startTag?: { range: number[] }, endTag?: { range: number[] } }[] } }
-    for (const element of services.getDocumentFragment?.().children ?? []) {
-      if (element.type === 'VElement' && element.name === 'style' && element.startTag && element.endTag) {
-        for (const name of cssClasses(context.sourceCode.text.slice(element.startTag.range[1], element.endTag.range[0])))
-          classes.add(name)
-      }
-    }
+    const classes = new Set([...theme.classes, ...componentClasses(context.sourceCode)])
     const bindings = createClassBindings(context.sourceCode)
     return defineTemplateBodyVisitor(context, {
       VAttribute(attribute: ClassAttribute) {

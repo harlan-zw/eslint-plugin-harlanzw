@@ -43,3 +43,9 @@ Enable it through `harlanzw({ nuxtUi: true })`, or configure the rule directly:
 
 The host ESLint config must supply `vue-eslint-parser` for `.vue` files.
 The rule has no options.
+
+Recognized Tailwind families, variants, and opacity modifiers report partial construction.
+Authored CSS families and library hooks, such as `zone-band--${zone}` and `shj-lang-${language}`, remain valid.
+Loaded theme CSS and local CSS distinguish custom families from Tailwind utilities.
+Without a loaded theme, the rule uses common Tailwind prefixes.
+It cannot prove every runtime class has generated CSS.

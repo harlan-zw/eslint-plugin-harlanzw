@@ -12,7 +12,7 @@ const stylesheet = join(directory, 'main.css')
 writeFileSync(stylesheet, `@theme { --spacing: 0.25rem; --color-brand: #123456; } @tailwind utilities; .site-logo { display: block; }`)
 afterAll(() => rmSync(directory, { recursive: true, force: true }))
 const parser = { files: ['**/*.vue'], languageOptions: { parser: vueParser, parserOptions: { parser: tsParser } } }
-const config = await tailwind({ stylesheet })
+const config = await tailwind({ stylesheet, arbitraryValues: true })
 const lint = (code: string) => new Linter().verify(code, [parser, config], 'app.vue')
 
 describe('theme-aware Vue lint', () => {
@@ -28,7 +28,7 @@ describe('theme-aware Vue lint', () => {
   it('permits classes defined inside the Vue stylesheet', () => {
     expect(lint('<template><div class="local-style" /></template><style scoped>.local-style { color: red; }</style>')).toEqual([])
   })
-  it('warns about hard-coded color and spacing without guessing replacements', () => {
+  it('enforces an explicit ban on arbitrary color and spacing', () => {
     expect(lint('<template><div class="hover:bg-[#123456] gap-[13px] p-(--space) w-[37px]" /></template>').map(m => m.ruleId)).toEqual([
       'harlanzw/vue-prefer-theme-tokens',
       'harlanzw/vue-prefer-theme-tokens',
@@ -114,4 +114,20 @@ it('accepts custom utilities and custom variants from the stylesheet', async () 
   writeFileSync(path, '@theme { --spacing: 0.25rem; } @tailwind utilities; @utility custom-surface { display: block; } @custom-variant hocus (&:hover, &:focus);')
   const config = await tailwind({ stylesheet: path, strict: true })
   expect(new Linter().verify('<template><div class="hocus:custom-surface hocus:p-4" /></template>', [parser, config], 'app.vue')).toEqual([])
+})
+
+it('preserves inheritance and third-party brand colors without a conflicting site policy', async () => {
+  const path = join(directory, 'precision.css')
+  writeFileSync(path, '@theme { --spacing: 0.25rem; --color-brand: #123456; } @tailwind utilities;')
+  const config = await tailwind({ stylesheet: path })
+  expect(new Linter().verify('<template><div class="text-[inherit] bg-[#34a853] px-[0.3rem]" /></template>', [parser, config], 'app.vue')).toEqual([])
+  expect(new Linter().verify('<template><div class="bg-[#123456]" /></template>', [parser, config], 'app.vue')[0]?.message).toContain('bg-brand')
+})
+
+it('accepts Nuxt UI semantic colors declared by the generated theme', async () => {
+  const path = join(directory, 'nuxt-ui.css')
+  writeFileSync(path, '@theme inline { --color-important: var(--ui-important); --color-brand: #123456; } @tailwind utilities;')
+  const theme = await tailwind({ stylesheet: path })
+  const messages = new Linter().verify('<template><div class="p-[1px]" /><UBadge color="important" /><UBadge color="brand" /></template>', [parser, theme, { rules: { 'harlanzw/nuxt-ui-no-restyle': 'warn' } }], 'app.vue')
+  expect(messages.filter(message => message.messageId === 'invalidProp').map(message => message.message)).toEqual([expect.stringContaining('"brand" is not a supported UBadge color')])
 })

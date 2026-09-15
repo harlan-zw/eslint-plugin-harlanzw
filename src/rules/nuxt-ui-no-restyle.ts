@@ -1,10 +1,17 @@
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { ClassAttribute } from '../design-classes'
+import type { TailwindContext } from '../tailwind-context'
 import { attributeClasses, baseUtility, createClassBindings, matchesUtility } from '../design-classes'
 import { createEslintRule } from '../utils'
 import { defineTemplateBodyVisitor } from '../vue-utils'
 
 export interface ComponentStyleOptions {
+  /** Nuxt UI primitive whose prop values this wrapper forwards. */
+  extends?: string
+  /** Props the wrapper intentionally removes from its public API. */
+  forbiddenProps?: string[]
+  /** Base utility patterns mapped to the prop that owns their style. */
+  classProps?: Record<string, string>
   /** Allowed base utilities. Replaces the default layout allowance. */
   allow?: string[]
   /** Allowed utilities for individual ui slots. Replaces the component allowance. */
@@ -26,7 +33,7 @@ export interface NuxtUiDesignOptions {
 
 export const RULE_NAME = 'nuxt-ui-no-restyle'
 export type Options = [NuxtUiDesignOptions?]
-export type MessageIds = 'restyle' | 'invalidProp'
+export type MessageIds = 'restyle' | 'invalidProp' | 'forbiddenProp'
 
 const LAYOUT = ['m-*', 'mx-*', 'my-*', 'mt-*', 'mr-*', 'mb-*', 'ml-*', 'ms-*', 'me-*', 'w-*', 'min-w-*', 'max-w-*', 'h-full', 'h-auto', 'min-h-*', 'max-h-*', 'self-*', 'justify-self-*', 'order-*', 'col-*', 'row-*', 'grow', 'grow-*', 'shrink', 'shrink-*', 'basis-*']
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl']
@@ -79,6 +86,9 @@ export default createEslintRule<Options, MessageIds>({
                 type: 'object',
                 additionalProperties: false,
                 properties: {
+                  extends: { type: 'string', enum: BUILT_INS },
+                  forbiddenProps: strings,
+                  classProps: { type: 'object', additionalProperties: { type: 'string', minLength: 1 } },
                   allow: strings,
                   slots: { type: 'object', additionalProperties: strings },
                   sizes: strings,
@@ -93,7 +103,7 @@ export default createEslintRule<Options, MessageIds>({
         },
       },
     }],
-    messages: { invalidProp: '"{{value}}" is not a supported {{component}} {{prop}}. Use: {{values}}.', restyle: '"{{className}}" overrides {{component}} styling. {{guidance}}' },
+    messages: { forbiddenProp: '{{component}} does not expose {{prop}}. {{guidance}}', invalidProp: '"{{value}}" is not a supported {{component}} {{prop}}. Use: {{values}}.', restyle: '"{{className}}" overrides {{component}} styling. {{guidance}}' },
   },
   defaultOptions: [{}],
   create(context, [options = {}]) {
@@ -101,6 +111,7 @@ export default createEslintRule<Options, MessageIds>({
       BUILT_INS
         .map(name => [normalize(name), { name, options: {} }]),
     )
+    const theme = context.settings['harlanzw/tailwind'] as TailwindContext | undefined
     const configured = new Set(Object.keys(options.components ?? {}).map(normalize))
     for (const [name, config] of Object.entries(options.components ?? {})) {
       if (config === false)
@@ -121,7 +132,11 @@ export default createEslintRule<Options, MessageIds>({
             : undefined
           : attribute.key.name
         const appearance = component.options.appearanceProp ?? 'variant'
-        const builtin = BUILT_INS.find(name => normalize(name) === normalize(component.name))
+        const builtin = component.options.extends ?? BUILT_INS.find(name => normalize(name) === normalize(component.name))
+        if (typeof name === 'string' && component.options.forbiddenProps?.includes(name)) {
+          const guidance = component.options.appearanceProp ? `Use the ${component.options.appearanceProp} prop.` : 'Use the shared component API.'
+          context.report({ node: attribute as unknown as TSESTree.Node, messageId: 'forbiddenProp', data: { component: component.name, prop: name, guidance } })
+        }
         const values = name === 'size'
           ? component.options.sizes ?? (builtin ? builtin === 'UAvatar' ? ['3xs', '2xs', ...SIZES, '2xl', '3xl'] : SIZES : undefined)
           : name === appearance
@@ -131,7 +146,9 @@ export default createEslintRule<Options, MessageIds>({
           ? attribute.value?.value === undefined ? [] : [attribute.value.value]
           : propValues(attribute.value?.expression, bindings.resolve(attribute))
         for (const value of new Set(supplied)) {
-          if (values?.length && !values.includes(value))
+          const semanticColor = name === 'color' && builtin && !component.options.colors
+            && /^[a-z][a-z0-9-]*$/.test(value) && theme?.compile(`bg-${value}`)?.includes(`var(--ui-${value})`)
+          if (values?.length && !values.includes(value) && !semanticColor)
             context.report({ node: attribute as unknown as TSESTree.Node, messageId: 'invalidProp', data: { component: component.name, prop: String(name), value, values: values.join(', ') } })
         }
         for (const finding of attributeClasses(attribute, bindings.resolve(attribute))) {
@@ -148,12 +165,15 @@ export default createEslintRule<Options, MessageIds>({
             if (/^text-(?:left|center|right|justify|start|end|wrap|nowrap|balance|pretty|ellipsis|clip)$/.test(utility))
               continue
             const appearanceOverride = /^(?:bg|text|border|ring|outline|shadow|rounded|font|tracking|leading)(?:-|$)/.test(utility)
-            if (!sizing && !appearanceOverride)
+            const mappedProp = Object.entries(component.options.classProps ?? {}).find(([pattern]) => matchesUtility(utility, pattern))?.[1]
+            if (!sizing && !appearanceOverride && !mappedProp)
               continue
             const values = sizing ? component.options.sizes : component.options.variants
-            const prop = sizing ? 'size' : component.options.appearanceProp ?? 'color or variant'
+            const prop = mappedProp ?? (sizing
+              ? builtin || component.options.sizes ? 'size' : undefined
+              : /^(?:bg|text)-(?!\[?(?:length|inherit))/.test(utility) ? component.options.appearanceProp ?? (builtin ? 'color or variant' : undefined) : undefined)
             const guidance = component.options.message
-              ?? `Use the ${prop} prop${values?.length ? `: ${values.join(', ')}` : ''}. See ${options.source ?? 'app/app.config.ts'} for shared styling.`
+              ?? `${prop ? `Use the ${prop} prop${!mappedProp && values?.length ? `: ${values.join(', ')}` : ''}. ` : ''}See ${options.source ?? 'app/app.config.ts'} for shared styling.`
             context.report({ node: finding.node, messageId: 'restyle', data: { className, component: component.name, guidance } })
           }
         }

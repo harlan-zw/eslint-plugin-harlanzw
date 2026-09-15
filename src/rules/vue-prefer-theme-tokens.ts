@@ -9,6 +9,8 @@ export interface ThemeTokenOptions {
   colors?: string[]
   /** Approved spacing suffixes. Omit to use the stylesheet scale. */
   spacing?: string[]
+  /** Also reject arbitrary values without a known token equivalent. */
+  arbitraryValues?: boolean
   allow?: string[]
 }
 
@@ -17,7 +19,7 @@ export default createEslintRule<[ThemeTokenOptions?], 'token'>({
   meta: {
     type: 'suggestion',
     docs: { description: 'Prefer theme colors and spacing over hard-coded values' },
-    schema: [{ type: 'object', additionalProperties: false, properties: Object.fromEntries(['colors', 'spacing', 'allow'].map(name => [name, { type: 'array', items: { type: 'string' } }])) }],
+    schema: [{ type: 'object', additionalProperties: false, properties: { arbitraryValues: { type: 'boolean' }, ...Object.fromEntries(['colors', 'spacing', 'allow'].map(name => [name, { type: 'array', items: { type: 'string' } }])) } }],
     messages: { token: '"{{className}}" bypasses the {{kind}} policy. Use {{choices}} from {{stylesheet}}, or define a shared token.' },
   },
   defaultOptions: [{}],
@@ -49,11 +51,16 @@ export default createEslintRule<[ThemeTokenOptions?], 'token'>({
             const kind = spacing ? 'spacing' : 'color'
             const approved = spacing ? options.spacing : options.colors
             const variable = /^(?:\(--|\[(?:[a-z-]+:)?(?:var\(|--))/.test(value) || /(?:var|env)\(/.test(value)
-            const structural = /^(?:auto|px|inherit|current|transparent|none)$/.test(value)
+            const structural = /^(?:auto|px|inherit|current|transparent|none)$/.test(value.replace(/^\[|\]$/g, ''))
             const arbitrary = value.startsWith('[') && !variable
-            if (!arbitrary && (!approved || variable || structural || approved.some(pattern => matchesUtility(value, pattern))))
+            if (variable || structural)
               continue
-            context.report({ node: finding.node, messageId: 'token', data: { className, kind, choices: approved?.length ? approved.join(', ') : `a theme ${kind} token`, stylesheet: theme.stylesheet } })
+            const equivalent = arbitrary ? theme.canonicalize(className) : className
+            const namedEquivalent = equivalent !== className && !baseUtility(equivalent).includes('[')
+            const violatesPolicy = approved && !approved.some(pattern => matchesUtility(value, pattern))
+            if (!violatesPolicy && !(arbitrary && options.arbitraryValues) && !namedEquivalent)
+              continue
+            context.report({ node: finding.node, messageId: 'token', data: { className, kind, choices: approved?.length ? approved.join(', ') : namedEquivalent ? equivalent : `a theme ${kind} token`, stylesheet: theme.stylesheet } })
           }
         }
       },

@@ -599,7 +599,10 @@ function detectFramework(): { nuxt: boolean, nuxtUi: boolean, vue: boolean, prom
     const pkg = JSON.parse(readFileSync(packagePath, 'utf-8'))
     const deps = { ...pkg.dependencies, ...pkg.devDependencies }
     nuxt = nuxt || !!deps.nuxt
-    nuxtUi = !!deps['@nuxt/ui']
+    const installedUi = resolve(cwd, 'node_modules/@nuxt/ui/package.json')
+    const uiVersion = existsSync(installedUi) ? JSON.parse(readFileSync(installedUi, 'utf8')).version : deps['@nuxt/ui']
+    const uiMajor = typeof uiVersion === 'string' ? /^[~^]?(\d+)\./.exec(uiVersion)?.[1] : undefined
+    nuxtUi = !!deps['@nuxt/ui'] && (!uiMajor || Number(uiMajor) >= 4)
     vue = vue || !!(deps.vue || deps.nuxt || nuxtUi)
   }
   const prompt = PROMPT_MARKERS.some(m => existsSync(resolve(cwd, m)))

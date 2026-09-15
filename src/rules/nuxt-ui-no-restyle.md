@@ -66,6 +66,9 @@ For one rule, configure `harlanzw/nuxt-ui-no-restyle` directly.
 | --- | --- |
 | `source` | Shared styling path shown in messages. Defaults to `app/app.config.ts`. |
 | `components` | Component names mapped to options. `false` disables a component. |
+| `components[name].extends` | Nuxt UI primitive whose prop values the wrapper forwards, such as `UInput`. |
+| `components[name].classProps` | Base utility patterns mapped to their owning prop, such as `{ 'font-mono': 'mono' }`. |
+| `components[name].forbiddenProps` | Styling props removed by the wrapper, such as `color` and `variant`. |
 | `components[name].allow` | Allowed base classes. Replaces the default layout allowance. |
 | `components[name].slots` | Allowed classes per `ui` slot. Replaces the component allowance for that slot. |
 | `components[name].sizes` | Supported size values used for validation and guidance. |
@@ -189,3 +192,37 @@ No pixel-to-size autofix is safe because wrapper defaults and themes can change 
 Minimum and maximum heights remain valid because sites use them for accessible touch targets and container constraints.
 Direct height, padding, and text-size overrides still receive prop guidance.
 Opacity and visibility changes remain valid interaction styles.
+
+## Wrapper contracts
+
+Declare the wrapper API instead of inferring behavior from its name:
+
+```ts
+components: {
+  UiInput: { extends: 'UInput' },
+  UiSelect: { extends: 'USelect' },
+  UiButton: {
+    extends: 'UButton',
+    appearanceProp: 'purpose',
+    variants: ['cta', 'secondary', 'quiet', 'danger', 'link'],
+    forbiddenProps: ['color', 'variant'],
+  },
+  UiCard: { sizes: ['xs', 'sm', 'md', 'lg'], variants: ['default', 'subtle'] },
+}
+```
+
+Explicit arrays override inherited prop values.
+Custom wrappers have no assumed size or color values without a declared contract.
+Radius, border, and font overrides point to shared styling instead of an unrelated appearance prop.
+Forbidden props report even when their bound value is dynamic.
+Object spreads and object-form `v-bind` remain outside prop validation.
+
+Load generated Nuxt UI CSS through `tailwind({ stylesheets: ['./.nuxt/ui.css'], stylesheet: '...' })`.
+This accepts additional Nuxt UI semantic colors, such as `important`, from the generated theme.
+Explicit `colors` arrays still enforce the site's approved values.
+
+Restyle warnings identify overrides. They do not prove visual defects.
+Keep documented exceptions for code typography, branded content, and accessible touch targets.
+Use file overrides for primitive definitions and deliberate component demonstrations.
+
+Automatic detection skips known Nuxt UI versions below v4. Explicit `nuxtUi` configuration overrides detection.

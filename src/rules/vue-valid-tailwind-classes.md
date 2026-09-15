@@ -36,9 +36,13 @@ Append it after your existing Nuxt or Vue configuration.
 | `allow` | Approved class patterns. `*` matches any characters. |
 | `strict` | Also report unknown custom class names. Defaults to `false`. |
 | `colors` | Approved color suffixes for the theme-token rule. |
+| `arbitraryValues` | Reject arbitrary colors and spacing even without a known equivalent. Defaults to `false`. |
 | `spacing` | Approved spacing suffixes for the theme-token rule. |
 
 The helper loads CSS imports and their theme extensions.
+Include generated Nuxt UI CSS, such as `.nuxt/ui.css`, in `stylesheets` after running Nuxt prepare.
+Monorepos need separate configuration blocks when apps load different themes.
+The helper does not execute Nuxt configuration or discover its CSS entries.
 Missing files, unresolved imports, and invalid stylesheets stop configuration loading with their original error.
 Tailwind may execute configured CSS plugins and JavaScript configuration, as during a normal build.
 
@@ -46,7 +50,8 @@ The default checks names that use known utility prefixes.
 It leaves unknown hook names alone because another component or library may own their CSS.
 Strict mode requires custom classes to appear in the loaded stylesheets, current Vue styles, or `allow`.
 
-Classes declared in the current component's `<style>` blocks remain valid.
+Classes declared in the current component's CSS and PostCSS `<style>` blocks remain valid.
+Preprocessor styles need compiled CSS in `stylesheets`, or explicit class allowances.
 `group`, `peer`, named group markers, and `not-prose` remain valid without emitted CSS.
 Do not use strict mode without registering external hooks and styles.
 

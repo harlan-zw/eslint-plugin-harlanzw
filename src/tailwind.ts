@@ -30,10 +30,13 @@ export async function tailwind({ stylesheet, stylesheets = [], files = ['**/*.vu
     },
   })
   const system = await __unstable__loadDesignSystem(css, { base: dirname(path) })
+  // Canonicalization mutates theme flags. Keep validation independent of suggestion order.
+  const canonicalSystem = await __unstable__loadDesignSystem(css, { base: dirname(path) })
   const roots = new Set<string>(system.getClassList().map(([name]) => baseUtility(name).split('-')[0]))
   const hash = createHash('sha256')
   for (const dependency of [...dependencies].sort())
     hash.update(dependency).update(await readFile(dependency))
+  const canonical = new Map<string, string>()
   const cache = new Map<string, string | null>()
   return {
     name: 'harlanzw/tailwind',
@@ -46,6 +49,11 @@ export async function tailwind({ stylesheet, stylesheets = [], files = ['**/*.vu
         fingerprint: hash.digest('hex'),
         classes: cssClasses(compiler.build([])),
         isUtility: (candidate: string) => system.parseCandidate(candidate).length > 0 || roots.has(candidate.split('-')[0]),
+        canonicalize(candidate: string) {
+          if (!canonical.has(candidate))
+            canonical.set(candidate, canonicalSystem.canonicalizeCandidates([candidate])[0] ?? candidate)
+          return canonical.get(candidate)!
+        },
         compile(candidate: string) {
           if (!cache.has(candidate))
             cache.set(candidate, system.candidatesToCss([candidate])[0])
