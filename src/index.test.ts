@@ -14,6 +14,37 @@ describe('plugin configs', () => {
     expect(factoryPlugin).toBe(plugin)
   })
 
+  it('scopes the docs config so the root allowlist never fires below the root', () => {
+    const docs = plugin.configs?.docs
+    expect(Array.isArray(docs)).toBe(true)
+    if (!Array.isArray(docs))
+      return
+
+    const root = docs.find(block => (block as LinterTypes.Config).name === 'harlanzw/docs/root') as LinterTypes.Config
+    const tree = docs.find(block => (block as LinterTypes.Config).name === 'harlanzw/docs/tree') as LinterTypes.Config
+
+    // `*.md` without a leading `**/` is the repository root only. A root
+    // allowlist that reached every nested folder would fail every docs file.
+    expect(root.files).toEqual(['*.md'])
+    expect(Object.keys(root.rules ?? {})).toContain('harlanzw/docs-root-allowlist')
+    expect(Object.keys(tree.rules ?? {})).not.toContain('harlanzw/docs-root-allowlist')
+
+    // The brief and reference rules self-filter on path, so they only need the tree.
+    expect(Object.keys(tree.rules ?? {})).toEqual(
+      expect.arrayContaining(['harlanzw/docs-work-brief-contract', 'harlanzw/docs-reference-no-status']),
+    )
+  })
+
+  it('keeps the docs rules out of recommended, since the contract is a convention', () => {
+    const recommended = plugin.configs?.recommended
+    expect(Array.isArray(recommended)).toBe(true)
+    if (!Array.isArray(recommended))
+      return
+    const rules = recommended.flatMap(block => Object.keys((block as LinterTypes.Config).rules ?? {}))
+    expect(rules).not.toContain('harlanzw/docs-root-allowlist')
+    expect(rules).not.toContain('harlanzw/docs-work-brief-contract')
+  })
+
   it('applies Nuxt and Vue rules to JavaScript and TypeScript module extensions', () => {
     const nuxtConfig = plugin.configs?.nuxt
     expect(Array.isArray(nuxtConfig)).toBe(true)
