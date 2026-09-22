@@ -417,14 +417,35 @@ export default [
 ]
 ```
 
-`docs-root-allowlist` applies to root `*.md` files. The brief and reference rules apply to `docs/**/*.md`:
+**This config is opinionated and opt-in.** It encodes one convention about where Markdown lives
+and what a brief must say. Nothing in it is enabled by `recommended`, `content`, or any
+`prompt:*` config, and a test pins that. Every default below is an option, because a repository
+adopting the config will not share every opinion in it.
 
-| Rule | What it does |
-| --- | --- |
-| `docs-work-brief-contract` | Requires every open brief in `docs/work/` to carry title, `Status:`, `**Next move:**`, `Done means:`, `## Ledger`, and `## Log` fields |
-| `docs-reference-no-status` | Forbids a `Status:` line in reference documents, where the folder already carries status |
-| `docs-root-allowlist` | Forbids new Markdown at the repository root outside the root-docs allowlist |
-| `docs-retired-pointer` | Flags a pointer to a retired document and names its replacement |
+`docs-root-allowlist` applies to root `*.md` files. The rest apply to `docs/**/*.md`:
+
+| Rule | What it does | Key options |
+| --- | --- | --- |
+| `docs-work-brief-contract` | Requires every open brief in `docs/work/` to carry title, `Status:`, `**Next move:**`, `Done means:`, `## Ledger`, and `## Log` fields | `dir`, `buckets`, `require` |
+| `docs-reference-no-status` | Forbids a `Status:` line in reference documents, where the folder already carries status | `dirs` |
+| `docs-root-allowlist` | Forbids new Markdown at the repository root outside the root-docs allowlist | `allow`, `additionalAllow`, `root` |
+| `docs-retired-pointer` | Flags a pointer to a retired document and names its replacement | `retired` |
+| `prompt-dangling-path` | Flags a backticked repository path that does not exist | `root`, `ignore` |
+
+The defaults are Harlan's. `**Next move:**` accepts `Harlan`, `Blocked` or `Ready`, and a
+bucket named after a person is the clearest sign to set your own:
+
+```js
+{
+  rules: {
+    'harlanzw/docs-work-brief-contract': ['error', {
+      dir: 'docs/initiatives',
+      buckets: ['Waiting', 'Go'],
+      require: ['title', 'doneMeans'],
+    }],
+  },
+}
+```
 
 ## Sponsors
 
