@@ -213,7 +213,6 @@ const promptRecommendedRules: Record<string, Linter.RuleSeverity> = {
   'harlanzw/prompt-empty-variable': 'error',
   'harlanzw/prompt-undefined-variable': 'warn',
   'harlanzw/prompt-large-prompt': 'warn',
-  'harlanzw/prompt-dangling-path': 'warn',
 }
 
 plugin.configs!['prompt:recommended'] = [
@@ -467,6 +466,7 @@ plugin.configs!.docs = [
     rules: {
       'harlanzw/docs-root-allowlist': 'error',
       'harlanzw/docs-retired-pointer': 'error',
+      'harlanzw/prompt-dangling-path': 'warn',
     },
   },
   {

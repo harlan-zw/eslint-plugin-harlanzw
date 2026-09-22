@@ -3,36 +3,56 @@ import { getCodeBlockLines, getFrontmatterEnd } from '../utils'
 
 // A brief lives in docs/work/ and tracks one open initiative. README.md is the
 // index, shipped/ is closed work, and a leading underscore marks a template.
-function isOpenBrief(filename: string): boolean {
+function isOpenBrief(filename: string, dir: string): boolean {
   // Leading slash so one `includes` covers an absolute and a relative path.
   const normalised = `/${filename.replaceAll('\\', '/').replace(/^\/+/, '')}`
-  if (!normalised.includes('/docs/work/'))
+  const workDir = `/${dir.replace(/^\/+|\/+$/g, '')}/`
+  if (!normalised.includes(workDir))
     return false
-  if (normalised.includes('/docs/work/shipped/'))
+  if (normalised.includes(`${workDir}shipped/`))
     return false
   const name = basename(normalised)
   return name.endsWith('.md') && name !== 'README.md' && !name.startsWith('_')
 }
 
+// Everything below is this contract's opinion, so everything below is an
+// option. The defaults are Harlan's; "Harlan" as a bucket name is the clearest
+// sign that a repository adopting this rule should set its own.
+const DEFAULT_BUCKETS = ['Harlan', 'Blocked', 'Ready']
+const DEFAULT_FIELDS = ['title', 'status', 'nextMove', 'doneMeans', 'ledger', 'log'] as const
+type Field = typeof DEFAULT_FIELDS[number]
+
 const H1 = /^#\s+\S/
 const STATUS = /^Status:\s*\S/i
-const NEXT_MOVE = /^\*\*Next move:\*\*\s*(?:Harlan|Blocked|Ready)\b/i
 const NEXT_MOVE_LOOSE = /^\*\*Next move:\*\*/i
 const DONE_MEANS = /^Done means:\s*\S/i
 const LEDGER = /^##\s+Ledger\s*$/i
 const LOG = /^##\s+Log\s*$/i
 const LOG_ENTRY = /^\s*[-*]\s+\d{4}-\d{2}-\d{2}\b/
 
+function bucketPattern(buckets: string[]): RegExp {
+  const alternation = buckets.map(b => b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')
+  return new RegExp(`^\\*\\*Next move:\\*\\*\\s*(?:${alternation})\\b`, 'i')
+}
+
 export default {
   meta: {
     type: 'problem' as const,
     docs: { description: 'Require every open brief in docs/work to carry the fields that make it auditable' },
-    schema: [],
+    schema: [{
+      type: 'object' as const,
+      properties: {
+        dir: { type: 'string' as const },
+        buckets: { type: 'array' as const, items: { type: 'string' as const } },
+        require: { type: 'array' as const, items: { enum: [...DEFAULT_FIELDS] } },
+      },
+      additionalProperties: false,
+    }],
     messages: {
       missingTitle: 'A brief opens with an H1 title.',
       missingStatus: 'A brief carries a `Status:` line with the date, and the branch or pull request if one exists.',
       missingNextMove: 'A brief carries a `**Next move:**` line. Without it a reader cannot tell who is blocked.',
-      badNextMove: 'A `**Next move:**` line starts with one bucket: Harlan, Blocked, or Ready.',
+      badNextMove: 'A `**Next move:**` line starts with one bucket: {{buckets}}.',
       missingDoneMeans: 'A brief carries a `Done means:` line stating one checkable end state. Closure is unauditable without it.',
       missingLedger: 'A brief carries a `## Ledger` section listing the work as checkboxes.',
       missingLog: 'A brief carries a `## Log` section. Append progress there, never to a separate file.',
@@ -40,7 +60,13 @@ export default {
     },
   },
   create(context: any) {
-    if (!isOpenBrief(context.filename ?? ''))
+    const options = context.options?.[0] ?? {}
+    const dir: string = options.dir ?? 'docs/work'
+    const buckets: string[] = options.buckets ?? DEFAULT_BUCKETS
+    const required = new Set<Field>(options.require ?? DEFAULT_FIELDS)
+    const NEXT_MOVE = bucketPattern(buckets)
+
+    if (!isOpenBrief(context.filename ?? '', dir))
       return {}
 
     return {
@@ -88,22 +114,26 @@ export default {
         })
         const top = { start: { line: 1, column: 1 }, end: { line: 1, column: 1 } }
 
-        if (found.title < 0)
+        if (required.has('title') && found.title < 0)
           context.report({ loc: top, messageId: 'missingTitle' })
-        if (found.status < 0)
+        if (required.has('status') && found.status < 0)
           context.report({ loc: top, messageId: 'missingStatus' })
-        if (found.nextMoveLoose < 0)
-          context.report({ loc: top, messageId: 'missingNextMove' })
-        else if (found.nextMove < 0)
-          context.report({ loc: at(found.nextMoveLoose), messageId: 'badNextMove' })
-        if (found.doneMeans < 0)
+        if (required.has('nextMove')) {
+          if (found.nextMoveLoose < 0)
+            context.report({ loc: top, messageId: 'missingNextMove' })
+          else if (found.nextMove < 0)
+            context.report({ loc: at(found.nextMoveLoose), messageId: 'badNextMove', data: { buckets: buckets.join(', ') } })
+        }
+        if (required.has('doneMeans') && found.doneMeans < 0)
           context.report({ loc: top, messageId: 'missingDoneMeans' })
-        if (found.ledger < 0)
+        if (required.has('ledger') && found.ledger < 0)
           context.report({ loc: top, messageId: 'missingLedger' })
-        if (found.log < 0)
-          context.report({ loc: top, messageId: 'missingLog' })
-        else if (!datedLogEntry)
-          context.report({ loc: at(found.log), messageId: 'undatedLog' })
+        if (required.has('log')) {
+          if (found.log < 0)
+            context.report({ loc: top, messageId: 'missingLog' })
+          else if (!datedLogEntry)
+            context.report({ loc: at(found.log), messageId: 'undatedLog' })
+        }
       },
     }
   },

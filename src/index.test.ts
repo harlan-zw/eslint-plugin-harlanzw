@@ -36,6 +36,28 @@ describe('plugin configs', () => {
     )
   })
 
+  it('ships no contract rule in any config a repository enables without opting in', () => {
+    // These five encode one person's convention about where Markdown lives and
+    // what a brief must say. Every one of them stays behind `docs`.
+    const OPINIONATED = [
+      'harlanzw/docs-root-allowlist',
+      'harlanzw/docs-work-brief-contract',
+      'harlanzw/docs-reference-no-status',
+      'harlanzw/docs-retired-pointer',
+      'harlanzw/prompt-dangling-path',
+    ]
+    const defaultConfigs = ['recommended', 'content', 'prompt:recommended', 'prompt:strict', 'prompt:skill', 'link', 'nuxt', 'vue', 'tests', 'pnpm']
+
+    for (const name of defaultConfigs) {
+      const config = plugin.configs?.[name]
+      if (!Array.isArray(config))
+        continue
+      const rules = config.flatMap(block => Object.keys((block as LinterTypes.Config).rules ?? {}))
+      for (const rule of OPINIONATED)
+        expect(rules, `${name} must not enable ${rule}`).not.toContain(rule)
+    }
+  })
+
   it('keeps the docs rules out of recommended, since the contract is a convention', () => {
     const recommended = plugin.configs?.recommended
     expect(Array.isArray(recommended)).toBe(true)
