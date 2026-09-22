@@ -436,15 +436,17 @@ The defaults are Harlan's. `**Next move:**` accepts `Harlan`, `Blocked` or `Read
 bucket named after a person is the clearest sign to set your own:
 
 ```js
-{
-  rules: {
-    'harlanzw/docs-work-brief-contract': ['error', {
-      dir: 'docs/initiatives',
-      buckets: ['Waiting', 'Go'],
-      require: ['title', 'doneMeans'],
-    }],
+export default [
+  {
+    rules: {
+      'harlanzw/docs-work-brief-contract': ['error', {
+        dir: 'docs/initiatives',
+        buckets: ['Waiting', 'Go'],
+        require: ['title', 'doneMeans'],
+      }],
+    },
   },
-}
+]
 ```
 
 ## Sponsors
