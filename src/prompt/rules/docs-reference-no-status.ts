@@ -1,4 +1,4 @@
-import { getCodeBlockLines } from '../utils'
+import { getCodeBlockLines, getFrontmatterEnd } from '../utils'
 
 // Location is status: a document's folder says where it sits in its lifecycle.
 // So a reference document is present tense and carries no status of its own;
@@ -37,8 +37,10 @@ export default {
       document() {
         const lines: string[] = context.sourceCode.lines
         const codeBlockLines = getCodeBlockLines(lines)
+        // A frontmatter `status:` key is metadata, not a Status line.
+        const frontmatterEnd = getFrontmatterEnd(lines)
 
-        for (let i = 0; i < lines.length; i++) {
+        for (let i = frontmatterEnd; i < lines.length; i++) {
           if (codeBlockLines.has(i))
             continue
           if (!STATUS_LINE.test(lines[i]))

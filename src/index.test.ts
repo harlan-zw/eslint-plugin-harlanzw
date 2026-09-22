@@ -1,5 +1,6 @@
 import type { ESLint, Linter as LinterTypes } from 'eslint'
 import type { RuleOptions } from './index'
+import { readFileSync } from 'node:fs'
 import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
 import harlanzw, { plugin } from './index'
@@ -63,6 +64,17 @@ describe('plugin configs', () => {
       '**/*.mts',
       '**/*.cts',
     ])
+  })
+
+  it('lists every public rule and the docs config in the README index', () => {
+    const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8')
+    const table = readme.slice(
+      readme.indexOf('<!-- rules:start -->'),
+      readme.indexOf('<!-- rules:end -->'),
+    )
+    for (const rule of ['docs-work-brief-contract', 'docs-reference-no-status', 'docs-root-allowlist', 'docs-retired-pointer', 'prompt-dangling-path'])
+      expect(table, `README rules table is missing \`${rule}\``).toContain(rule)
+    expect(readme).toContain('plugin.configs.docs')
   })
 
   it('warns on file reads in tests without warning on source files', () => {

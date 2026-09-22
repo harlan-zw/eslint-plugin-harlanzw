@@ -13,6 +13,8 @@ ruleTester.run('harlanzw/docs-reference-no-status', rule, {
     { code: '# Arch\n\n```md\nStatus: open\n```\n', filename: 'docs/arch/README.md' },
     // Prose that merely contains the word is not a status line.
     { code: 'The status code is 404.', filename: 'docs/arch/README.md' },
+    // Frontmatter fields are metadata, not a Status line in the document.
+    { code: '---\nstatus: draft\n---\n# Arch\n', filename: 'docs/arch/README.md' },
   ],
   invalid: [
     { code: 'Status: shipped', filename: 'docs/arch/README.md', errors: [{ messageId: 'status' }] },

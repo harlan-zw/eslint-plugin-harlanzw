@@ -1,4 +1,4 @@
-import { getCodeBlockLines } from '../utils'
+import { getCodeBlockLines, isInScope, parseLineScopes } from '../utils'
 
 // A document renamed across every repository leaves pointers behind. This rule
 // names the replacement rather than leaving the reader to guess.
@@ -11,6 +11,18 @@ const DEFAULT_RETIRED: Record<string, string> = {
 // repository's retired one. `~/.claude/CLAUDE.md` is genuinely named that and
 // nothing renamed it.
 const EXTERNAL = /(?:~|\/home\/[^/\s`]+|\/Users\/[^/\s`]+|\$HOME)\/[^\s`)]*/g
+
+// A retired name inside a URL names a file on another site, not a pointer
+// into this repository.
+function insideUrl(line: string, start: number): boolean {
+  for (let i = start - 1; i >= 0; i--) {
+    if (/\s/.test(line[i]))
+      return false
+    if (line.slice(i, i + 3) === '://')
+      return true
+  }
+  return false
+}
 
 export default {
   meta: {
@@ -41,12 +53,20 @@ export default {
         for (let i = 0; i < lines.length; i++) {
           if (codeBlockLines.has(i))
             continue
+          const original = lines[i]
+          const scopes = parseLineScopes(original)
           // Strip external paths first, so a line may cite the global file and
-          // still be caught for a bare pointer elsewhere on it.
-          const line = lines[i].replace(EXTERNAL, '')
+          // still be caught for a bare pointer elsewhere on it. Blank each one
+          // out at its original width, so report columns stay on the original
+          // line.
+          const line = original.replace(EXTERNAL, match => ' '.repeat(match.length))
           for (const name of names) {
             const at = line.indexOf(name)
             if (at < 0)
+              continue
+            if (isInScope(scopes, at, at + name.length, ['link-url']))
+              continue
+            if (insideUrl(original, at))
               continue
             context.report({
               loc: {
