@@ -99,6 +99,45 @@ describe('plugin configs', () => {
     expect(readme).toContain('plugin.configs.docs')
   })
 
+  it('states a docs scope per rule that matches its enabling config block', () => {
+    const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8')
+    const docs = plugin.configs?.docs
+    expect(Array.isArray(docs)).toBe(true)
+    if (!Array.isArray(docs))
+      return
+
+    const section = readme.slice(readme.indexOf('### Docs Rules'), readme.indexOf('## Sponsors'))
+
+    // Each scope sentence names rules and the glob(s) that scope them, e.g.
+    // "`a-rule` and `another-rule` apply to root `*.md` files only."
+    const enabledRules = new Set(docs.flatMap(block => Object.keys((block as LinterTypes.Config).rules ?? {})))
+    const stated = new Map<string, Set<string>>()
+    for (const line of section.split('\n')) {
+      const tokens = [...line.matchAll(/`([^`]+)`/g)].map(match => match[1])
+      const rules = tokens.filter(token => enabledRules.has(`harlanzw/${token}`))
+      const globs = tokens.filter(token => token.includes('.md'))
+      if (!rules.length || !globs.length)
+        continue
+      for (const rule of rules)
+        stated.set(rule, new Set([...(stated.get(rule) ?? []), ...globs]))
+    }
+
+    expect([...stated.keys()].sort()).toEqual([...enabledRules].map(name => name.replace('harlanzw/', '')).sort())
+
+    const BLOCK_BY_GLOB: Record<string, string> = {
+      '*.md': 'harlanzw/docs/root',
+      'docs/**/*.md': 'harlanzw/docs/tree',
+    }
+    for (const [rule, globs] of stated) {
+      const expectedBlocks = [...globs].map(glob => BLOCK_BY_GLOB[glob])
+      expect(expectedBlocks, `README scopes \`${rule}\` with unknown globs: ${[...globs].join(', ')}`).not.toContain(undefined)
+      const enablingBlocks = docs
+        .filter(block => Object.keys((block as LinterTypes.Config).rules ?? {}).includes(`harlanzw/${rule}`))
+        .map(block => (block as LinterTypes.Config).name)
+      expect(enablingBlocks.sort()).toEqual(expectedBlocks.sort())
+    }
+  })
+
   it('warns on file reads in tests without warning on source files', () => {
     const configs = harlanzw({
       content: false,

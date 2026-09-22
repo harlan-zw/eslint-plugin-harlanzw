@@ -11,6 +11,11 @@ ruleTester.run('harlanzw/prompt-dangling-path', rule, {
   valid: [
     { code: 'Rules live in `src/index.ts`.', options: [root] },
     { code: 'See `src/prompt/rules/docs-root-allowlist.ts`.', options: [root] },
+    // A line number, a line range and a fragment anchor point into a file,
+    // so they resolve to the path underneath them.
+    { code: 'Rules live in `src/index.ts:42`.', options: [root] },
+    { code: 'Read `src/index.ts:42-50` for the config.', options: [root] },
+    { code: 'See `src/prompt/utils.ts#L214`.', options: [root] },
     { code: 'The folder `src/prompt/` holds them.', options: [root] },
     // Not paths: a bare word, a package, a protocol, a home path, a glob, a command.
     { code: 'Run `eslint` first.', options: [root] },
@@ -35,6 +40,17 @@ ruleTester.run('harlanzw/prompt-dangling-path', rule, {
       code: 'Read `docs/arch/gone.md` and `src/index.ts`.',
       options: [root],
       errors: [{ messageId: 'dangling' }],
+    },
+    {
+      // A suffix still names the missing file underneath it.
+      code: 'See `src/nope/missing.ts:42`.',
+      options: [root],
+      errors: [{ messageId: 'dangling', data: { path: 'src/nope/missing.ts:42' } }],
+    },
+    {
+      code: 'See `src/nope/missing.md#L214`.',
+      options: [root],
+      errors: [{ messageId: 'dangling', data: { path: 'src/nope/missing.md#L214' } }],
     },
   ],
 })

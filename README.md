@@ -422,7 +422,9 @@ and what a brief must say. Nothing in it is enabled by `recommended`, `content`,
 `prompt:*` config, and a test pins that. Every default below is an option, because a repository
 adopting the config will not share every opinion in it.
 
-`docs-root-allowlist` applies to root `*.md` files. The rest apply to `docs/**/*.md`:
+`docs-root-allowlist` and `prompt-dangling-path` apply to root `*.md` files only.
+`docs-work-brief-contract` and `docs-reference-no-status` apply to `docs/**/*.md`.
+`docs-retired-pointer` applies to both root `*.md` and `docs/**/*.md`:
 
 | Rule | What it does | Key options |
 | --- | --- | --- |

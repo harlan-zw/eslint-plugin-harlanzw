@@ -27,6 +27,15 @@ function looksLikeRepoPath(value: string): boolean {
   return true
 }
 
+// A citation often carries a position: `src/index.ts:42`, a `:42-50` range or
+// a `README.md#L214` anchor. The suffix points into the file, so the check
+// must resolve the path underneath it.
+function stripPositionSuffix(value: string): string {
+  return value
+    .replace(/#.*$/, '')
+    .replace(/(:\d+(?:-\d+)?)+$/, '')
+}
+
 export default {
   meta: {
     type: 'problem' as const,
@@ -66,7 +75,7 @@ export default {
               continue
             if (isInScope(scopes, match.index, match.index + match[0].length, ['link-url']))
               continue
-            const candidate = value.replace(/\/$/, '')
+            const candidate = stripPositionSuffix(value).replace(/\/$/, '')
             if (existsSync(resolve(root, candidate)))
               continue
             context.report({
