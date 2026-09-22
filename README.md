@@ -32,6 +32,8 @@ The rules are organized into the following categories:
 - **Nuxt Rules**: Best practices for Nuxt applications
 - **Vue Rules**: Vue composition API and reactivity best practices
 - **AI Deslop Rules**: Clean AI-generated slop from content markdown
+- **Prompt Rules**: Lint agent prompt files for dangling paths, dilution, and structure
+- **Docs Rules**: Enforce the root-docs contract across a repository's documentation
 
 <!-- rules:start -->
 | Rule | Description |
@@ -92,6 +94,13 @@ The rules are organized into the following categories:
 | [`ai-deslop-frontmatter-spacing`](./src/prompt/rules/deslop-frontmatter-spacing.ts) | remove empty lines inside YAML frontmatter |
 | [`ai-deslop-code-lang`](./src/prompt/rules/deslop-code-lang.ts) | require language hints on fenced code examples |
 | [`ai-deslop-vue-ts-lang`](./src/prompt/rules/deslop-vue-ts-lang.ts) | require `lang="ts"` on Vue `<script>` blocks in code examples |
+| **Prompt** | |
+| [`prompt-dangling-path`](./src/prompt/rules/prompt-dangling-path.ts) | flag a backticked repository path in an instruction file that does not exist |
+| **Docs** | |
+| [`docs-work-brief-contract`](./src/prompt/rules/docs-work-brief-contract.ts) | require every open brief in docs/work to carry the fields that make it auditable |
+| [`docs-reference-no-status`](./src/prompt/rules/docs-reference-no-status.ts) | forbid a Status line in a reference document, where location already carries status |
+| [`docs-root-allowlist`](./src/prompt/rules/docs-root-allowlist.ts) | forbid new Markdown at the repository root outside the root-docs allowlist |
+| [`docs-retired-pointer`](./src/prompt/rules/docs-retired-pointer.ts) | flag a pointer to a document that has been retired, naming its replacement |
 | **pnpm** | |
 | [`pnpm-require-trust-policy`](./src/prompt/rules/pnpm-require-trust-policy.ts) | require `trustPolicyIgnoreAfter: 262800` in `pnpm-workspace.yaml` |
 | **Nuxt UI design, opt in** | |
@@ -99,7 +108,7 @@ The rules are organized into the following categories:
 | [`vue-no-dynamic-tailwind-classes`](./src/rules/vue-no-dynamic-tailwind-classes.md) | use complete Tailwind class names in Vue bindings |
 <!-- rules:end -->
 
-The plugin also includes 20 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
+The plugin also includes 21 **prompt linting** rules for `.prompt.md` and `.skill.md` files. See the [prompt configs](#prompt-rules) section below.
 
 ## Installation
 
@@ -358,7 +367,7 @@ export default [
 
 ### Prompt Rules
 
-20 rules for linting `.prompt.md` and `.skill.md` files using a custom prompt language:
+21 rules for linting `.prompt.md` and `.skill.md` files using a custom prompt language:
 
 ```js
 import { plugin } from 'eslint-plugin-harlanzw'
@@ -395,6 +404,52 @@ export default [
 | Rule | What it does |
 | --- | --- |
 | `pnpm-require-trust-policy` | Ensures `trustPolicyIgnoreAfter: 262800` is present in `pnpm-workspace.yaml` (auto-fixable) |
+
+### Docs Rules
+
+Opt-in rules for the root-docs contract: an allowlist for Markdown at the repository root and a lifecycle for `docs/`. Enable them per repository, since the contract is a convention rather than a fact about Markdown.
+
+```js
+import { plugin } from 'eslint-plugin-harlanzw'
+
+export default [
+  ...plugin.configs.docs,
+]
+```
+
+**This config is opinionated and opt-in.** It encodes one convention about where Markdown lives
+and what a brief must say. Nothing in it is enabled by `recommended`, `content`, or any
+`prompt:*` config, and a test pins that. Every default below is an option, because a repository
+adopting the config will not share every opinion in it.
+
+`docs-root-allowlist` and `prompt-dangling-path` apply to root `*.md` files only.
+`docs-work-brief-contract` and `docs-reference-no-status` apply to `docs/**/*.md`.
+`docs-retired-pointer` applies to both root `*.md` and `docs/**/*.md`:
+
+| Rule | What it does | Key options |
+| --- | --- | --- |
+| `docs-work-brief-contract` | Requires every open brief in `docs/work/` to carry title, `Status:`, `**Next move:**`, `Done means:`, `## Ledger`, and `## Log` fields | `dir`, `buckets`, `require` |
+| `docs-reference-no-status` | Forbids a `Status:` line in reference documents, where the folder already carries status | `dirs` |
+| `docs-root-allowlist` | Forbids new Markdown at the repository root outside the root-docs allowlist | `allow`, `additionalAllow`, `root` |
+| `docs-retired-pointer` | Flags a pointer to a retired document and names its replacement | `retired` |
+| `prompt-dangling-path` | Flags a backticked repository path that does not exist | `root`, `ignore` |
+
+The defaults are Harlan's. `**Next move:**` accepts `Harlan`, `Blocked` or `Ready`, and a
+bucket named after a person is the clearest sign to set your own:
+
+```js
+export default [
+  {
+    rules: {
+      'harlanzw/docs-work-brief-contract': ['error', {
+        dir: 'docs/initiatives',
+        buckets: ['Waiting', 'Go'],
+        require: ['title', 'doneMeans'],
+      }],
+    },
+  },
+]
+```
 
 ## Sponsors
 

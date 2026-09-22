@@ -281,4 +281,10 @@ export const HEDGING_WORDS: string[] = [
 ]
 
 export const CONTENT_FILES = ['**/content/**/*.md', '**/docs/**/*.md', '**/README.md']
+
+// The root-docs contract: the fixed set of Markdown a repository root carries,
+// and the docs/ lifecycle beneath it. Root markdown is matched without a
+// leading `**/` so it means the repository root and not every nested folder.
+export const DOCS_ROOT_FILES = ['*.md']
+export const DOCS_TREE_FILES = ['docs/**/*.md', '**/docs/**/*.md']
 export const NUXT_CONTENT_FILES = ['**/content/**/*.md', '**/docs/**/*.md']

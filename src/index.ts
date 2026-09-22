@@ -10,7 +10,7 @@ import process from 'node:process'
 import { version } from '../package.json'
 import { base, TEST_FILES } from './base'
 import { PROMPT_FILES, SKILL_FILES } from './prompt/constants'
-import { CONTENT_FILES, NUXT_CONTENT_FILES } from './prompt/deslop-constants'
+import { CONTENT_FILES, DOCS_ROOT_FILES, DOCS_TREE_FILES, NUXT_CONTENT_FILES } from './prompt/deslop-constants'
 import { PromptLanguage } from './prompt/language'
 import promptAmbiguousQuantifier from './prompt/rules/ambiguous-quantifier'
 import aiDeslopAdverbs from './prompt/rules/deslop-adverbs'
@@ -28,6 +28,10 @@ import aiDeslopNoExclamation from './prompt/rules/deslop-no-exclamation'
 import aiDeslopPassiveVoice from './prompt/rules/deslop-passive-voice'
 import aiDeslopVueTsLang from './prompt/rules/deslop-vue-ts-lang'
 import aiDeslopWeakOpener from './prompt/rules/deslop-weak-opener'
+import docsReferenceNoStatus from './prompt/rules/docs-reference-no-status'
+import docsRetiredPointer from './prompt/rules/docs-retired-pointer'
+import docsRootAllowlist from './prompt/rules/docs-root-allowlist'
+import docsWorkBriefContract from './prompt/rules/docs-work-brief-contract'
 import promptDuplicateHeading from './prompt/rules/duplicate-heading'
 import promptEmptySection from './prompt/rules/empty-section'
 import promptEmptyVariable from './prompt/rules/empty-variable'
@@ -38,6 +42,7 @@ import promptLargePrompt from './prompt/rules/large-prompt'
 import promptMissingExamples from './prompt/rules/missing-examples'
 import promptNoTrailingSpaces from './prompt/rules/no-trailing-spaces'
 import pnpmRequireTrustPolicy from './prompt/rules/pnpm-require-trust-policy'
+import promptDanglingPath from './prompt/rules/prompt-dangling-path'
 import promptRedundantInstruction from './prompt/rules/redundant-instruction'
 import promptSkillFrontmatterRequired from './prompt/rules/skill-frontmatter-required'
 import promptSkillFrontmatterSchema from './prompt/rules/skill-frontmatter-schema'
@@ -110,6 +115,10 @@ const rules = defineRules({
   'ai-deslop-passive-voice': aiDeslopPassiveVoice,
   'ai-deslop-vue-ts-lang': aiDeslopVueTsLang,
   'ai-deslop-weak-opener': aiDeslopWeakOpener,
+  'docs-reference-no-status': docsReferenceNoStatus,
+  'docs-retired-pointer': docsRetiredPointer,
+  'docs-root-allowlist': docsRootAllowlist,
+  'docs-work-brief-contract': docsWorkBriefContract,
   'link-ascii-only': linkAsciiOnly,
   'link-lowercase': linkLowercase,
   'link-no-double-slashes': linkNoDoubleSlashes,
@@ -137,6 +146,7 @@ const rules = defineRules({
   'prefer-node-style-text': preferNodeStyleText,
   'prefer-satisfies': preferSatisfies,
   'prompt-ambiguous-quantifier': promptAmbiguousQuantifier,
+  'prompt-dangling-path': promptDanglingPath,
   'prompt-duplicate-heading': promptDuplicateHeading,
   'prompt-empty-section': promptEmptySection,
   'prompt-empty-variable': promptEmptyVariable,
@@ -440,6 +450,34 @@ plugin.configs!.tests = [
     plugins: { harlanzw: plugin },
     rules: {
       'harlanzw/no-test-file-reads': 'warn',
+    },
+  },
+]
+
+// Docs config: the root-docs contract. Structure, not wording; the content and
+// prompt configs already own wording. Opt in per repository, because the root
+// allowlist and the docs/ lifecycle are a convention, not a fact about Markdown.
+plugin.configs!.docs = [
+  {
+    name: 'harlanzw/docs/root',
+    files: DOCS_ROOT_FILES,
+    language: 'harlanzw/prompt',
+    plugins: { harlanzw: plugin },
+    rules: {
+      'harlanzw/docs-root-allowlist': 'error',
+      'harlanzw/docs-retired-pointer': 'error',
+      'harlanzw/prompt-dangling-path': 'warn',
+    },
+  },
+  {
+    name: 'harlanzw/docs/tree',
+    files: DOCS_TREE_FILES,
+    language: 'harlanzw/prompt',
+    plugins: { harlanzw: plugin },
+    rules: {
+      'harlanzw/docs-work-brief-contract': 'error',
+      'harlanzw/docs-reference-no-status': 'error',
+      'harlanzw/docs-retired-pointer': 'error',
     },
   },
 ]
