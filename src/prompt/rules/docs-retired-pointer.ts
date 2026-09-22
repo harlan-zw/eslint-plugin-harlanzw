@@ -1,4 +1,5 @@
-import { getCodeBlockLines, isInScope, parseLineScopes } from '../utils'
+import type { MarkdownScope } from '../utils'
+import { getCodeBlockLines, parseLineScopes } from '../utils'
 
 // A document renamed across every repository leaves pointers behind. This rule
 // names the replacement rather than leaving the reader to guess.
@@ -22,6 +23,15 @@ function insideUrl(line: string, start: number): boolean {
       return true
   }
   return false
+}
+
+// A scheme (https:, mailto:) or protocol-relative `//` makes a link URL
+// remote. A relative link URL is still a pointer into this repository.
+const REMOTE_URL = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i
+
+function inRemoteUrl(line: string, scopes: MarkdownScope[], start: number, end: number): boolean {
+  const url = scopes.find(s => s.type === 'link-url' && start >= s.start && end <= s.end)
+  return url !== undefined && REMOTE_URL.test(line.slice(url.start, url.end))
 }
 
 export default {
@@ -64,7 +74,7 @@ export default {
             const at = line.indexOf(name)
             if (at < 0)
               continue
-            if (isInScope(scopes, at, at + name.length, ['link-url']))
+            if (inRemoteUrl(original, scopes, at, at + name.length))
               continue
             if (insideUrl(original, at))
               continue

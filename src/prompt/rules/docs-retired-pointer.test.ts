@@ -32,5 +32,11 @@ ruleTester.run('harlanzw/docs-retired-pointer', rule, {
       options: [{ retired: { 'OLD.md': 'NEW.md' } }],
       errors: [{ messageId: 'retired' }],
     },
+    // A relative link URL is a broken in-repo pointer, the most common form.
+    // The report points at the retired name inside the URL.
+    {
+      code: 'Archive: [old rules](CLAUDE.md).',
+      errors: [{ messageId: 'retired', column: 22, endColumn: 31 }],
+    },
   ],
 })
