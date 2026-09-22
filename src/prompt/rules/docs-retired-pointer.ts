@@ -71,21 +71,23 @@ export default {
           // line.
           const line = original.replace(EXTERNAL, match => ' '.repeat(match.length))
           for (const name of names) {
-            const at = line.indexOf(name)
-            if (at < 0)
-              continue
-            if (inRemoteUrl(original, scopes, at, at + name.length))
-              continue
-            if (insideUrl(original, at))
-              continue
-            context.report({
-              loc: {
-                start: { line: i + 1, column: at + 1 },
-                end: { line: i + 1, column: at + name.length + 1 },
-              },
-              messageId: 'retired',
-              data: { name, replacement: retired[name] },
-            })
+            // Scan every occurrence, so an exempt hit (a remote URL) cannot
+            // mask a bare pointer later on the same line.
+            let at = line.indexOf(name)
+            while (at >= 0) {
+              const end = at + name.length
+              if (!inRemoteUrl(original, scopes, at, end) && !insideUrl(original, at)) {
+                context.report({
+                  loc: {
+                    start: { line: i + 1, column: at + 1 },
+                    end: { line: i + 1, column: end + 1 },
+                  },
+                  messageId: 'retired',
+                  data: { name, replacement: retired[name] },
+                })
+              }
+              at = line.indexOf(name, end)
+            }
           }
         }
       },

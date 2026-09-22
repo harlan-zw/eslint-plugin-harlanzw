@@ -38,5 +38,11 @@ ruleTester.run('harlanzw/docs-retired-pointer', rule, {
       code: 'Archive: [old rules](CLAUDE.md).',
       errors: [{ messageId: 'retired', column: 22, endColumn: 31 }],
     },
+    // A remote-URL hit must not mask a bare pointer later on the same line.
+    // The report points at the bare second occurrence.
+    {
+      code: 'see [y](https://e.com/CLAUDE.md) and CLAUDE.md',
+      errors: [{ messageId: 'retired', column: 38, endColumn: 47 }],
+    },
   ],
 })
