@@ -87,7 +87,7 @@ The rules are organized into the following categories:
 | [`ai-deslop-false-sincerity`](./src/prompt/rules/deslop-false-sincerity.ts) | remove false-sincerity openers that pad sentences ("honestly", "frankly", "in all honesty") |
 | [`ai-deslop-filler`](./src/prompt/rules/deslop-filler.ts) | remove AI-generated filler sentences and phrases (e.g. "it's worth noting that") |
 | [`ai-deslop-hedging`](./src/prompt/rules/deslop-hedging.ts) | remove hedging/qualifying words that weaken copy (e.g. "very", "really", "quite", "just") |
-| [`ai-deslop-no-em-dash`](./src/prompt/rules/deslop-no-em-dash.ts) | replace em dashes in content prose |
+| [`ai-deslop-no-em-dash`](./src/prompt/rules/deslop-no-em-dash.ts) | flag em dashes and optional spaced hyphens in content prose |
 | [`ai-deslop-no-exclamation`](./src/prompt/rules/deslop-no-exclamation.ts) | remove exclamation marks from content prose |
 | [`ai-deslop-passive-voice`](./src/prompt/rules/deslop-passive-voice.ts) | flag passive voice constructions (e.g. "is generated" → rewrite in active voice) |
 | [`ai-deslop-weak-opener`](./src/prompt/rules/deslop-weak-opener.ts) | flag weak sentence openers like "There is" and "It is possible to" |
@@ -357,13 +357,36 @@ export default [
 | `ai-deslop-false-dichotomy` | Flags "it's not X, it's Y" false contrast patterns |
 | `ai-deslop-false-sincerity` | Strips false-sincerity openers ("honestly", "frankly", "in all honesty", "let's be real") |
 | `ai-deslop-hedging` | Strips hedging words that weaken copy ("very", "really", "quite", "just", "somewhat") |
-| `ai-deslop-no-em-dash` | Replaces em dashes in content prose |
+| `ai-deslop-no-em-dash` | Flags em dashes and optional spaced hyphens in content prose |
 | `ai-deslop-no-exclamation` | Replaces exclamation marks with periods in content prose |
 | `ai-deslop-passive-voice` | Flags passive voice ("is generated", "was created") for active rewriting |
 | `ai-deslop-weak-opener` | Flags weak expletive openers ("There is", "It is possible to") |
 | `ai-deslop-frontmatter-spacing` | Removes empty lines inside YAML frontmatter blocks |
 | `ai-deslop-code-lang` | Adds language hints to fenced code blocks |
 | `ai-deslop-vue-ts-lang` | Adds `lang="ts"` to Vue `<script>` blocks in code examples |
+
+To flag spaced hyphens in prose, enable `checkSpacedHyphens` on selected Markdown files:
+
+```ts
+import { plugin } from 'eslint-plugin-harlanzw'
+
+export default [
+  ...plugin.configs.content,
+  {
+    files: ['content/**/*.md'],
+    rules: {
+      'harlanzw/ai-deslop-no-em-dash': ['warn', { checkSpacedHyphens: true }],
+    },
+  },
+]
+```
+
+The option defaults to `false`. It flags `Read the docs - they explain it.` without changing the text.
+It checks spaces or tabs around a hyphen between letters on one line.
+It skips fenced code, inline code, frontmatter, and Markdown link destinations.
+List markers, compound words, and numeric ranges do not match.
+Put literal expressions such as `count - offset` in inline code.
+Formatted or wrapped separators may need manual review.
 
 ### Prompt Rules
 

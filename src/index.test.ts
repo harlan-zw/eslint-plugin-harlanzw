@@ -10,6 +10,34 @@ const factoryPlugin: ESLint.Plugin = harlanzw.plugin
 const linter = new Linter()
 
 describe('plugin configs', () => {
+  it('reports spaced prose hyphens only when the consumer enables the option', () => {
+    const code = 'Read the docs - they explain it.\nUse `count - offset` for subtraction.'
+    const config: LinterTypes.Config = {
+      files: ['**/*.md'],
+      plugins: { harlanzw: plugin },
+      language: 'harlanzw/prompt',
+      rules: {
+        'harlanzw/ai-deslop-no-em-dash': 'warn',
+      },
+    }
+
+    expect(linter.verify(code, [config], 'content/example.md')).toEqual([])
+    expect(linter.verify(code, [{
+      ...config,
+      rules: {
+        'harlanzw/ai-deslop-no-em-dash': ['warn', { checkSpacedHyphens: true }],
+      },
+    }], 'content/example.md').map(({ ruleId, severity, line, column, messageId, fix }) => ({ ruleId, severity, line, column, messageId, fix })))
+      .toEqual([{
+        ruleId: 'harlanzw/ai-deslop-no-em-dash',
+        severity: 1,
+        line: 1,
+        column: 15,
+        messageId: 'spacedHyphen',
+        fix: undefined,
+      }])
+  })
+
   it('preserves options for every exported rule type', () => {
     expect(linkOptions).toEqual([{ ignoreExternal: true }])
     expect(factoryPlugin).toBe(plugin)
