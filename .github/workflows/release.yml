@@ -30,12 +30,12 @@ jobs:
       - name: Force Set pnpm Registry
         run: pnpm config set registry https://registry.npmjs.org
 
-      - run: npx changelogithub
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - run: pnpm exec changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Install Dependencies
-        run: pnpm i
 
       - name: Build
         run: pnpm build
