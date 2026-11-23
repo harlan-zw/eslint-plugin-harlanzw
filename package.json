@@ -36,7 +36,7 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@tailwindcss/node": "~4.3.3",
+    "@tailwindcss/node": "~4.3.5",
     "eslint": ">=9.0.0"
   },
   "peerDependenciesMeta": {
@@ -46,32 +46,32 @@
   },
   "dependencies": {
     "@eslint/plugin-kit": "^0.7.3",
-    "postcss": "^8.5.28",
-    "postcss-selector-parser": "^7.1.6"
+    "postcss": "^8.5.33",
+    "postcss-selector-parser": "^7.2.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.5.1",
-    "@antfu/ni": "^30.5.0",
+    "@antfu/ni": "^30.6.0",
     "@antfu/utils": "^9.3.0",
-    "@tailwindcss/node": "4.3.3",
+    "@tailwindcss/node": "4.3.5",
     "@types/eslint": "^9.6.1",
-    "@types/node": "^26.5.1",
+    "@types/node": "^26.6.6",
     "@typescript-eslint/parser": "^8.70.0",
     "@typescript-eslint/typescript-estree": "^8.70.0",
     "@typescript-eslint/utils": "^8.70.0",
     "bumpp": "^12.3.0",
     "changelogithub": "^15.0.5",
-    "eslint": "^10.10.0",
+    "eslint": "^10.15.0",
     "eslint-vitest-rule-tester": "^3.2.0",
     "jsonc-eslint-parser": "^3.3.0",
     "tsup": "^8.5.1",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.15",
     "typescript": "6.0.3",
     "unbuild": "^3.6.1",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.0",
-    "vue": "^3.5.42",
-    "vue-eslint-parser": "^10.4.1",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1",
+    "vue": "^3.5.46",
+    "vue-eslint-parser": "^10.4.2",
     "yaml-eslint-parser": "^2.1.0"
   },
   "resolutions": {
